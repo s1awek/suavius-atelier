@@ -1,11 +1,16 @@
 import Stripe from 'stripe'
 
-const secretKey = process.env.STRIPE_SECRET_KEY
-if (!secretKey) {
-  throw new Error('STRIPE_SECRET_KEY is not set')
-}
+let cached: Stripe | null = null
 
-export const stripe = new Stripe(secretKey, {
-  apiVersion: '2026-04-22.dahlia',
-  typescript: true,
-})
+export function getStripe(): Stripe {
+  if (cached) return cached
+  const secretKey = process.env.STRIPE_SECRET_KEY
+  if (!secretKey) {
+    throw new Error('STRIPE_SECRET_KEY is not set')
+  }
+  cached = new Stripe(secretKey, {
+    apiVersion: '2026-04-22.dahlia',
+    typescript: true,
+  })
+  return cached
+}

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { Media } from '@/payload-types'
 import { getPayloadClient } from '@/lib/payload'
-import { stripe } from '@/lib/stripe'
+import { getStripe } from '@/lib/stripe'
 
 type IncomingItem = { productId: number; quantity: number }
 
@@ -87,7 +87,7 @@ export async function POST(req: Request) {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 
-  const session = await stripe.checkout.sessions.create({
+  const session = await getStripe().checkout.sessions.create({
     mode: 'payment',
     line_items: lineItems,
     success_url: `${siteUrl}/order-confirmation?session_id={CHECKOUT_SESSION_ID}`,

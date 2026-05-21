@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { stripe } from '@/lib/stripe'
+import { getStripe } from '@/lib/stripe'
 import { formatPrice } from '@/lib/payload'
 import { ClearCartOnMount } from './ClearCartOnMount'
 
@@ -31,7 +31,7 @@ export default async function OrderConfirmationPage({
     )
   }
 
-  const session = await stripe.checkout.sessions.retrieve(sessionId, {
+  const session = await getStripe().checkout.sessions.retrieve(sessionId, {
     expand: ['line_items'],
   })
 
