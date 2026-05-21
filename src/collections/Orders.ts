@@ -4,7 +4,7 @@ export const Orders: CollectionConfig = {
   slug: 'orders',
   admin: {
     useAsTitle: 'stripePaymentIntentId',
-    defaultColumns: ['stripePaymentIntentId', 'status', 'customerEmail', 'createdAt'],
+    defaultColumns: ['stripePaymentIntentId', 'status', 'customerEmailDenorm', 'createdAt'],
   },
   access: {
     read: () => true,
@@ -67,7 +67,7 @@ export const Orders: CollectionConfig = {
       ],
     },
     {
-      name: 'customerEmail',
+      name: 'customerEmailDenorm',
       type: 'text',
       admin: {
         hidden: true,

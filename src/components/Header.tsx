@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getPayloadClient } from '@/lib/payload'
+import { CartButton } from './CartButton'
 
 export async function Header() {
   const payload = await getPayloadClient()
@@ -34,6 +35,7 @@ export async function Header() {
           <Link href="/contact" className="hover:text-copper transition-colors">
             Contact
           </Link>
+          <CartButton />
         </nav>
       </div>
     </header>

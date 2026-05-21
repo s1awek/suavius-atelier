@@ -282,7 +282,7 @@ export interface Order {
       country: string;
     };
   };
-  customerEmail?: string | null;
+  customerEmailDenorm?: string | null;
   items?:
     | {
         product: number | Product;
@@ -551,7 +551,7 @@ export interface OrdersSelect<T extends boolean = true> {
               country?: T;
             };
       };
-  customerEmail?: T;
+  customerEmailDenorm?: T;
   items?:
     | T
     | {

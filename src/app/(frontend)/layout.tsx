@@ -2,6 +2,7 @@ import React from 'react'
 import { Cormorant_Garamond, Inter } from 'next/font/google'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
+import { CartDrawer } from '@/components/CartDrawer'
 import './styles.css'
 
 const cormorant = Cormorant_Garamond({
@@ -29,10 +30,11 @@ export const metadata = {
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${cormorant.variable} ${inter.variable}`}>
-      <body className="min-h-screen flex flex-col">
+      <body className="min-h-screen flex flex-col" suppressHydrationWarning>
         <Header />
         <main className="flex-1">{props.children}</main>
         <Footer />
+        <CartDrawer />
       </body>
     </html>
   )
