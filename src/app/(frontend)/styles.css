@@ -1,0 +1,47 @@
+@import 'tailwindcss';
+
+@theme {
+  /* Brand colors */
+  --color-copper: #b87333;
+  --color-copper-light: #d4956a;
+  --color-dark: #1a1714;
+  --color-warm: #f5f0e8;
+  --color-warm-mid: #e8e0d0;
+  --color-ink: #2c2825;
+  --color-ink-muted: #8c7b6b;
+
+  /* Typography */
+  --font-display: var(--font-cormorant), 'Cormorant Garamond', Georgia, serif;
+  --font-body: var(--font-inter), system-ui, -apple-system, sans-serif;
+
+  /* Sensible defaults overrides */
+  --default-font-family: var(--font-body);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--color-warm);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+}
