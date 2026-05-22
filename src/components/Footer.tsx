@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { getPayloadClient } from '@/lib/payload'
+import { PaymentBadges } from './PaymentBadges'
 
 export async function Footer() {
   const payload = await getPayloadClient()
@@ -102,8 +103,11 @@ export async function Footer() {
         </div>
       </div>
       <div className="border-t border-warm-mid">
-        <div className="max-w-7xl mx-auto px-6 py-4 text-xs text-ink-muted">
-          © {year} {storeName}. All rights reserved.
+        <div className="max-w-7xl mx-auto px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <p className="text-xs text-ink-muted">
+            © {year} {storeName}. All rights reserved.
+          </p>
+          <PaymentBadges variant="footer" />
         </div>
       </div>
     </footer>

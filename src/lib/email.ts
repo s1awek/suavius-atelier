@@ -194,6 +194,46 @@ export async function sendShipmentNotification(
   })
 }
 
+export type ContactMessageInput = {
+  name: string
+  email: string
+  subject: string | null
+  message: string
+  ip: string
+}
+
+export async function sendContactMessage(
+  input: ContactMessageInput,
+  adminEmail: string,
+): Promise<void> {
+  const transport = getTransport()
+  const from = `"${FROM_NAME} - Contact form" <${process.env.SMTP_USER}>`
+  const subjectLine = input.subject?.trim()
+    ? `[Suavius contact] ${input.subject.trim()}`
+    : `[Suavius contact] New message from ${input.name}`
+
+  const html = `<!DOCTYPE html>
+<html><body style="font-family:Georgia,serif;color:#2c2825;background:#f5f0e8;padding:24px;">
+  <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background:#fff;padding:32px;border-radius:4px;">
+    <tr><td style="border-bottom:2px solid #b87333;padding-bottom:16px;font-size:18px;letter-spacing:0.1em;">SUAVIUS ATELIER - CONTACT FORM</td></tr>
+    <tr><td style="padding-top:24px;">
+      <p style="margin:0 0 6px;"><strong>From:</strong> ${escapeHtml(input.name)} &lt;${escapeHtml(input.email)}&gt;</p>
+      ${input.subject ? `<p style="margin:0 0 6px;"><strong>Subject:</strong> ${escapeHtml(input.subject)}</p>` : ''}
+      <p style="margin:0 0 16px;color:#8c7b6b;font-size:12px;">IP: ${escapeHtml(input.ip)}</p>
+      <div style="padding:16px;background:#f5f0e8;border-left:3px solid #b87333;white-space:pre-wrap;line-height:1.6;">${escapeHtml(input.message)}</div>
+    </td></tr>
+  </table>
+</body></html>`
+
+  await transport.sendMail({
+    from,
+    to: adminEmail,
+    replyTo: input.email,
+    subject: subjectLine,
+    html,
+  })
+}
+
 export async function sendOrderConfirmation(
   input: OrderConfirmationInput,
   adminEmail?: string,

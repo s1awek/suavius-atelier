@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation'
-import Image from 'next/image'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { Media, Product } from '@/payload-types'
 import { getPayloadClient, formatPrice } from '@/lib/payload'
 import { ProductPurchasePanel } from '@/components/ProductPurchasePanel'
+import { ProductGallery, type GalleryImage } from '@/components/ProductGallery'
 
 type Params = { slug: string }
 
@@ -132,44 +132,17 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className="grid gap-12 md:grid-cols-2">
-        <div className="space-y-4">
-          {images.length === 0 ? (
-            <div className="aspect-square bg-warm-mid flex items-center justify-center text-ink-muted text-sm">
-              [no images]
-            </div>
-          ) : (
-            <>
-              <div className="aspect-square bg-warm-mid relative overflow-hidden">
-                {images[0].url && (
-                  <Image
-                    src={images[0].url}
-                    alt={images[0].alt ?? product.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="object-cover"
-                    priority
-                  />
-                )}
-              </div>
-              {images.length > 1 && (
-                <div className="grid grid-cols-4 gap-3">
-                  {images.slice(1).map((img) => (
-                    <div key={img.id} className="aspect-square bg-warm-mid relative overflow-hidden">
-                      {img.url && (
-                        <Image
-                          src={img.url}
-                          alt={img.alt ?? product.title}
-                          fill
-                          sizes="120px"
-                          className="object-cover"
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
+        <div>
+          <ProductGallery
+            images={images
+              .filter((img): img is Media & { url: string } => Boolean(img.url))
+              .map<GalleryImage>((img) => ({
+                id: img.id,
+                url: img.url,
+                alt: img.alt ?? product.title,
+              }))}
+            productTitle={product.title}
+          />
         </div>
 
         <div>

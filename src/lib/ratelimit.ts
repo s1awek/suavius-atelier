@@ -15,6 +15,15 @@ export const checkoutRatelimit = redis
     })
   : null
 
+export const contactRatelimit = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(5, '10 m'),
+      analytics: true,
+      prefix: 'rl:contact',
+    })
+  : null
+
 export function getClientIp(req: Request): string {
   const fwd = req.headers.get('x-forwarded-for')
   if (fwd) return fwd.split(',')[0]!.trim()

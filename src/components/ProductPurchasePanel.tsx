@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { AddToCartButton } from './AddToCartButton'
+import { PaymentBadges } from './PaymentBadges'
 import { useCart } from '@/lib/cart'
 
 type Variant = {
@@ -127,6 +128,10 @@ export function ProductPurchasePanel({
           and we will make a small batch for you.
         </p>
       )}
+
+      <div className="mt-6 pt-6 border-t border-warm-mid">
+        <PaymentBadges variant="pdp" />
+      </div>
     </div>
   )
 }

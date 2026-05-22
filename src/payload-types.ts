@@ -73,6 +73,7 @@ export interface Config {
     products: Product;
     orders: Order;
     pages: Page;
+    'contact-messages': ContactMessage;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -86,6 +87,7 @@ export interface Config {
     products: ProductsSelect<false> | ProductsSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
+    'contact-messages': ContactMessagesSelect<false> | ContactMessagesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -236,6 +238,14 @@ export interface Product {
    */
   compareAtPrice?: number | null;
   material: 'pcb' | 'wood' | 'other';
+  /**
+   * Show "New" badge on product card and PDP
+   */
+  isNew?: boolean | null;
+  /**
+   * Show "Bestseller" badge
+   */
+  isBestseller?: boolean | null;
   variants?:
     | {
         name: string;
@@ -369,6 +379,30 @@ export interface Page {
   createdAt: string;
 }
 /**
+ * Messages submitted through the public contact form.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-messages".
+ */
+export interface ContactMessage {
+  id: number;
+  name: string;
+  email: string;
+  subject?: string | null;
+  message: string;
+  /**
+   * IP captured at submission (for abuse review)
+   */
+  ip?: string | null;
+  userAgent?: string | null;
+  /**
+   * Mark when responded to / archived
+   */
+  handled?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -415,6 +449,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'pages';
         value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'contact-messages';
+        value: number | ContactMessage;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -530,6 +568,8 @@ export interface ProductsSelect<T extends boolean = true> {
   price?: T;
   compareAtPrice?: T;
   material?: T;
+  isNew?: T;
+  isBestseller?: T;
   variants?:
     | T
     | {
@@ -607,6 +647,21 @@ export interface PagesSelect<T extends boolean = true> {
   content?: T;
   seoTitle?: T;
   seoDescription?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-messages_select".
+ */
+export interface ContactMessagesSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  subject?: T;
+  message?: T;
+  ip?: T;
+  userAgent?: T;
+  handled?: T;
   updatedAt?: T;
   createdAt?: T;
 }

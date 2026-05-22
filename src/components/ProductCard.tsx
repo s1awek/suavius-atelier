@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { Product, Media } from '@/payload-types'
 import { formatPrice } from '@/lib/payload'
+import { ProductBadges } from './ProductBadges'
 
 function getCoverImage(product: Product): Media | null {
   const first = product.images?.[0]?.image
@@ -16,7 +17,7 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <Link href={`/products/${product.slug}`} className="group block">
-      <div className="aspect-square bg-warm-mid overflow-hidden mb-4 relative">
+      <div className="aspect-square bg-warm-mid overflow-hidden mb-4 relative rounded-md">
         {cover && cover.url ? (
           <Image
             src={cover.url}
@@ -31,6 +32,7 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
         )}
       </div>
+      <ProductBadges product={product} className="block mb-1" />
       <h3 className="font-display text-xl text-dark group-hover:text-copper transition-colors">
         {product.title}
       </h3>

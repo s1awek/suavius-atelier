@@ -95,6 +95,31 @@ export const Products: CollectionConfig = {
               ],
             },
             {
+              type: 'row',
+              fields: [
+                {
+                  name: 'isNew',
+                  type: 'checkbox',
+                  label: 'New',
+                  defaultValue: false,
+                  admin: {
+                    description: 'Show "New" badge on product card and PDP',
+                    width: '50%',
+                  },
+                },
+                {
+                  name: 'isBestseller',
+                  type: 'checkbox',
+                  label: 'Bestseller',
+                  defaultValue: false,
+                  admin: {
+                    description: 'Show "Bestseller" badge',
+                    width: '50%',
+                  },
+                },
+              ],
+            },
+            {
               name: 'variants',
               type: 'array',
               labels: { singular: 'Variant', plural: 'Variants' },
