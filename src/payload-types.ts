@@ -445,6 +445,14 @@ export interface NewsletterSubscriber {
   email: string;
   source?: ('footer' | 'checkout' | 'manual') | null;
   unsubscribed?: boolean | null;
+  /**
+   * Timestamp when GDPR consent was given
+   */
+  consentedAt?: string | null;
+  /**
+   * Exact consent wording shown at signup (snapshot for legal evidence)
+   */
+  consentText?: string | null;
   ip?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -744,6 +752,8 @@ export interface NewsletterSubscribersSelect<T extends boolean = true> {
   email?: T;
   source?: T;
   unsubscribed?: T;
+  consentedAt?: T;
+  consentText?: T;
   ip?: T;
   updatedAt?: T;
   createdAt?: T;

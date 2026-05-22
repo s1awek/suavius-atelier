@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server'
 import { getPayloadClient } from '@/lib/payload'
 import { contactRatelimit, enforceRatelimit, getClientIp } from '@/lib/ratelimit'
+import { NEWSLETTER_CONSENT_TEXT } from '@/lib/newsletter-consent'
 
 type IncomingBody = {
   email?: string
   website?: string
+  consent?: boolean
 }
 
 export async function POST(req: Request) {
@@ -32,8 +34,15 @@ export async function POST(req: Request) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ error: 'Valid email is required' }, { status: 400 })
   }
+  if (body.consent !== true) {
+    return NextResponse.json(
+      { error: 'You must agree to receive newsletter emails' },
+      { status: 400 },
+    )
+  }
 
   const payload = await getPayloadClient()
+  const consentedAt = new Date().toISOString()
 
   const existing = await payload.find({
     collection: 'newsletter-subscribers',
@@ -47,7 +56,11 @@ export async function POST(req: Request) {
       await payload.update({
         collection: 'newsletter-subscribers',
         id: sub.id,
-        data: { unsubscribed: false },
+        data: {
+          unsubscribed: false,
+          consentedAt,
+          consentText: NEWSLETTER_CONSENT_TEXT,
+        },
       })
     }
     return NextResponse.json({ ok: true, alreadySubscribed: !sub.unsubscribed })
@@ -55,7 +68,14 @@ export async function POST(req: Request) {
 
   await payload.create({
     collection: 'newsletter-subscribers',
-    data: { email, source: 'footer', unsubscribed: false, ip },
+    data: {
+      email,
+      source: 'footer',
+      unsubscribed: false,
+      consentedAt,
+      consentText: NEWSLETTER_CONSENT_TEXT,
+      ip,
+    },
   })
 
   return NextResponse.json({ ok: true })

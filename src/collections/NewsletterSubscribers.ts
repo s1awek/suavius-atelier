@@ -38,6 +38,23 @@ export const NewsletterSubscribers: CollectionConfig = {
       index: true,
     },
     {
+      name: 'consentedAt',
+      type: 'date',
+      admin: {
+        readOnly: true,
+        date: { pickerAppearance: 'dayAndTime' },
+        description: 'Timestamp when GDPR consent was given',
+      },
+    },
+    {
+      name: 'consentText',
+      type: 'textarea',
+      admin: {
+        readOnly: true,
+        description: 'Exact consent wording shown at signup (snapshot for legal evidence)',
+      },
+    },
+    {
       name: 'ip',
       type: 'text',
       admin: { readOnly: true },

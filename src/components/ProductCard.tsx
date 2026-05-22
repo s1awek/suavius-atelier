@@ -10,7 +10,13 @@ function getCoverImage(product: Product): Media | null {
   return typeof first === 'object' ? first : null
 }
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({
+  product,
+  priority = false,
+}: {
+  product: Product
+  priority?: boolean
+}) {
   const cover = getCoverImage(product)
   const onSale =
     typeof product.compareAtPrice === 'number' && product.compareAtPrice > product.price
@@ -25,6 +31,7 @@ export function ProductCard({ product }: { product: Product }) {
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover group-hover:scale-105 transition-transform duration-500"
+            priority={priority}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-ink-muted text-xs">
@@ -32,7 +39,7 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
         )}
       </div>
-      <ProductBadges product={product} className="block mb-1" />
+      <ProductBadges product={product} className="block mb-2" />
       <h3 className="font-display text-xl text-dark group-hover:text-copper transition-colors">
         {product.title}
       </h3>

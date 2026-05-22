@@ -72,10 +72,11 @@ export function StockAlertForm({ productId, variantSku, variantName }: Props) {
         <input
           name="email"
           type="email"
+          size={1}
           required
           placeholder="your@email.com"
           aria-label="Email for stock notification"
-          className="flex-1 min-w-0 px-3 py-2 bg-warm border border-warm-mid focus:border-dark focus:outline-none text-sm"
+          className="flex-1 w-0 min-w-0 px-3 py-2 bg-warm border border-warm-mid focus:border-dark focus:outline-none text-sm"
         />
         <button
           type="submit"

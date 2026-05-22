@@ -121,8 +121,8 @@ export default async function HomePage() {
             </Link>
           </div>
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {featured.docs.map((p) => (
-              <ProductCard key={p.id} product={p} />
+            {featured.docs.map((p, i) => (
+              <ProductCard key={p.id} product={p} priority={i === 0} />
             ))}
           </div>
         </section>
