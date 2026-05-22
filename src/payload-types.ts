@@ -299,6 +299,14 @@ export interface Order {
       }[]
     | null;
   /**
+   * Shipping amount charged (minor units), already included in totalAtPurchase
+   */
+  shippingCost?: number | null;
+  /**
+   * Name of the shipping zone applied at checkout
+   */
+  shippingZone?: string | null;
+  /**
    * Total amount paid (minor units), incl. shipping
    */
   totalAtPurchase: number;
@@ -561,6 +569,8 @@ export interface OrdersSelect<T extends boolean = true> {
         priceAtPurchase?: T;
         id?: T;
       };
+  shippingCost?: T;
+  shippingZone?: T;
   totalAtPurchase?: T;
   currency?: T;
   shippingTracking?: T;

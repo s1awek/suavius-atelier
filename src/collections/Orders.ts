@@ -123,6 +123,26 @@ export const Orders: CollectionConfig = {
       ],
     },
     {
+      name: 'shippingCost',
+      type: 'number',
+      min: 0,
+      defaultValue: 0,
+      admin: {
+        description: 'Shipping amount charged (minor units), already included in totalAtPurchase',
+        components: {
+          Description: '@/components/admin/PriceDescription#PriceDescription',
+          Cell: '@/components/admin/PriceCell#PriceCell',
+        },
+      },
+    },
+    {
+      name: 'shippingZone',
+      type: 'text',
+      admin: {
+        description: 'Name of the shipping zone applied at checkout',
+      },
+    },
+    {
       name: 'totalAtPurchase',
       type: 'number',
       required: true,

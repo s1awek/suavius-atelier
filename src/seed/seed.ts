@@ -20,6 +20,7 @@ type ProductSeed = {
   imageSeed: string
   weightGrams: number
   dimensions: { widthMm: number; heightMm: number; depthMm: number }
+  stock?: number
 }
 
 const CATEGORIES: CategorySeed[] = [
@@ -299,9 +300,32 @@ async function run() {
         status: 'active',
         weightGrams: p.weightGrams,
         dimensions: p.dimensions,
+        variants: [
+          { name: 'Standard', sku: `${p.slug}-standard`, stock: p.stock ?? 10 },
+        ],
       },
     })
     payload.logger.info(`  + created: ${p.slug}`)
+  }
+
+  payload.logger.info('Seeding shipping zones (if missing)...')
+  const settings = await payload.findGlobal({ slug: 'settings' })
+  const zones = (settings as { shippingZones?: unknown[] }).shippingZones
+  if (!Array.isArray(zones) || zones.length === 0) {
+    await payload.updateGlobal({
+      slug: 'settings',
+      data: {
+        shippingZones: [
+          { name: 'Poland', countries: 'PL', flatRate: 1500 },
+          { name: 'European Union', countries: 'DE,FR,ES,IT,NL,BE,AT,CZ,SK', flatRate: 2200 },
+          { name: 'United Kingdom', countries: 'GB', flatRate: 2800 },
+          { name: 'United States', countries: 'US', flatRate: 3500 },
+        ],
+      },
+    })
+    payload.logger.info('  + seeded 4 default zones')
+  } else {
+    payload.logger.info(`  - exists: ${zones.length} zones`)
   }
 
   payload.logger.info('Seeding pages...')

@@ -9,6 +9,12 @@ type Props = {
   price: number
   imageUrl: string | null
   currency?: string
+  variantSku: string
+  variantName: string
+  stock: number
+  disabled?: boolean
+  disabledLabel?: string
+  label?: string
 }
 
 export function AddToCartButton({
@@ -18,21 +24,29 @@ export function AddToCartButton({
   price,
   imageUrl,
   currency = 'EUR',
+  variantSku,
+  variantName,
+  stock,
+  disabled = false,
+  disabledLabel = 'Out of stock',
+  label = 'Add to cart',
 }: Props) {
   const add = useCart((s) => s.add)
 
   return (
     <button
       type="button"
+      disabled={disabled}
       onClick={() =>
         add({
           productId,
-          snapshot: { title, slug, price, imageUrl, currency },
+          variantSku,
+          snapshot: { title, slug, price, imageUrl, currency, variantName, stock },
         })
       }
-      className="mt-10 w-full px-6 py-4 bg-dark text-warm hover:bg-copper transition-colors text-sm tracking-wide cursor-pointer"
+      className="mt-10 w-full px-6 py-4 bg-dark text-warm hover:bg-copper transition-colors text-sm tracking-wide cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-dark"
     >
-      Add to cart
+      {disabled ? disabledLabel : label}
     </button>
   )
 }

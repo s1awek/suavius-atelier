@@ -32,7 +32,11 @@ export function CartDrawer() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
+          items: items.map((i) => ({
+            productId: i.productId,
+            variantSku: i.variantSku,
+            quantity: i.quantity,
+          })),
         }),
       })
       if (!res.ok) {
@@ -81,53 +85,76 @@ export function CartDrawer() {
             <p className="text-ink-muted text-sm py-8 text-center">Your cart is empty.</p>
           ) : (
             <ul className="space-y-6">
-              {items.map((item) => (
-                <li key={item.productId} className="flex gap-4">
-                  <div className="w-20 h-20 bg-warm-mid relative flex-shrink-0">
-                    {item.snapshot.imageUrl && (
-                      <Image
-                        src={item.snapshot.imageUrl}
-                        alt={item.snapshot.title}
-                        fill
-                        sizes="80px"
-                        className="object-cover"
-                      />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{item.snapshot.title}</p>
-                    <p className="text-sm text-ink-muted mt-1">
-                      {formatPrice(item.snapshot.price, item.snapshot.currency)}
-                    </p>
-                    <div className="flex items-center gap-3 mt-2">
-                      <button
-                        type="button"
-                        onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                        className="w-6 h-6 border border-warm-mid hover:bg-warm-mid cursor-pointer text-sm"
-                        aria-label="Decrease quantity"
-                      >
-                        −
-                      </button>
-                      <span className="text-sm w-6 text-center">{item.quantity}</span>
-                      <button
-                        type="button"
-                        onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                        className="w-6 h-6 border border-warm-mid hover:bg-warm-mid cursor-pointer text-sm"
-                        aria-label="Increase quantity"
-                      >
-                        +
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => remove(item.productId)}
-                        className="ml-auto text-xs text-ink-muted hover:text-copper cursor-pointer"
-                      >
-                        Remove
-                      </button>
+              {items.map((item) => {
+                const atLimit = item.quantity >= item.snapshot.stock
+                return (
+                  <li key={`${item.productId}::${item.variantSku}`} className="flex gap-4">
+                    <div className="w-20 h-20 bg-warm-mid relative flex-shrink-0">
+                      {item.snapshot.imageUrl && (
+                        <Image
+                          src={item.snapshot.imageUrl}
+                          alt={item.snapshot.title}
+                          fill
+                          sizes="80px"
+                          className="object-cover"
+                        />
+                      )}
                     </div>
-                  </div>
-                </li>
-              ))}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{item.snapshot.title}</p>
+                      {item.snapshot.variantName && item.snapshot.variantName !== 'Standard' && (
+                        <p className="text-xs text-ink-muted mt-0.5">{item.snapshot.variantName}</p>
+                      )}
+                      <p className="text-sm text-ink-muted mt-1">
+                        {formatPrice(item.snapshot.price, item.snapshot.currency)}
+                      </p>
+                      <div className="flex items-center gap-3 mt-2">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateQuantity(item.productId, item.variantSku, item.quantity - 1)
+                          }
+                          className="w-6 h-6 border border-warm-mid hover:bg-warm-mid cursor-pointer text-sm"
+                          aria-label="Decrease quantity"
+                        >
+                          −
+                        </button>
+                        <span className="text-sm w-6 text-center">{item.quantity}</span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateQuantity(item.productId, item.variantSku, item.quantity + 1)
+                          }
+                          disabled={atLimit}
+                          className="w-6 h-6 border border-warm-mid hover:bg-warm-mid cursor-pointer text-sm disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                          aria-label="Increase quantity"
+                        >
+                          +
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => remove(item.productId, item.variantSku)}
+                          className="ml-auto text-xs text-ink-muted hover:text-copper cursor-pointer"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                      {atLimit && (
+                        <p className="text-xs text-ink-muted mt-2">
+                          You have all available units. Need more?{' '}
+                          <a
+                            href="mailto:orders@suaviusatelier.com"
+                            className="underline hover:text-copper"
+                          >
+                            Email us
+                          </a>
+                          .
+                        </p>
+                      )}
+                    </div>
+                  </li>
+                )
+              })}
             </ul>
           )}
         </div>

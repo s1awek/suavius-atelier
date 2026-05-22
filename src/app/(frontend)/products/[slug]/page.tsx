@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { Media, Product } from '@/payload-types'
 import { getPayloadClient, formatPrice } from '@/lib/payload'
-import { AddToCartButton } from '@/components/AddToCartButton'
+import { ProductPurchasePanel } from '@/components/ProductPurchasePanel'
 
 type Params = { slug: string }
 
@@ -164,13 +164,18 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
             </div>
           )}
 
-          <AddToCartButton
+          <ProductPurchasePanel
             productId={product.id}
             title={product.title}
             slug={product.slug ?? ''}
             price={product.price}
             imageUrl={images[0]?.url ?? null}
             currency="EUR"
+            variants={(product.variants ?? []).map((v) => ({
+              name: v.name,
+              sku: v.sku,
+              stock: typeof v.stock === 'number' ? v.stock : 0,
+            }))}
           />
 
           {(product.weightGrams ||

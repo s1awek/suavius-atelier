@@ -45,3 +45,4 @@ next-env.d.ts
 # local ad-hoc artifacts (plans, exports, scratch notes)
 /.workspace/
 .env*
+/.workspace/

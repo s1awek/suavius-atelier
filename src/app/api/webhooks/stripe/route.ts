@@ -8,6 +8,7 @@ export const runtime = 'nodejs'
 
 type SnapshotItem = {
   productId: number
+  variantSku?: string
   title: string
   price: number
   quantity: number
@@ -40,6 +41,15 @@ export async function POST(req: Request) {
 }
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+  const expectedSiteUrl = process.env.NEXT_PUBLIC_SITE_URL
+  const sessionSiteUrl = session.metadata?.siteUrl
+  if (expectedSiteUrl && sessionSiteUrl && sessionSiteUrl !== expectedSiteUrl) {
+    console.log(
+      `[stripe webhook] ignoring session ${session.id}: siteUrl=${sessionSiteUrl} != ${expectedSiteUrl}`,
+    )
+    return
+  }
+
   const paymentIntentId =
     typeof session.payment_intent === 'string'
       ? session.payment_intent
@@ -90,6 +100,19 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
   const totalAtPurchase = session.amount_total ?? 0
   const currency = (session.currency ?? 'eur').toUpperCase()
+  const shippingCost = session.shipping_cost?.amount_total ?? 0
+
+  let shippingZone: string | null = null
+  const shippingRateRef = session.shipping_cost?.shipping_rate
+  if (shippingRateRef) {
+    try {
+      const rateId = typeof shippingRateRef === 'string' ? shippingRateRef : shippingRateRef.id
+      const rate = await getStripe().shippingRates.retrieve(rateId)
+      shippingZone = rate.metadata?.zoneName ?? rate.display_name ?? null
+    } catch (err) {
+      console.error('[stripe webhook] failed to retrieve shipping rate', err)
+    }
+  }
 
   const order = await payload.create({
     collection: 'orders',
@@ -103,13 +126,22 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       },
       items: snapshot.map((s) => ({
         product: s.productId,
+        variantSku: s.variantSku,
         quantity: s.quantity,
         priceAtPurchase: s.price,
       })),
       totalAtPurchase,
       currency,
+      shippingCost,
+      ...(shippingZone ? { shippingZone } : {}),
     },
   })
+
+  try {
+    await decrementStock(payload, snapshot)
+  } catch (err) {
+    console.error('[stripe webhook] stock decrement failed', err)
+  }
 
   try {
     const settings = await payload.findGlobal({ slug: 'settings' })
@@ -133,5 +165,51 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     )
   } catch (err) {
     console.error('[stripe webhook] order email failed', err)
+  }
+}
+
+async function decrementStock(
+  payload: Awaited<ReturnType<typeof getPayloadClient>>,
+  snapshot: SnapshotItem[],
+) {
+  const byProduct = new Map<number, SnapshotItem[]>()
+  for (const s of snapshot) {
+    if (!s.variantSku) continue
+    const arr = byProduct.get(s.productId) ?? []
+    arr.push(s)
+    byProduct.set(s.productId, arr)
+  }
+
+  for (const [productId, lines] of byProduct) {
+    try {
+      const product = await payload.findByID({
+        collection: 'products',
+        id: productId,
+        depth: 0,
+      })
+      const variants = Array.isArray(product.variants) ? product.variants : []
+      if (variants.length === 0) continue
+
+      const updated = variants.map((v) => {
+        const line = lines.find((l) => l.variantSku === v.sku)
+        if (!line) return v
+        const currentStock = typeof v.stock === 'number' ? v.stock : 0
+        const nextStock = currentStock - line.quantity
+        if (nextStock < 0) {
+          console.warn(
+            `[stripe webhook] negative stock for product ${productId} sku ${v.sku}: ${currentStock} - ${line.quantity}`,
+          )
+        }
+        return { ...v, stock: Math.max(0, nextStock) }
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: productId,
+        data: { variants: updated },
+      })
+    } catch (err) {
+      console.error(`[stripe webhook] failed to decrement stock for product ${productId}`, err)
+    }
   }
 }
