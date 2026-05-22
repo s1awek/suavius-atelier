@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { useCart, cartTotal } from '@/lib/cart'
 import { formatPrice } from '@/lib/format'
+import { track } from '@vercel/analytics'
 
 export function CartDrawer() {
   const items = useCart((s) => s.items)
@@ -27,6 +28,11 @@ export function CartDrawer() {
   async function handleCheckout() {
     setError(null)
     setIsCheckingOut(true)
+    track('begin_checkout', {
+      itemCount: items.reduce((n, i) => n + i.quantity, 0),
+      value: total / 100,
+      currency: items[0]?.snapshot.currency ?? 'EUR',
+    })
     try {
       const res = await fetch('/api/checkout/session', {
         method: 'POST',

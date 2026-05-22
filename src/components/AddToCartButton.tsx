@@ -1,6 +1,7 @@
 'use client'
 
 import { useCart } from '@/lib/cart'
+import { track } from '@vercel/analytics'
 
 type Props = {
   productId: number
@@ -37,13 +38,20 @@ export function AddToCartButton({
     <button
       type="button"
       disabled={disabled}
-      onClick={() =>
+      onClick={() => {
         add({
           productId,
           variantSku,
           snapshot: { title, slug, price, imageUrl, currency, variantName, stock },
         })
-      }
+        track('add_to_cart', {
+          productId,
+          variantSku,
+          title,
+          value: price / 100,
+          currency,
+        })
+      }}
       className="mt-10 w-full px-6 py-4 bg-dark text-warm hover:bg-copper transition-colors text-sm tracking-wide cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-dark"
     >
       {disabled ? disabledLabel : label}

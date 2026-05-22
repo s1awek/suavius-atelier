@@ -12,6 +12,7 @@ function buildCsp(nonce: string, r2Host: string | undefined): string {
       "'strict-dynamic'",
       'https://js.stripe.com',
       'https://m.stripe.network',
+      ...(process.env.NODE_ENV === 'development' ? ["'unsafe-eval'"] : []),
     ],
     'style-src': ["'self'", "'unsafe-inline'"],
     'img-src': imgHosts,

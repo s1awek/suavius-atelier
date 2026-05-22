@@ -40,7 +40,12 @@ export default async function OrderConfirmationPage({
 
   return (
     <section className="max-w-2xl mx-auto px-6 py-24">
-      <ClearCartOnMount />
+      <ClearCartOnMount
+        sessionId={sessionId}
+        value={(session.amount_total ?? 0) / 100}
+        currency={(session.currency ?? 'eur').toUpperCase()}
+        isPaid={isPaid}
+      />
       <h1 className="font-display text-4xl">
         {isPaid ? 'Thank you for your order' : 'Order received'}
       </h1>
