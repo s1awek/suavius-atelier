@@ -19,11 +19,32 @@ const inter = Inter({
   display: 'swap',
 })
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://suaviusatelier.com'
+
 export const metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: 'Suavius Atelier',
     template: '%s · Suavius Atelier',
   },
+  description:
+    'Hand-designed PCB coasters and laser-engraved wood accessories from a small atelier.',
+  openGraph: {
+    type: 'website',
+    siteName: 'Suavius Atelier',
+    url: SITE_URL,
+  },
+  twitter: {
+    card: 'summary_large_image',
+  },
+}
+
+const orgJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Suavius Atelier',
+  url: SITE_URL,
   description:
     'Hand-designed PCB coasters and laser-engraved wood accessories from a small atelier.',
 }
@@ -32,6 +53,10 @@ export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${cormorant.variable} ${inter.variable}`}>
       <body className="min-h-screen flex flex-col" suppressHydrationWarning>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+        />
         <TestModeBanner />
         <Header />
         <main className="flex-1">{props.children}</main>

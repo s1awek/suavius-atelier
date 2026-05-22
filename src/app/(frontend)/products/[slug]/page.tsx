@@ -7,6 +7,9 @@ import { AddToCartButton } from '@/components/AddToCartButton'
 
 type Params = { slug: string }
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://suaviusatelier.com'
+
 async function fetchProduct(slug: string): Promise<Product | null> {
   const payload = await getPayloadClient()
   const result = await payload.find({
@@ -24,9 +27,24 @@ export async function generateMetadata({ params }: { params: Promise<Params> }) 
   const { slug } = await params
   const product = await fetchProduct(slug)
   if (!product) return { title: 'Product not found' }
+  const url = `${SITE_URL}/products/${product.slug}`
+  const title = product.seoTitle ?? product.title
+  const description = product.seoDescription ?? undefined
   return {
-    title: product.seoTitle ?? product.title,
-    description: product.seoDescription ?? undefined,
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title,
+      description,
+      url,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
   }
 }
 
@@ -42,8 +60,40 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
   const onSale =
     typeof product.compareAtPrice === 'number' && product.compareAtPrice > product.price
 
+  const productUrl = `${SITE_URL}/products/${product.slug}`
+  const totalStock = (product.variants ?? []).reduce(
+    (sum, v) => sum + (typeof v.stock === 'number' ? v.stock : 0),
+    0,
+  )
+  const inStock = (product.variants ?? []).length === 0 || totalStock > 0
+  const jsonLd = {
+    '@context': 'https://schema.org/',
+    '@type': 'Product',
+    name: product.title,
+    description:
+      product.seoDescription ??
+      `${product.title} by Suavius Atelier - hand-designed ${product.material === 'pcb' ? 'PCB' : product.material === 'wood' ? 'wood' : ''} accessory.`,
+    image: images.map((img) => img.url).filter(Boolean),
+    url: productUrl,
+    brand: { '@type': 'Brand', name: 'Suavius Atelier' },
+    offers: {
+      '@type': 'Offer',
+      url: productUrl,
+      priceCurrency: 'EUR',
+      price: (product.price / 100).toFixed(2),
+      availability: inStock
+        ? 'https://schema.org/InStock'
+        : 'https://schema.org/OutOfStock',
+      itemCondition: 'https://schema.org/NewCondition',
+    },
+  }
+
   return (
     <article className="max-w-7xl mx-auto px-6 py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="grid gap-12 md:grid-cols-2">
         <div className="space-y-4">
           {images.length === 0 ? (
