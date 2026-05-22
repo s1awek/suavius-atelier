@@ -66,6 +66,10 @@ export const Products: CollectionConfig = {
               min: 0,
               admin: {
                 description: 'Price in minor units (e.g. 4900 = 49.00 PLN/EUR/USD)',
+                components: {
+                  Description: '@/components/admin/PriceDescription#PriceDescription',
+                  Cell: '@/components/admin/PriceCell#PriceCell',
+                },
               },
             },
             {
@@ -74,6 +78,10 @@ export const Products: CollectionConfig = {
               min: 0,
               admin: {
                 description: 'Optional crossed-out reference price (minor units)',
+                components: {
+                  Description: '@/components/admin/PriceDescription#PriceDescription',
+                  Cell: '@/components/admin/PriceCell#PriceCell',
+                },
               },
             },
             {

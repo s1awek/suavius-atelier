@@ -114,6 +114,10 @@ export const Orders: CollectionConfig = {
           min: 0,
           admin: {
             description: 'Snapshot of price (minor units) at the time of purchase',
+            components: {
+              Description: '@/components/admin/PriceDescription#PriceDescription',
+              Cell: '@/components/admin/PriceCell#PriceCell',
+            },
           },
         },
       ],
@@ -125,6 +129,10 @@ export const Orders: CollectionConfig = {
       min: 0,
       admin: {
         description: 'Total amount paid (minor units), incl. shipping',
+        components: {
+          Description: '@/components/admin/PriceDescription#PriceDescription',
+          Cell: '@/components/admin/PriceCell#PriceCell',
+        },
       },
     },
     {
