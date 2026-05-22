@@ -5,6 +5,8 @@ import { getPayloadClient } from '@/lib/payload'
 
 type Params = { slug: string }
 
+export const revalidate = 600
+
 async function fetchPage(slug: string): Promise<Page | null> {
   const payload = await getPayloadClient()
   const result = await payload.find({

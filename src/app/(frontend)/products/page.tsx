@@ -3,6 +3,8 @@ import { ProductCard } from '@/components/ProductCard'
 
 export const metadata = { title: 'Shop' }
 
+export const revalidate = 300
+
 export default async function ProductsPage() {
   const payload = await getPayloadClient()
 

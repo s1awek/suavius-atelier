@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { getPayloadClient } from '@/lib/payload'
 import { ProductCard } from '@/components/ProductCard'
 
+export const revalidate = 300
+
 export default async function HomePage() {
   const payload = await getPayloadClient()
 

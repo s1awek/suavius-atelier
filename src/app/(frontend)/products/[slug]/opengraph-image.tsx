@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og'
 import { getPayloadClient, formatPrice } from '@/lib/payload'
-import { imageResponseToJpeg } from '@/lib/og'
+import { imageResponseToJpeg, getCormorantFonts } from '@/lib/og'
 
 export const alt = 'Suavius Atelier product'
 export const size = { width: 1200, height: 630 }
@@ -12,7 +12,7 @@ export default async function ProductOGImage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const payload = await getPayloadClient()
+  const [payload, fonts] = await Promise.all([getPayloadClient(), getCormorantFonts()])
   const result = await payload.find({
     collection: 'products',
     where: {
@@ -36,7 +36,7 @@ export default async function ProductOGImage({
             justifyContent: 'center',
             fontSize: 64,
             color: '#1a1714',
-            fontFamily: 'Georgia, serif',
+            fontFamily: 'Cormorant, Georgia, serif',
           }}
         >
           Suavius Atelier
@@ -61,7 +61,7 @@ export default async function ProductOGImage({
           height: '100%',
           background: '#f5f0e8',
           display: 'flex',
-          fontFamily: 'Georgia, serif',
+          fontFamily: 'Cormorant, Georgia, serif',
         }}
       >
         <div
@@ -149,7 +149,7 @@ export default async function ProductOGImage({
         </div>
       </div>
     ),
-    { ...size },
+    { ...size, fonts },
   )
   return imageResponseToJpeg(png, 80)
 }

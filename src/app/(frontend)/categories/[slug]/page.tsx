@@ -4,6 +4,11 @@ import { ProductCard } from '@/components/ProductCard'
 
 type Params = { slug: string }
 
+export const revalidate = 300
+
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://suaviusatelier.com'
+
 export async function generateMetadata({ params }: { params: Promise<Params> }) {
   const { slug } = await params
   const payload = await getPayloadClient()
@@ -40,8 +45,26 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
     sort: '-updatedAt',
   })
 
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org/',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Shop', item: `${SITE_URL}/products` },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: category.title,
+        item: `${SITE_URL}/categories/${category.slug}`,
+      },
+    ],
+  }
+
   return (
     <section className="max-w-7xl mx-auto px-6 py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <div className="mb-12">
         <p className="text-xs uppercase tracking-[0.2em] text-copper mb-4">Category</p>
         <h1 className="text-4xl md:text-5xl">{category.title}</h1>

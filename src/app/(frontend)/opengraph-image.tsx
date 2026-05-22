@@ -1,11 +1,12 @@
 import { ImageResponse } from 'next/og'
-import { imageResponseToJpeg } from '@/lib/og'
+import { imageResponseToJpeg, getCormorantFonts } from '@/lib/og'
 
 export const alt = 'Suavius Atelier - hand-designed PCB coasters and wood accessories'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/jpeg'
 
 export default async function OGImage() {
+  const fonts = await getCormorantFonts()
   const png = new ImageResponse(
     (
       <div
@@ -18,7 +19,7 @@ export default async function OGImage() {
           justifyContent: 'center',
           alignItems: 'center',
           padding: '80px',
-          fontFamily: 'Georgia, serif',
+          fontFamily: 'Cormorant, Georgia, serif',
         }}
       >
         <div
@@ -67,7 +68,7 @@ export default async function OGImage() {
         </div>
       </div>
     ),
-    { ...size },
+    { ...size, fonts },
   )
   return imageResponseToJpeg(png, 85)
 }

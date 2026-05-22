@@ -7,6 +7,8 @@ import { ProductPurchasePanel } from '@/components/ProductPurchasePanel'
 
 type Params = { slug: string }
 
+export const revalidate = 300
+
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://suaviusatelier.com'
 
@@ -77,27 +79,51 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
     0,
   )
   const inStock = (product.variants ?? []).length === 0 || totalStock > 0
-  const jsonLd = {
-    '@context': 'https://schema.org/',
-    '@type': 'Product',
-    name: product.title,
-    description:
-      product.seoDescription ??
-      `${product.title} by Suavius Atelier - hand-designed ${product.material === 'pcb' ? 'PCB' : product.material === 'wood' ? 'wood' : ''} accessory.`,
-    image: images.map((img) => img.url).filter(Boolean),
-    url: productUrl,
-    brand: { '@type': 'Brand', name: 'Suavius Atelier' },
-    offers: {
-      '@type': 'Offer',
-      url: productUrl,
-      priceCurrency: 'EUR',
-      price: (product.price / 100).toFixed(2),
-      availability: inStock
-        ? 'https://schema.org/InStock'
-        : 'https://schema.org/OutOfStock',
-      itemCondition: 'https://schema.org/NewCondition',
-    },
+
+  const category =
+    product.category && typeof product.category === 'object' ? product.category : null
+
+  const breadcrumbItems: Array<{ name: string; url: string }> = [
+    { name: 'Shop', url: `${SITE_URL}/products` },
+  ]
+  if (category?.slug && category?.title) {
+    breadcrumbItems.push({ name: category.title, url: `${SITE_URL}/categories/${category.slug}` })
   }
+  breadcrumbItems.push({ name: product.title, url: productUrl })
+
+  const jsonLd = [
+    {
+      '@context': 'https://schema.org/',
+      '@type': 'Product',
+      name: product.title,
+      description:
+        product.seoDescription ??
+        `${product.title} by Suavius Atelier - hand-designed ${product.material === 'pcb' ? 'PCB' : product.material === 'wood' ? 'wood' : ''} accessory.`,
+      image: images.map((img) => img.url).filter(Boolean),
+      url: productUrl,
+      brand: { '@type': 'Brand', name: 'Suavius Atelier' },
+      offers: {
+        '@type': 'Offer',
+        url: productUrl,
+        priceCurrency: 'EUR',
+        price: (product.price / 100).toFixed(2),
+        availability: inStock
+          ? 'https://schema.org/InStock'
+          : 'https://schema.org/OutOfStock',
+        itemCondition: 'https://schema.org/NewCondition',
+      },
+    },
+    {
+      '@context': 'https://schema.org/',
+      '@type': 'BreadcrumbList',
+      itemListElement: breadcrumbItems.map((b, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: b.name,
+        item: b.url,
+      })),
+    },
+  ]
 
   return (
     <article className="max-w-7xl mx-auto px-6 py-16">
