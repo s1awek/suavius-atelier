@@ -1,6 +1,13 @@
 import 'dotenv/config'
+import { readFileSync, existsSync } from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { getPayload } from 'payload'
 import config from '../payload.config.js'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const projectRoot = path.resolve(__dirname, '../..')
 
 type Block = { type: 'h2' | 'h3' | 'p'; text: string }
 
@@ -206,19 +213,52 @@ async function main() {
     payload.logger.warn('  - About page not found (was it seeded?)')
   }
 
-  payload.logger.info('Seeding collections...')
+  payload.logger.info('Seeding collections + heroes...')
   for (const c of COLLECTIONS) {
     const existing = await payload.find({
       collection: 'collections',
       where: { slug: { equals: c.slug } },
       limit: 1,
     })
+
+    let heroMediaId: number | undefined
+    const heroPath = path.join(projectRoot, '.workspace/collection-heroes', `${c.slug}.webp`)
+    if (existsSync(heroPath)) {
+      const fileName = `collection-hero-${c.slug}.webp`
+      const existingMedia = await payload.find({
+        collection: 'media',
+        where: { filename: { equals: fileName } },
+        limit: 1,
+      })
+      if (existingMedia.docs.length > 0) {
+        heroMediaId = existingMedia.docs[0].id
+        payload.logger.info(`    - hero exists: ${fileName}`)
+      } else {
+        const buffer = readFileSync(heroPath)
+        const media = await payload.create({
+          collection: 'media',
+          data: { alt: `${c.title} collection - design preview` },
+          file: {
+            data: buffer,
+            mimetype: 'image/webp',
+            name: fileName,
+            size: buffer.byteLength,
+          },
+        })
+        heroMediaId = media.id
+        payload.logger.info(`    + uploaded hero: ${fileName}`)
+      }
+    } else {
+      payload.logger.warn(`    - hero file not found: ${heroPath}`)
+    }
+
     const data = {
       title: c.title,
       slug: c.slug,
       subtitle: c.subtitle,
       tagline: c.tagline,
       description: richTextFromBlocks(c.descriptionBlocks),
+      ...(heroMediaId ? { heroImage: heroMediaId } : {}),
       order: c.order,
       seoTitle: c.seoTitle,
       seoDescription: c.seoDescription,

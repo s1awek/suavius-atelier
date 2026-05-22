@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import Image from 'next/image'
+import type { Media } from '@/payload-types'
 import { getPayloadClient } from '@/lib/payload'
 import { ProductCard } from '@/components/ProductCard'
 
@@ -7,12 +9,20 @@ export const revalidate = 300
 export default async function HomePage() {
   const payload = await getPayloadClient()
 
-  const featured = await payload.find({
-    collection: 'products',
-    where: { status: { equals: 'active' } },
-    limit: 6,
-    sort: '-updatedAt',
-  })
+  const [featured, collections] = await Promise.all([
+    payload.find({
+      collection: 'products',
+      where: { status: { equals: 'active' } },
+      limit: 6,
+      sort: '-updatedAt',
+    }),
+    payload.find({
+      collection: 'collections',
+      limit: 4,
+      sort: 'order',
+      depth: 1,
+    }),
+  ])
 
   return (
     <>
@@ -109,6 +119,72 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {collections.docs.length > 0 && (
+        <section className="max-w-7xl mx-auto px-6 py-16 md:py-20 border-t border-warm-mid">
+          <div className="flex items-end justify-between mb-10 md:mb-14 gap-6">
+            <div>
+              <p className="text-xs uppercase tracking-[0.3em] text-copper mb-3">
+                In production
+              </p>
+              <h2 className="font-display text-3xl md:text-4xl text-dark leading-tight">
+                The first four collections.
+              </h2>
+              <p className="mt-3 text-ink-muted max-w-xl text-sm md:text-base">
+                Sixteen designs across four themes. Drawn here, fabricated by partners,
+                arriving soon.
+              </p>
+            </div>
+            <Link
+              href="/collections"
+              className="hidden md:inline-block text-sm text-copper hover:text-dark transition-colors whitespace-nowrap"
+            >
+              See all -&gt;
+            </Link>
+          </div>
+          <div className="grid gap-6 grid-cols-2 lg:grid-cols-4">
+            {collections.docs.map((c) => {
+              const hero = typeof c.heroImage === 'object' && c.heroImage
+                ? (c.heroImage as Media)
+                : null
+              return (
+                <Link
+                  key={c.id}
+                  href={`/collections/${c.slug}`}
+                  className="group block"
+                >
+                  <div className="aspect-square bg-warm-mid relative overflow-hidden rounded-md mb-3">
+                    {hero?.url ? (
+                      <Image
+                        src={hero.url}
+                        alt={hero.alt ?? c.title}
+                        fill
+                        sizes="(max-width: 640px) 50vw, 25vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-700"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-ink-muted text-xs uppercase tracking-[0.2em]">
+                        [{c.title}]
+                      </div>
+                    )}
+                  </div>
+                  <h3 className="font-display text-lg md:text-xl text-dark group-hover:text-copper transition-colors">
+                    {c.title}
+                  </h3>
+                </Link>
+              )
+            })}
+          </div>
+          <div className="md:hidden text-center mt-10">
+            <Link
+              href="/collections"
+              className="inline-block text-sm text-copper hover:text-dark transition-colors"
+            >
+              See all collections -&gt;
+            </Link>
+          </div>
+        </section>
+      )}
+
       {featured.docs.length > 0 && (
         <section className="max-w-7xl mx-auto px-6 py-16">
           <div className="flex items-end justify-between mb-10">
@@ -137,6 +213,12 @@ export default async function HomePage() {
           result is a small object that catches light like a circuit board and survives daily
           use like one too.
         </p>
+        <Link
+          href="/materials"
+          className="inline-block mt-8 text-sm text-copper hover:text-dark transition-colors"
+        >
+          Read about materials &amp; process -&gt;
+        </Link>
       </section>
     </>
   )
