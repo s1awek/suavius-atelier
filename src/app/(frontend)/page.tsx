@@ -44,8 +44,67 @@ export default async function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="aspect-square bg-warm-mid border border-warm-mid flex items-center justify-center text-ink-muted text-sm">
-            [hero image placeholder]
+          <div className="aspect-square relative overflow-hidden rounded-md">
+            <div className="absolute inset-0 bg-[#ede2cf]" aria-hidden="true" />
+            <svg
+              className="absolute inset-0 w-full h-full opacity-[0.06]"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <filter id="heroPaper">
+                <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" />
+                <feColorMatrix values="0 0 0 0 0.2  0 0 0 0 0.15  0 0 0 0 0.1  0 0 0 1 0" />
+              </filter>
+              <rect width="100%" height="100%" filter="url(#heroPaper)" />
+            </svg>
+
+            <div className="relative h-full flex flex-col p-8 md:p-10">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.35em] text-ink-muted">
+                    Suavius Atelier
+                  </p>
+                  <div className="mt-2 w-12 h-px bg-copper" />
+                </div>
+                <p className="text-[10px] uppercase tracking-[0.25em] text-ink-muted">
+                  Anno MMXXVI
+                </p>
+              </div>
+
+              <div className="flex-1 flex items-center">
+                <blockquote className="font-display italic text-2xl md:text-3xl leading-tight text-dark">
+                  <span className="text-copper text-4xl leading-none mr-1">&ldquo;</span>
+                  Small batches, hand-finished, designed to outlast the trend that asked for them.
+                  <span className="text-copper text-4xl leading-none ml-1">&rdquo;</span>
+                </blockquote>
+              </div>
+
+              <div className="flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-ink-muted">From the</p>
+                  <p className="font-display italic text-lg mt-1">Atelier journal</p>
+                </div>
+                <svg
+                  width="56"
+                  height="56"
+                  viewBox="0 0 56 56"
+                  fill="none"
+                  className="text-copper opacity-90"
+                  aria-hidden="true"
+                >
+                  <circle cx="28" cy="28" r="27" stroke="currentColor" strokeWidth="0.6" />
+                  <circle cx="28" cy="28" r="20" stroke="currentColor" strokeWidth="0.4" opacity="0.6" />
+                  <path
+                    d="M 18 28 L 24 34 L 38 20"
+                    stroke="currentColor"
+                    strokeWidth="1"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
       </section>

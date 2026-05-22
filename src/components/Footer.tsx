@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { getPayloadClient } from '@/lib/payload'
 import { PaymentBadges } from './PaymentBadges'
+import { NewsletterForm } from './NewsletterForm'
 
 export async function Footer() {
   const payload = await getPayloadClient()
@@ -12,6 +13,20 @@ export async function Footer() {
 
   return (
     <footer className="border-t border-warm-mid bg-warm-mid/30 mt-24">
+      <div className="max-w-7xl mx-auto px-6 py-14 border-b border-warm-mid grid gap-8 md:grid-cols-[1.4fr_1fr] items-center">
+        <div>
+          <p className="text-xs uppercase tracking-[0.3em] text-copper mb-3">
+            Atelier journal
+          </p>
+          <h3 className="font-display text-2xl md:text-3xl text-dark leading-tight">
+            First news of new pieces, in your inbox.
+          </h3>
+          <p className="mt-3 text-sm text-ink-muted max-w-md">
+            Quiet letters when a small batch is ready. No more than once a month. Unsubscribe with one click.
+          </p>
+        </div>
+        <NewsletterForm />
+      </div>
       <div className="max-w-7xl mx-auto px-6 py-12 grid gap-8 md:grid-cols-4">
         <div>
           <Image

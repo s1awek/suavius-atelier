@@ -14,6 +14,7 @@ import { Orders } from './collections/Orders'
 import { Pages } from './collections/Pages'
 import { ContactMessages } from './collections/ContactMessages'
 import { StockAlerts } from './collections/StockAlerts'
+import { NewsletterSubscribers } from './collections/NewsletterSubscribers'
 import { Settings } from './globals/Settings'
 
 const filename = fileURLToPath(import.meta.url)
@@ -26,7 +27,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Categories, Products, Orders, Pages, ContactMessages, StockAlerts],
+  collections: [Users, Media, Categories, Products, Orders, Pages, ContactMessages, StockAlerts, NewsletterSubscribers],
   globals: [Settings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
