@@ -1,0 +1,60 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":dependencyDashboard", ":semanticCommits"],
+  "schedule": ["before 5am on monday"],
+  "timezone": "Europe/Warsaw",
+  "minimumReleaseAge": "3 days",
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "labels": ["dependencies"],
+  "rangeStrategy": "bump",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 5am on the first day of the month"]
+  },
+  "vulnerabilityAlerts": {
+    "labels": ["security"],
+    "minimumReleaseAge": "0 days",
+    "schedule": ["at any time"]
+  },
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["patch"],
+      "matchCurrentVersion": "!/^0/",
+      "automerge": false,
+      "groupName": "patch updates"
+    },
+    {
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "devDependencies (non-major)"
+    },
+    {
+      "matchPackagePatterns": ["^@payloadcms/", "^payload$"],
+      "groupName": "Payload CMS",
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "matchPackagePatterns": ["^next$", "^@next/", "^eslint-config-next$"],
+      "groupName": "Next.js"
+    },
+    {
+      "matchPackagePatterns": ["^react", "^@types/react"],
+      "groupName": "React"
+    },
+    {
+      "matchPackagePatterns": ["^@aws-sdk/"],
+      "groupName": "AWS SDK"
+    },
+    {
+      "matchPackagePatterns": ["^stripe", "^@stripe/"],
+      "groupName": "Stripe"
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["major"],
+      "minimumReleaseAge": "14 days",
+      "dependencyDashboardApproval": true
+    }
+  ]
+}
