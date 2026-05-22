@@ -46,3 +46,6 @@ next-env.d.ts
 /.workspace/
 .env*
 /.workspace/
+
+# Claude Code local runtime (locks, scheduled tasks, agent state)
+/.claude/
