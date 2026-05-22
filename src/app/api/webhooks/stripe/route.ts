@@ -114,6 +114,27 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     }
   }
 
+  let promoCode: string | null = null
+  let discountAmount = session.total_details?.amount_discount ?? 0
+  if (discountAmount > 0) {
+    try {
+      const expanded = await getStripe().checkout.sessions.retrieve(session.id, {
+        expand: ['total_details.breakdown.discounts.discount.promotion_code'],
+      })
+      const discounts = expanded.total_details?.breakdown?.discounts ?? []
+      const first = discounts[0]
+      if (first) {
+        discountAmount = first.amount ?? discountAmount
+        const promo = (first.discount as { promotion_code?: unknown } | undefined)?.promotion_code
+        if (promo && typeof promo === 'object' && 'code' in promo) {
+          promoCode = (promo as { code?: string | null }).code ?? null
+        }
+      }
+    } catch (err) {
+      console.error('[stripe webhook] failed to retrieve discount breakdown', err)
+    }
+  }
+
   const order = await payload.create({
     collection: 'orders',
     data: {
@@ -134,6 +155,8 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       currency,
       shippingCost,
       ...(shippingZone ? { shippingZone } : {}),
+      ...(promoCode ? { promoCode } : {}),
+      ...(discountAmount > 0 ? { discountAmount } : {}),
     },
   })
 

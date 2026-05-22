@@ -318,6 +318,14 @@ export interface Order {
    * Carrier tracking number, set when shipped
    */
   shippingTracking?: string | null;
+  /**
+   * Stripe promotion code applied at checkout, if any
+   */
+  promoCode?: string | null;
+  /**
+   * Total discount applied (minor units), if any
+   */
+  discountAmount?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -574,6 +582,8 @@ export interface OrdersSelect<T extends boolean = true> {
   totalAtPurchase?: T;
   currency?: T;
   shippingTracking?: T;
+  promoCode?: T;
+  discountAmount?: T;
   updatedAt?: T;
   createdAt?: T;
 }

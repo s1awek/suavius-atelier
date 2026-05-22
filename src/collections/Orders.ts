@@ -214,6 +214,27 @@ export const Orders: CollectionConfig = {
         description: 'Carrier tracking number, set when shipped',
       },
     },
+    {
+      name: 'promoCode',
+      type: 'text',
+      admin: {
+        readOnly: true,
+        description: 'Stripe promotion code applied at checkout, if any',
+      },
+    },
+    {
+      name: 'discountAmount',
+      type: 'number',
+      min: 0,
+      admin: {
+        readOnly: true,
+        description: 'Total discount applied (minor units), if any',
+        components: {
+          Description: '@/components/admin/PriceDescription#PriceDescription',
+          Cell: '@/components/admin/PriceCell#PriceCell',
+        },
+      },
+    },
   ],
   timestamps: true,
 }

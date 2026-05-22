@@ -164,6 +164,7 @@ export async function POST(req: Request) {
     },
     shipping_options: shippingOptions,
     phone_number_collection: { enabled: true },
+    allow_promotion_codes: true,
     metadata: {
       itemsSnapshot: JSON.stringify(orderItemsSnapshot),
       siteUrl,
