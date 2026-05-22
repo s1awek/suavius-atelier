@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { sql } from 'drizzle-orm'
 import type Stripe from 'stripe'
 import { getStripe } from '@/lib/stripe'
 import { getPayloadClient } from '@/lib/payload'
@@ -196,44 +197,46 @@ async function decrementStock(
   payload: Awaited<ReturnType<typeof getPayloadClient>>,
   snapshot: SnapshotItem[],
 ) {
-  const byProduct = new Map<number, SnapshotItem[]>()
-  for (const s of snapshot) {
-    if (!s.variantSku) continue
-    const arr = byProduct.get(s.productId) ?? []
-    arr.push(s)
-    byProduct.set(s.productId, arr)
-  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = (payload.db as any).drizzle
 
-  for (const [productId, lines] of byProduct) {
+  for (const line of snapshot) {
+    if (!line.variantSku || !Number.isFinite(line.quantity) || line.quantity <= 0) continue
+
     try {
-      const product = await payload.findByID({
-        collection: 'products',
-        id: productId,
-        depth: 0,
-      })
-      const variants = Array.isArray(product.variants) ? product.variants : []
-      if (variants.length === 0) continue
+      // Atomic decrement: only succeeds if there is enough stock.
+      // Postgres locks the row during UPDATE, so concurrent webhooks serialize.
+      const strict = await db.execute(sql`
+        UPDATE products_variants
+        SET stock = stock - ${line.quantity}::numeric
+        WHERE sku = ${line.variantSku} AND stock >= ${line.quantity}::numeric
+        RETURNING stock
+      `)
 
-      const updated = variants.map((v) => {
-        const line = lines.find((l) => l.variantSku === v.sku)
-        if (!line) return v
-        const currentStock = typeof v.stock === 'number' ? v.stock : 0
-        const nextStock = currentStock - line.quantity
-        if (nextStock < 0) {
+      if (strict.rowCount === 0) {
+        // Either the SKU does not exist or there was not enough stock.
+        // Verify which case and, if a row exists, clamp to 0 atomically.
+        const clamp = await db.execute(sql`
+          UPDATE products_variants
+          SET stock = 0
+          WHERE sku = ${line.variantSku} AND stock > 0
+          RETURNING stock
+        `)
+        if (clamp.rowCount === 0) {
           console.warn(
-            `[stripe webhook] negative stock for product ${productId} sku ${v.sku}: ${currentStock} - ${line.quantity}`,
+            `[stripe webhook] stock decrement found no row or already zero for sku ${line.variantSku} (product ${line.productId})`,
+          )
+        } else {
+          console.warn(
+            `[stripe webhook] oversold sku ${line.variantSku} (product ${line.productId}): asked ${line.quantity}, clamped to 0`,
           )
         }
-        return { ...v, stock: Math.max(0, nextStock) }
-      })
-
-      await payload.update({
-        collection: 'products',
-        id: productId,
-        data: { variants: updated },
-      })
+      }
     } catch (err) {
-      console.error(`[stripe webhook] failed to decrement stock for product ${productId}`, err)
+      console.error(
+        `[stripe webhook] failed to decrement stock for sku ${line.variantSku}`,
+        err,
+      )
     }
   }
 }
