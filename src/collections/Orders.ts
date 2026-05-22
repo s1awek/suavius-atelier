@@ -1,7 +1,50 @@
 import type { CollectionConfig } from 'payload'
+import { sendShipmentNotification } from '@/lib/email'
+
+function guessCarrierUrl(tracking: string): string | null {
+  const t = tracking.trim()
+  // InPost - 24 digits
+  if (/^\d{24}$/.test(t)) return `https://inpost.pl/sledzenie-przesylek?number=${t}`
+  // DPD PL - typical alphanumeric 14 chars
+  if (/^\d{14}$/.test(t)) return `https://tracktrace.dpd.com.pl/parcelDetails?p1=${t}`
+  // UPS - 1Z + 16 chars
+  if (/^1Z[A-Z0-9]{16}$/i.test(t)) return `https://www.ups.com/track?tracknum=${t}`
+  // DHL - 10-14 digits
+  if (/^\d{10,14}$/.test(t)) return `https://www.dhl.com/global-en/home/tracking.html?tracking-id=${t}`
+  // Poczta Polska - 13 chars ending with PL
+  if (/^[A-Z]{2}\d{9}PL$/i.test(t)) return `https://emonitoring.poczta-polska.pl/?numer=${t}`
+  return null
+}
 
 export const Orders: CollectionConfig = {
   slug: 'orders',
+  hooks: {
+    afterChange: [
+      async ({ doc, previousDoc, operation, req }) => {
+        if (operation !== 'update') return
+        const becameShipped = doc.status === 'shipped' && previousDoc?.status !== 'shipped'
+        if (!becameShipped) return
+        const tracking = doc.shippingTracking
+        if (!tracking || typeof tracking !== 'string') return
+        const customerEmail = doc.customer?.email
+        const customerName = doc.customer?.name
+        if (!customerEmail) return
+
+        try {
+          await sendShipmentNotification({
+            orderId: doc.id,
+            customerEmail,
+            customerName: customerName ?? '',
+            trackingNumber: tracking,
+            trackingUrl: guessCarrierUrl(tracking),
+          })
+          req.payload.logger.info(`Shipment email sent for order #${doc.id}`)
+        } catch (err) {
+          req.payload.logger.error(`Shipment email failed for order #${doc.id}: ${err}`)
+        }
+      },
+    ],
+  },
   admin: {
     useAsTitle: 'stripePaymentIntentId',
     defaultColumns: ['stripePaymentIntentId', 'status', 'customerEmailDenorm', 'createdAt'],

@@ -138,6 +138,62 @@ function escapeHtml(s: string): string {
     .replace(/'/g, '&#39;')
 }
 
+export type ShipmentNotificationInput = {
+  orderId: number | string
+  customerEmail: string
+  customerName: string
+  trackingNumber: string
+  trackingUrl?: string | null
+}
+
+function renderShipmentEmail(input: ShipmentNotificationInput): string {
+  const { orderId, customerName, trackingNumber, trackingUrl } = input
+  const trackingBlock = trackingUrl
+    ? `<a href="${escapeHtml(trackingUrl)}" style="color:#b87333;text-decoration:underline;">${escapeHtml(trackingNumber)}</a>`
+    : escapeHtml(trackingNumber)
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Your order has shipped</title></head>
+<body style="margin:0;padding:0;background:#f5f0e8;font-family:Georgia,serif;color:#2c2825;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f0e8;padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:4px;padding:40px;">
+        <tr><td style="text-align:center;padding-bottom:24px;border-bottom:2px solid #b87333;">
+          <div style="font-family:Georgia,serif;font-size:24px;letter-spacing:0.15em;color:#1a1714;">SUAVIUS ATELIER</div>
+        </td></tr>
+        <tr><td style="padding:32px 0 16px;">
+          <h1 style="margin:0 0 16px;font-family:Georgia,serif;font-size:22px;font-weight:normal;color:#1a1714;">Your order is on its way, ${escapeHtml(customerName || 'friend')}.</h1>
+          <p style="margin:0 0 8px;line-height:1.6;">We have packed your pieces and dropped them off with the carrier.</p>
+          <p style="margin:0;color:#8c7b6b;font-size:14px;">Order #${escapeHtml(String(orderId))}</p>
+        </td></tr>
+        <tr><td style="padding:24px 0;border-top:1px solid #e8e0d0;">
+          <div style="font-size:12px;letter-spacing:0.1em;color:#8c7b6b;text-transform:uppercase;margin-bottom:8px;">Tracking number</div>
+          <div style="font-size:16px;color:#2c2825;">${trackingBlock}</div>
+        </td></tr>
+        <tr><td style="padding:32px 0 0;border-top:1px solid #e8e0d0;text-align:center;color:#8c7b6b;font-size:13px;line-height:1.6;">
+          Delivery times vary by destination. If your package does not arrive within 14 working days, reply to this email.
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`
+}
+
+export async function sendShipmentNotification(
+  input: ShipmentNotificationInput,
+): Promise<void> {
+  const transport = getTransport()
+  const from = `"${FROM_NAME}" <${process.env.SMTP_USER}>`
+  await transport.sendMail({
+    from,
+    to: input.customerEmail,
+    subject: `Your Suavius Atelier order #${input.orderId} has shipped`,
+    html: renderShipmentEmail(input),
+  })
+}
+
 export async function sendOrderConfirmation(
   input: OrderConfirmationInput,
   adminEmail?: string,

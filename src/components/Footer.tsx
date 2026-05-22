@@ -11,7 +11,7 @@ export async function Footer() {
 
   return (
     <footer className="border-t border-warm-mid bg-warm-mid/30 mt-24">
-      <div className="max-w-7xl mx-auto px-6 py-12 grid gap-8 md:grid-cols-3">
+      <div className="max-w-7xl mx-auto px-6 py-12 grid gap-8 md:grid-cols-4">
         <div>
           <Image
             src="/brand/wordmark.svg"
@@ -75,6 +75,29 @@ export async function Footer() {
                 </a>
               </li>
             ))}
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="text-sm font-medium uppercase tracking-wider text-ink-muted mb-3">
+            Legal
+          </h4>
+          <ul className="space-y-2 text-sm">
+            <li>
+              <Link href="/terms" className="hover:text-copper">
+                Terms & Conditions
+              </Link>
+            </li>
+            <li>
+              <Link href="/privacy" className="hover:text-copper">
+                Privacy Policy
+              </Link>
+            </li>
+            <li>
+              <Link href="/cookies" className="hover:text-copper">
+                Cookie Policy
+              </Link>
+            </li>
           </ul>
         </div>
       </div>
