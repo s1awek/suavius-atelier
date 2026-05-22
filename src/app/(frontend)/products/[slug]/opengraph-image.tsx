@@ -1,9 +1,10 @@
 import { ImageResponse } from 'next/og'
 import { getPayloadClient, formatPrice } from '@/lib/payload'
+import { imageResponseToJpeg } from '@/lib/og'
 
 export const alt = 'Suavius Atelier product'
 export const size = { width: 1200, height: 630 }
-export const contentType = 'image/png'
+export const contentType = 'image/jpeg'
 
 export default async function ProductOGImage({
   params,
@@ -23,7 +24,7 @@ export default async function ProductOGImage({
   const product = result.docs[0]
 
   if (!product) {
-    return new ImageResponse(
+    const png = new ImageResponse(
       (
         <div
           style={{
@@ -43,6 +44,7 @@ export default async function ProductOGImage({
       ),
       { ...size },
     )
+    return imageResponseToJpeg(png, 85)
   }
 
   const firstImage =
@@ -51,7 +53,7 @@ export default async function ProductOGImage({
       : null
   const imageUrl = firstImage?.url ?? null
 
-  return new ImageResponse(
+  const png = new ImageResponse(
     (
       <div
         style={{
@@ -133,4 +135,5 @@ export default async function ProductOGImage({
     ),
     { ...size },
   )
+  return imageResponseToJpeg(png, 80)
 }

@@ -1,11 +1,12 @@
 import { ImageResponse } from 'next/og'
+import { imageResponseToJpeg } from '@/lib/og'
 
 export const alt = 'Suavius Atelier - hand-designed PCB coasters and wood accessories'
 export const size = { width: 1200, height: 630 }
-export const contentType = 'image/png'
+export const contentType = 'image/jpeg'
 
 export default async function OGImage() {
-  return new ImageResponse(
+  const png = new ImageResponse(
     (
       <div
         style={{
@@ -44,15 +45,29 @@ export default async function OGImage() {
         </div>
         <div
           style={{
-            marginTop: 48,
-            fontSize: 24,
-            color: '#8c7b6b',
+            marginTop: 56,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 24,
           }}
         >
-          suaviusatelier.com
+          <div
+            style={{
+              fontSize: 26,
+              color: '#ffffff',
+              background: '#b87333',
+              padding: '18px 40px',
+              borderRadius: 4,
+              letterSpacing: '0.05em',
+            }}
+          >
+            Shop the collection
+          </div>
+          <div style={{ fontSize: 22, color: '#8c7b6b' }}>suaviusatelier.com</div>
         </div>
       </div>
     ),
     { ...size },
   )
+  return imageResponseToJpeg(png, 85)
 }

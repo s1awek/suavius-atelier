@@ -22,21 +22,28 @@ const inter = Inter({
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://suaviusatelier.com'
 
+const SITE_TITLE = 'Suavius Atelier - Handcrafted PCB Coasters & Engraved Wood'
+const SITE_DESCRIPTION =
+  'A small atelier crafting hand-designed PCB coasters and laser-engraved wood accessories. Unique handmade pieces blending circuit-board aesthetics with natural materials.'
+
 export const metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Suavius Atelier',
+    default: SITE_TITLE,
     template: '%s · Suavius Atelier',
   },
-  description:
-    'Hand-designed PCB coasters and laser-engraved wood accessories from a small atelier.',
+  description: SITE_DESCRIPTION,
   openGraph: {
     type: 'website',
     siteName: 'Suavius Atelier',
     url: SITE_URL,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
   },
   twitter: {
     card: 'summary_large_image',
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
   },
 }
 

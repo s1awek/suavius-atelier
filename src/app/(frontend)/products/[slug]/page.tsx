@@ -23,26 +23,37 @@ async function fetchProduct(slug: string): Promise<Product | null> {
   return result.docs[0] ?? null
 }
 
+function fallbackDescription(product: Product): string {
+  const materialLabel =
+    product.material === 'pcb'
+      ? 'hand-designed PCB'
+      : product.material === 'wood'
+        ? 'laser-engraved wood'
+        : 'handcrafted'
+  return `${product.title} - a ${materialLabel} piece from Suavius Atelier. Hand-finished, made in small batches, shipped from Poland to anywhere in Europe.`
+}
+
 export async function generateMetadata({ params }: { params: Promise<Params> }) {
   const { slug } = await params
   const product = await fetchProduct(slug)
   if (!product) return { title: 'Product not found' }
   const url = `${SITE_URL}/products/${product.slug}`
   const title = product.seoTitle ?? product.title
-  const description = product.seoDescription ?? undefined
+  const description = product.seoDescription ?? fallbackDescription(product)
+  const brandedTitle = `${title} · Suavius Atelier`
   return {
     title,
     description,
     alternates: { canonical: url },
     openGraph: {
-      title,
+      title: brandedTitle,
       description,
       url,
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
-      title,
+      title: brandedTitle,
       description,
     },
   }
