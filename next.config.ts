@@ -20,6 +20,9 @@ const nextConfig: NextConfig = {
       {
         pathname: '/api/media/file/**',
       },
+      {
+        pathname: '/brand/**',
+      },
     ],
     remotePatterns: r2PublicHost
       ? [

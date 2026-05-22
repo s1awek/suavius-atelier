@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { getPayloadClient } from '@/lib/payload'
 import { CartButton } from './CartButton'
 
@@ -22,8 +23,15 @@ export async function Header() {
         </div>
       )}
       <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
-        <Link href="/" className="font-display text-2xl tracking-tight text-dark">
-          {storeName}
+        <Link href="/" aria-label={storeName} className="block">
+          <Image
+            src="/brand/wordmark.svg"
+            alt={storeName}
+            width={260}
+            height={34}
+            priority
+            className="h-7 w-auto md:h-8"
+          />
         </Link>
         <nav className="flex items-center gap-8 text-sm">
           <Link href="/products" className="hover:text-copper transition-colors">

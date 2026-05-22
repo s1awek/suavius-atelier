@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { getPayloadClient } from '@/lib/payload'
 
 export async function Footer() {
@@ -12,8 +13,14 @@ export async function Footer() {
     <footer className="border-t border-warm-mid bg-warm-mid/30 mt-24">
       <div className="max-w-7xl mx-auto px-6 py-12 grid gap-8 md:grid-cols-3">
         <div>
-          <p className="font-display text-xl text-dark">{storeName}</p>
-          <p className="text-sm text-ink-muted mt-2 max-w-xs">
+          <Image
+            src="/brand/wordmark.svg"
+            alt={storeName}
+            width={220}
+            height={28}
+            className="h-6 w-auto"
+          />
+          <p className="text-sm text-ink-muted mt-3 max-w-xs">
             Hand-designed PCB coasters and laser-engraved wood accessories.
           </p>
         </div>
