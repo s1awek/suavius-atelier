@@ -7,7 +7,7 @@ const SITE_URL =
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const payload = await getPayloadClient()
 
-  const [products, categories, pages] = await Promise.all([
+  const [products, categories, pages, designCollections] = await Promise.all([
     payload.find({
       collection: 'products',
       where: { status: { equals: 'active' } },
@@ -16,12 +16,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
     payload.find({ collection: 'categories', limit: 1000, depth: 0 }),
     payload.find({ collection: 'pages', limit: 1000, depth: 0 }),
+    payload.find({ collection: 'collections', limit: 1000, depth: 0 }),
   ])
 
   const staticEntries: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/`, changeFrequency: 'weekly', priority: 1 },
     { url: `${SITE_URL}/products`, changeFrequency: 'daily', priority: 0.9 },
+    { url: `${SITE_URL}/collections`, changeFrequency: 'weekly', priority: 0.85 },
+    { url: `${SITE_URL}/materials`, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${SITE_URL}/bespoke`, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${SITE_URL}/contact`, changeFrequency: 'monthly', priority: 0.5 },
   ]
+
+  const designCollectionEntries: MetadataRoute.Sitemap = designCollections.docs
+    .filter((c) => c.slug)
+    .map((c) => ({
+      url: `${SITE_URL}/collections/${c.slug}`,
+      lastModified: c.updatedAt ? new Date(c.updatedAt) : undefined,
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    }))
 
   const productEntries: MetadataRoute.Sitemap = products.docs
     .filter((p) => p.slug)
@@ -50,5 +64,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.4,
     }))
 
-  return [...staticEntries, ...productEntries, ...categoryEntries, ...pageEntries]
+  return [
+    ...staticEntries,
+    ...productEntries,
+    ...categoryEntries,
+    ...designCollectionEntries,
+    ...pageEntries,
+  ]
 }

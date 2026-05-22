@@ -93,6 +93,9 @@ export function MobileMenu({ storeName, email }: Props) {
           <nav className="flex-1 overflow-y-auto">
             <ul className="min-h-full flex flex-col justify-center space-y-7 text-center px-8 py-8">
               <NavItem href="/products" label="Shop" />
+              <NavItem href="/collections" label="Collections" />
+              <NavItem href="/materials" label="Materials" />
+              <NavItem href="/bespoke" label="Bespoke" />
               <NavItem href="/about" label="About" />
               <NavItem href="/contact" label="Contact" />
               <NavItem href="/shipping-returns" label="Shipping & returns" small />

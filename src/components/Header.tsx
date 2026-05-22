@@ -34,9 +34,18 @@ export async function Header() {
             className="h-6 sm:h-7 md:h-8 w-auto max-w-[60vw]"
           />
         </Link>
-        <nav className="hidden md:flex items-center gap-8 text-sm">
+        <nav className="hidden md:flex items-center gap-7 text-sm">
           <Link href="/products" className="hover:text-copper transition-colors">
             Shop
+          </Link>
+          <Link href="/collections" className="hover:text-copper transition-colors">
+            Collections
+          </Link>
+          <Link href="/materials" className="hover:text-copper transition-colors">
+            Materials
+          </Link>
+          <Link href="/bespoke" className="hover:text-copper transition-colors">
+            Bespoke
           </Link>
           <Link href="/about" className="hover:text-copper transition-colors">
             About

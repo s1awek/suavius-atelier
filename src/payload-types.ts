@@ -76,6 +76,7 @@ export interface Config {
     'contact-messages': ContactMessage;
     'stock-alerts': StockAlert;
     'newsletter-subscribers': NewsletterSubscriber;
+    collections: Collection;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -92,6 +93,7 @@ export interface Config {
     'contact-messages': ContactMessagesSelect<false> | ContactMessagesSelect<true>;
     'stock-alerts': StockAlertsSelect<false> | StockAlertsSelect<true>;
     'newsletter-subscribers': NewsletterSubscribersSelect<false> | NewsletterSubscribersSelect<true>;
+    collections: CollectionsSelect<false> | CollectionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -458,6 +460,59 @@ export interface NewsletterSubscriber {
   createdAt: string;
 }
 /**
+ * Curated design themes (Botanical, Sport, Abstract, Regional). Each entry becomes a /collections/[slug] landing page.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections".
+ */
+export interface Collection {
+  id: number;
+  title: string;
+  slug: string;
+  /**
+   * Short kicker shown above title on landing page (e.g. "Collection 01")
+   */
+  subtitle?: string | null;
+  /**
+   * One-line emotional hook shown under title
+   */
+  tagline?: string | null;
+  /**
+   * Long-form intro shown above product grid on the collection page
+   */
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Hero visual for collection landing page
+   */
+  heroImage?: (number | null) | Media;
+  /**
+   * Products belonging to this collection (manually curated)
+   */
+  products?: (number | Product)[] | null;
+  /**
+   * Sort order on /collections index (lower = first)
+   */
+  order?: number | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -516,6 +571,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'newsletter-subscribers';
         value: number | NewsletterSubscriber;
+      } | null)
+    | ({
+        relationTo: 'collections';
+        value: number | Collection;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -755,6 +814,24 @@ export interface NewsletterSubscribersSelect<T extends boolean = true> {
   consentedAt?: T;
   consentText?: T;
   ip?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_select".
+ */
+export interface CollectionsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  subtitle?: T;
+  tagline?: T;
+  description?: T;
+  heroImage?: T;
+  products?: T;
+  order?: T;
+  seoTitle?: T;
+  seoDescription?: T;
   updatedAt?: T;
   createdAt?: T;
 }

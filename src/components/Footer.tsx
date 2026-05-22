@@ -52,6 +52,16 @@ export async function Footer() {
               </Link>
             </li>
             <li>
+              <Link href="/collections" className="hover:text-copper">
+                Collections
+              </Link>
+            </li>
+            <li>
+              <Link href="/bespoke" className="hover:text-copper">
+                Bespoke orders
+              </Link>
+            </li>
+            <li>
               <Link href="/shipping-returns" className="hover:text-copper">
                 Shipping & returns
               </Link>
@@ -72,6 +82,11 @@ export async function Footer() {
             <li>
               <Link href="/about" className="hover:text-copper">
                 About
+              </Link>
+            </li>
+            <li>
+              <Link href="/materials" className="hover:text-copper">
+                Materials & process
               </Link>
             </li>
             <li>
