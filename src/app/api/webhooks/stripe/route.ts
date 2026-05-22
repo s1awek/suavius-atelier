@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import type Stripe from 'stripe'
 import { getStripe } from '@/lib/stripe'
 import { getPayloadClient } from '@/lib/payload'
+import { sendOrderConfirmation } from '@/lib/email'
 
 export const runtime = 'nodejs'
 
@@ -78,29 +79,59 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const shipping = session.collected_information?.shipping_details ?? null
   const address = shipping?.address ?? customer?.address ?? null
 
-  await payload.create({
+  const customerEmail = customer?.email ?? 'unknown@example.com'
+  const customerName = shipping?.name ?? customer?.name ?? ''
+  const shippingAddress = {
+    line1: address?.line1 ?? '',
+    line2: address?.line2 ?? undefined,
+    city: address?.city ?? '',
+    postalCode: address?.postal_code ?? '',
+    country: address?.country ?? '',
+  }
+  const totalAtPurchase = session.amount_total ?? 0
+  const currency = (session.currency ?? 'eur').toUpperCase()
+
+  const order = await payload.create({
     collection: 'orders',
     data: {
       stripePaymentIntentId: paymentIntentId,
       status: 'paid',
       customer: {
-        email: customer?.email ?? 'unknown@example.com',
-        name: shipping?.name ?? customer?.name ?? '',
-        address: {
-          line1: address?.line1 ?? '',
-          line2: address?.line2 ?? undefined,
-          city: address?.city ?? '',
-          postalCode: address?.postal_code ?? '',
-          country: address?.country ?? '',
-        },
+        email: customerEmail,
+        name: customerName,
+        address: shippingAddress,
       },
       items: snapshot.map((s) => ({
         product: s.productId,
         quantity: s.quantity,
         priceAtPurchase: s.price,
       })),
-      totalAtPurchase: session.amount_total ?? 0,
-      currency: (session.currency ?? 'eur').toUpperCase(),
+      totalAtPurchase,
+      currency,
     },
   })
+
+  try {
+    const settings = await payload.findGlobal({ slug: 'settings' })
+    const adminEmail = settings?.storeEmail || undefined
+
+    await sendOrderConfirmation(
+      {
+        orderId: order.id,
+        customerEmail,
+        customerName,
+        items: snapshot.map((s) => ({
+          title: s.title,
+          quantity: s.quantity,
+          priceAtPurchase: s.price,
+        })),
+        total: totalAtPurchase,
+        currency,
+        shippingAddress,
+      },
+      adminEmail,
+    )
+  } catch (err) {
+    console.error('[stripe webhook] order email failed', err)
+  }
 }
