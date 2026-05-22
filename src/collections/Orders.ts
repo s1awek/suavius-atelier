@@ -215,6 +215,28 @@ export const Orders: CollectionConfig = {
       },
     },
     {
+      name: 'taxAmount',
+      type: 'number',
+      min: 0,
+      defaultValue: 0,
+      admin: {
+        readOnly: true,
+        description: 'VAT/sales tax included in totalAtPurchase (minor units)',
+        components: {
+          Description: '@/components/admin/PriceDescription#PriceDescription',
+          Cell: '@/components/admin/PriceCell#PriceCell',
+        },
+      },
+    },
+    {
+      name: 'customerVatId',
+      type: 'text',
+      admin: {
+        readOnly: true,
+        description: 'Tax ID provided by customer at checkout (B2B reverse charge, etc.)',
+      },
+    },
+    {
       name: 'promoCode',
       type: 'text',
       admin: {

@@ -319,6 +319,14 @@ export interface Order {
    */
   shippingTracking?: string | null;
   /**
+   * VAT/sales tax included in totalAtPurchase (minor units)
+   */
+  taxAmount?: number | null;
+  /**
+   * Tax ID provided by customer at checkout (B2B reverse charge, etc.)
+   */
+  customerVatId?: string | null;
+  /**
    * Stripe promotion code applied at checkout, if any
    */
   promoCode?: string | null;
@@ -582,6 +590,8 @@ export interface OrdersSelect<T extends boolean = true> {
   totalAtPurchase?: T;
   currency?: T;
   shippingTracking?: T;
+  taxAmount?: T;
+  customerVatId?: T;
   promoCode?: T;
   discountAmount?: T;
   updatedAt?: T;

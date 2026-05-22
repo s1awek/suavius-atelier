@@ -46,7 +46,8 @@ export async function POST(req: Request) {
     price_data: {
       currency: string
       unit_amount: number
-      product_data: { name: string; images?: string[] }
+      tax_behavior: 'inclusive'
+      product_data: { name: string; images?: string[]; tax_code: string }
     }
     quantity: number
   }> = []
@@ -103,8 +104,10 @@ export async function POST(req: Request) {
       price_data: {
         currency: 'eur',
         unit_amount: product.price,
+        tax_behavior: 'inclusive',
         product_data: {
           name: lineName,
+          tax_code: 'txcd_99999999',
           ...(imageUrl ? { images: [imageUrl] } : {}),
         },
       },
@@ -150,6 +153,8 @@ export async function POST(req: Request) {
       type: 'fixed_amount' as const,
       display_name: z.name,
       fixed_amount: { amount: z.flatRate, currency: 'eur' },
+      tax_behavior: 'inclusive' as const,
+      tax_code: 'txcd_92010001',
       metadata: { zoneName: z.name },
     },
   }))
@@ -165,6 +170,8 @@ export async function POST(req: Request) {
     shipping_options: shippingOptions,
     phone_number_collection: { enabled: true },
     allow_promotion_codes: true,
+    automatic_tax: { enabled: true },
+    tax_id_collection: { enabled: true },
     metadata: {
       itemsSnapshot: JSON.stringify(orderItemsSnapshot),
       siteUrl,
