@@ -2,10 +2,26 @@ import { NextResponse } from 'next/server'
 import type { Media } from '@/payload-types'
 import { getPayloadClient } from '@/lib/payload'
 import { getStripe } from '@/lib/stripe'
+import { checkoutRatelimit, enforceRatelimit, getClientIp } from '@/lib/ratelimit'
 
 type IncomingItem = { productId: number; variantSku: string; quantity: number }
 
 export async function POST(req: Request) {
+  const ip = getClientIp(req)
+  const limit = await enforceRatelimit(checkoutRatelimit, ip)
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: 'Too many checkout attempts. Please try again in a moment.' },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(limit.retryAfter),
+          'X-RateLimit-Reset': String(limit.reset),
+        },
+      },
+    )
+  }
+
   let body: { items?: IncomingItem[] }
   try {
     body = await req.json()

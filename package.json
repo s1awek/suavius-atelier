@@ -25,6 +25,8 @@
     "@payloadcms/storage-s3": "3.84.1",
     "@payloadcms/ui": "3.84.1",
     "@stripe/stripe-js": "^9.6.0",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.38.0",
     "cross-env": "10.1.0",
     "dotenv": "16.4.7",
     "graphql": "^16.8.1",

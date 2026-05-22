@@ -29,6 +29,7 @@ export async function POST(req: Request) {
     event = getStripe().webhooks.constructEvent(rawBody, signature, webhookSecret)
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Invalid signature'
+    console.warn(`[stripe webhook] rejected: ${message}`)
     return NextResponse.json({ error: message }, { status: 400 })
   }
 
