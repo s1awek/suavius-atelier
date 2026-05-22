@@ -122,13 +122,29 @@ export default async function ProductOGImage({
           </div>
           <div
             style={{
-              fontSize: 40,
-              color: '#1a1714',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 24,
               borderTop: '1px solid #d4c5b0',
               paddingTop: 24,
             }}
           >
-            {formatPrice(product.price)}
+            <div style={{ fontSize: 40, color: '#1a1714' }}>
+              {formatPrice(product.price)}
+            </div>
+            <div
+              style={{
+                fontSize: 22,
+                color: '#ffffff',
+                background: '#b87333',
+                padding: '14px 32px',
+                borderRadius: 4,
+                letterSpacing: '0.05em',
+                alignSelf: 'flex-start',
+              }}
+            >
+              Shop now ›
+            </div>
           </div>
         </div>
       </div>

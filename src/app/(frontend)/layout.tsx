@@ -33,6 +33,14 @@ export const metadata = {
     template: '%s · Suavius Atelier',
   },
   description: SITE_DESCRIPTION,
+  icons: {
+    icon: [
+      { url: '/brand/icon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/brand/mark-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/brand/mark.svg', type: 'image/svg+xml' },
+    ],
+    apple: '/brand/apple-touch-icon.png',
+  },
   openGraph: {
     type: 'website',
     siteName: 'Suavius Atelier',
@@ -52,6 +60,7 @@ const orgJsonLd = {
   '@type': 'Organization',
   name: 'Suavius Atelier',
   url: SITE_URL,
+  logo: `${SITE_URL}/brand/mark-512.png`,
   description:
     'Hand-designed PCB coasters and laser-engraved wood accessories from a small atelier.',
 }
