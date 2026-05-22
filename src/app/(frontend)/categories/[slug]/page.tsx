@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { getPayloadClient } from '@/lib/payload'
 import { ProductCard } from '@/components/ProductCard'
+import { Breadcrumbs } from '@/components/Breadcrumbs'
 
 type Params = { slug: string }
 
@@ -64,6 +65,13 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <Breadcrumbs
+        items={[
+          { label: 'Shop', href: '/products' },
+          { label: category.title },
+        ]}
+        className="mb-8"
       />
       <div className="mb-12">
         <p className="text-xs uppercase tracking-[0.2em] text-copper mb-4">Category</p>

@@ -1,13 +1,17 @@
 import type { CollectionConfig } from 'payload'
+import { notifyStockRestock } from './hooks/notifyStockRestock'
 
 export const Products: CollectionConfig = {
   slug: 'products',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'slug', 'material', 'price', 'status', 'updatedAt'],
+    defaultColumns: ['title', 'slug', 'material', 'price', 'totalStock', 'status', 'updatedAt'],
   },
   access: {
     read: () => true,
+  },
+  hooks: {
+    afterChange: [notifyStockRestock],
   },
   fields: [
     {
@@ -143,6 +147,23 @@ export const Products: CollectionConfig = {
                   min: 0,
                 },
               ],
+            },
+            {
+              name: 'totalStock',
+              type: 'number',
+              virtual: true,
+              admin: {
+                readOnly: true,
+                description: 'Sum of all variant stocks (auto-calculated)',
+              },
+              hooks: {
+                afterRead: [
+                  ({ data }) => {
+                    const variants = (data?.variants ?? []) as Array<{ stock?: number }>
+                    return variants.reduce((sum, v) => sum + (v.stock ?? 0), 0)
+                  },
+                ],
+              },
             },
           ],
         },

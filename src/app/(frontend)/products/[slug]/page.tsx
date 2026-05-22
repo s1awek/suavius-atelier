@@ -4,6 +4,9 @@ import type { Media, Product } from '@/payload-types'
 import { getPayloadClient, formatPrice } from '@/lib/payload'
 import { ProductPurchasePanel } from '@/components/ProductPurchasePanel'
 import { ProductGallery, type GalleryImage } from '@/components/ProductGallery'
+import { RelatedProducts } from '@/components/RelatedProducts'
+import { Breadcrumbs, type Crumb } from '@/components/Breadcrumbs'
+import { ShareButtons } from '@/components/ShareButtons'
 
 type Params = { slug: string }
 
@@ -23,6 +26,24 @@ async function fetchProduct(slug: string): Promise<Product | null> {
     depth: 2,
   })
   return result.docs[0] ?? null
+}
+
+async function fetchRelated(currentId: number, categoryId: number | null): Promise<Product[]> {
+  if (!categoryId) return []
+  const payload = await getPayloadClient()
+  const result = await payload.find({
+    collection: 'products',
+    where: {
+      and: [
+        { status: { equals: 'active' } },
+        { category: { equals: categoryId } },
+        { id: { not_equals: currentId } },
+      ],
+    },
+    limit: 4,
+    depth: 1,
+  })
+  return result.docs
 }
 
 function fallbackDescription(product: Product): string {
@@ -83,6 +104,8 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
   const category =
     product.category && typeof product.category === 'object' ? product.category : null
 
+  const related = await fetchRelated(product.id, category?.id ?? null)
+
   const breadcrumbItems: Array<{ name: string; url: string }> = [
     { name: 'Shop', url: `${SITE_URL}/products` },
   ]
@@ -125,12 +148,21 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
     },
   ]
 
+  const visibleBreadcrumbs: Crumb[] = [
+    { label: 'Shop', href: '/products' },
+    ...(category?.slug && category?.title
+      ? [{ label: category.title, href: `/categories/${category.slug}` }]
+      : []),
+    { label: product.title },
+  ]
+
   return (
     <article className="max-w-7xl mx-auto px-6 py-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <Breadcrumbs items={visibleBreadcrumbs} className="mb-8" />
       <div className="grid gap-12 md:grid-cols-2">
         <div>
           <ProductGallery
@@ -207,8 +239,16 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
               )}
             </dl>
           )}
+
+          <ShareButtons
+            url={productUrl}
+            title={product.title}
+            imageUrl={images[0]?.url ? `${SITE_URL}${images[0].url}` : null}
+          />
         </div>
       </div>
+
+      <RelatedProducts products={related} />
     </article>
   )
 }

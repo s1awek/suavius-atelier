@@ -74,6 +74,7 @@ export interface Config {
     orders: Order;
     pages: Page;
     'contact-messages': ContactMessage;
+    'stock-alerts': StockAlert;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -88,6 +89,7 @@ export interface Config {
     orders: OrdersSelect<false> | OrdersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     'contact-messages': ContactMessagesSelect<false> | ContactMessagesSelect<true>;
+    'stock-alerts': StockAlertsSelect<false> | StockAlertsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -255,6 +257,10 @@ export interface Product {
       }[]
     | null;
   /**
+   * Sum of all variant stocks (auto-calculated)
+   */
+  totalStock?: number | null;
+  /**
    * Net product weight in grams (for shipping estimation)
    */
   weightGrams?: number | null;
@@ -403,6 +409,30 @@ export interface ContactMessage {
   createdAt: string;
 }
 /**
+ * Email subscriptions for back-in-stock notifications on out-of-stock variants.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "stock-alerts".
+ */
+export interface StockAlert {
+  id: number;
+  product: number | Product;
+  /**
+   * Cached from product at signup time
+   */
+  productSlug?: string | null;
+  variantSku: string;
+  email: string;
+  /**
+   * Set automatically when restock email is sent
+   */
+  notified?: boolean | null;
+  notifiedAt?: string | null;
+  ip?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -453,6 +483,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'contact-messages';
         value: number | ContactMessage;
+      } | null)
+    | ({
+        relationTo: 'stock-alerts';
+        value: number | StockAlert;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -578,6 +612,7 @@ export interface ProductsSelect<T extends boolean = true> {
         stock?: T;
         id?: T;
       };
+  totalStock?: T;
   weightGrams?: T;
   dimensions?:
     | T
@@ -662,6 +697,21 @@ export interface ContactMessagesSelect<T extends boolean = true> {
   ip?: T;
   userAgent?: T;
   handled?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "stock-alerts_select".
+ */
+export interface StockAlertsSelect<T extends boolean = true> {
+  product?: T;
+  productSlug?: T;
+  variantSku?: T;
+  email?: T;
+  notified?: T;
+  notifiedAt?: T;
+  ip?: T;
   updatedAt?: T;
   createdAt?: T;
 }

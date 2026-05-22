@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { AddToCartButton } from './AddToCartButton'
 import { PaymentBadges } from './PaymentBadges'
+import { StockAlertForm } from './StockAlertForm'
 import { useCart } from '@/lib/cart'
 
 type Variant = {
@@ -119,9 +120,17 @@ export function ProductPurchasePanel({
         </p>
       )}
 
-      {(outOfStock || atLimit) && (
+      {outOfStock && (
+        <StockAlertForm
+          productId={productId}
+          variantSku={selected.sku}
+          variantName={selected.name}
+        />
+      )}
+
+      {atLimit && !outOfStock && (
         <p className="text-xs text-ink-muted mt-3 leading-relaxed">
-          Need more?{' '}
+          You have all available units. Need more?{' '}
           <a href={`mailto:${CONTACT_EMAIL}`} className="underline hover:text-copper">
             Email us
           </a>{' '}

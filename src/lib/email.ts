@@ -181,6 +181,54 @@ function renderShipmentEmail(input: ShipmentNotificationInput): string {
 </html>`
 }
 
+export type StockRestockInput = {
+  email: string
+  productTitle: string
+  variantName: string
+  productUrl: string
+}
+
+export async function sendStockRestockNotification(input: StockRestockInput): Promise<void> {
+  const transport = getTransport()
+  const from = `"${FROM_NAME}" <${process.env.SMTP_USER}>`
+  const variantLine =
+    input.variantName && input.variantName !== 'Standard'
+      ? `${escapeHtml(input.productTitle)} - ${escapeHtml(input.variantName)}`
+      : escapeHtml(input.productTitle)
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Back in stock</title></head>
+<body style="margin:0;padding:0;background:#f5f0e8;font-family:Georgia,serif;color:#2c2825;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f0e8;padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:4px;padding:40px;">
+        <tr><td style="text-align:center;padding-bottom:24px;border-bottom:2px solid #b87333;">
+          <div style="font-family:Georgia,serif;font-size:24px;letter-spacing:0.15em;color:#1a1714;">SUAVIUS ATELIER</div>
+        </td></tr>
+        <tr><td style="padding:32px 0 16px;">
+          <h1 style="margin:0 0 16px;font-family:Georgia,serif;font-size:22px;font-weight:normal;color:#1a1714;">Back in stock</h1>
+          <p style="margin:0 0 8px;line-height:1.6;">${variantLine} is available again.</p>
+          <p style="margin:0 0 24px;color:#8c7b6b;font-size:14px;">Quantities are limited; we craft in small batches.</p>
+          <p style="margin:24px 0 0;"><a href="${escapeHtml(input.productUrl)}" style="display:inline-block;padding:12px 32px;background:#1a1714;color:#f5f0e8;text-decoration:none;font-family:Georgia,serif;letter-spacing:0.05em;">View piece</a></p>
+        </td></tr>
+        <tr><td style="padding:32px 0 0;border-top:1px solid #e8e0d0;text-align:center;color:#8c7b6b;font-size:12px;line-height:1.6;">
+          You are receiving this because you subscribed to a back-in-stock alert.<br>
+          We only send one notification per subscription.
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`
+
+  await transport.sendMail({
+    from,
+    to: input.email,
+    subject: `Back in stock: ${input.productTitle}`,
+    html,
+  })
+}
+
 export async function sendShipmentNotification(
   input: ShipmentNotificationInput,
 ): Promise<void> {
