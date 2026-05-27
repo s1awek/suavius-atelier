@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { Media, Product } from '@/payload-types'
@@ -56,7 +57,11 @@ function fallbackDescription(product: Product): string {
   return `${product.title} - a ${materialLabel} piece from Suavius Atelier. Hand-finished, made in small batches, shipped from Poland to anywhere in Europe.`
 }
 
-export async function generateMetadata({ params }: { params: Promise<Params> }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<Params>
+}): Promise<Metadata> {
   const { slug } = await params
   const product = await fetchProduct(slug)
   if (!product) return { title: 'Product not found' }

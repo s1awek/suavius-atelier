@@ -1,8 +1,10 @@
+import type { Metadata } from 'next'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { Page } from '@/payload-types'
 import { getPayloadClient } from '@/lib/payload'
 import { ContactForm } from '@/components/ContactForm'
 import { LocationMap } from '@/components/LocationMap'
+import { Breadcrumbs } from '@/components/Breadcrumbs'
 
 export const revalidate = 600
 
@@ -16,7 +18,7 @@ async function fetchContactPage(): Promise<Page | null> {
   return result.docs[0] ?? null
 }
 
-export async function generateMetadata() {
+export async function generateMetadata(): Promise<Metadata> {
   const page = await fetchContactPage()
   return {
     title: page?.seoTitle ?? page?.title ?? 'Contact',
@@ -32,7 +34,8 @@ export default async function ContactPage() {
   const page = await fetchContactPage()
 
   return (
-    <article className="max-w-6xl mx-auto px-6 py-16">
+    <article className="max-w-7xl mx-auto px-6 py-16">
+      <Breadcrumbs home items={[{ label: 'Contact' }]} className="mb-8" />
       <header className="max-w-3xl mb-12">
         <h1 className="font-display text-4xl md:text-5xl text-dark mb-6">
           {page?.title ?? 'Contact'}

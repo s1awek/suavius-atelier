@@ -1,7 +1,8 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Bespoke & Custom Orders',
   description:
     'Commission a one-of-a-kind PCB or wood piece from Suavius Atelier - custom artwork, engraved names, corporate logos, wedding sets, and limited editions.',
@@ -9,9 +10,8 @@ export const metadata = {
 
 export default function BespokePage() {
   return (
-    <article className="max-w-5xl mx-auto px-6 py-16 md:py-24">
-      <Breadcrumbs items={[{ label: 'Bespoke' }]} className="mb-8" />
-
+    <article className="max-w-7xl mx-auto px-6 py-16 md:py-24">
+      <Breadcrumbs home items={[{ label: 'Bespoke' }]} className="mb-8" />
       <header className="max-w-3xl mb-16">
         <p className="text-xs uppercase tracking-[0.3em] text-copper mb-4">Commissions</p>
         <h1 className="font-display text-4xl md:text-5xl text-dark leading-tight">
@@ -19,7 +19,7 @@ export default function BespokePage() {
         </h1>
         <p className="mt-6 text-lg text-ink-muted leading-relaxed">
           We accept a small number of bespoke commissions each month. Wedding gifts, corporate
-          editions, monogrammed wood pieces, custom artwork on PCB — if it can be drawn and
+          editions, monogrammed wood pieces, custom artwork on PCB - if it can be drawn and
           fabricated to our standards, we will quote it.
         </p>
       </header>
@@ -70,7 +70,7 @@ export default function BespokePage() {
           />
           <BespokeItem
             title="Regional editions"
-            body="Maps of cities, regions, ski runs, hiking trails, sailing routes — drawn for a place that matters to someone. PCB or wood, single piece or a small run."
+            body="Maps of cities, regions, ski runs, hiking trails, sailing routes - drawn for a place that matters to someone. PCB or wood, single piece or a small run."
           />
           <BespokeItem
             title="Wedding sets"

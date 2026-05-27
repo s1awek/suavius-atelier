@@ -36,7 +36,7 @@ export default async function HomePage() {
               Circuits, wood, and a quiet kind of craft.
             </h1>
             <p className="mt-6 text-lg text-ink-muted max-w-md">
-              PCB coasters with ENIG copper finish and laser-engraved wood pieces — designed
+              PCB coasters with ENIG copper finish and laser-engraved wood pieces - designed
               to last, made in small batches.
             </p>
             <div className="mt-10 flex gap-4">
@@ -208,7 +208,7 @@ export default async function HomePage() {
         <p className="text-xs uppercase tracking-[0.2em] text-copper mb-6">Material & process</p>
         <h2 className="text-3xl md:text-4xl mb-6">Why a PCB makes a beautiful coaster</h2>
         <p className="text-lg text-ink-muted">
-          We start with FR4 laminate — the same fiberglass-epoxy used in fine electronics —
+          We start with FR4 laminate - the same fiberglass-epoxy used in fine electronics -
           plate it with gold-over-nickel (ENIG), then print designs with UV silkscreen. The
           result is a small object that catches light like a circuit board and survives daily
           use like one too.

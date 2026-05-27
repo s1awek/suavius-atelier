@@ -1,6 +1,8 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
+import { Breadcrumbs } from '@/components/Breadcrumbs'
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Materials & Process',
   description:
     'How a Suavius Atelier piece is made - from FR4 fiberglass and ENIG gold-plated copper to laser-engraved hardwood. Designed in Bielawa, produced with trusted partners.',
@@ -8,7 +10,8 @@ export const metadata = {
 
 export default function MaterialsPage() {
   return (
-    <article className="max-w-5xl mx-auto px-6 py-16 md:py-24">
+    <article className="max-w-7xl mx-auto px-6 py-16 md:py-24">
+      <Breadcrumbs home items={[{ label: 'Materials' }]} className="mb-8" />
       <header className="max-w-3xl mb-16">
         <p className="text-xs uppercase tracking-[0.3em] text-copper mb-4">
           Materials & Process
@@ -30,7 +33,7 @@ export default function MaterialsPage() {
         </div>
         <div className="prose prose-lg max-w-none text-ink">
           <p>
-            FR4 is the substrate used in high-reliability electronics — satellites,
+            FR4 is the substrate used in high-reliability electronics - satellites,
             medical devices, fine audio. It is a glass-fibre laminate bonded with epoxy resin,
             cured under pressure. It does not warp. It does not stain. It survives heat from a
             fresh espresso and the next decade of weekday mornings.
@@ -52,7 +55,7 @@ export default function MaterialsPage() {
           <p>
             The thin gold border on every PCB piece is not paint. It is the actual edge
             of the copper layer beneath, plated with electroless nickel and immersion gold
-            (ENIG) — the same finish used on fine-pitch electronics where corrosion is not
+            (ENIG) - the same finish used on fine-pitch electronics where corrosion is not
             an option.
           </p>
           <p>
@@ -78,7 +81,7 @@ export default function MaterialsPage() {
           <p>
             We draw each design in our studio, refine the colour separations, and supply
             the artwork alongside the Gerber files our manufacturer uses to plate the
-            copper. The two layers — graphic and metal — are laid down in separate passes
+            copper. The two layers - graphic and metal - are laid down in separate passes
             and meet only on the finished board.
           </p>
         </div>
@@ -91,7 +94,7 @@ export default function MaterialsPage() {
         </div>
         <div className="prose prose-lg max-w-none text-ink">
           <p>
-            Our wooden pieces are cut from European hardwoods — oak, walnut, beech — and
+            Our wooden pieces are cut from European hardwoods - oak, walnut, beech - and
             finished with food-safe linseed oil. Patterns are burned into the surface
             with a CO₂ laser. No ink. No lacquer. The grain shows through every mark,
             and the colour deepens with use rather than chipping away.
@@ -113,15 +116,15 @@ export default function MaterialsPage() {
             <p>
               We design and finish every piece in our small studio in Bielawa, in the
               Lower Silesia region of Poland. Each PCB is fabricated by a specialist
-              partner in Shenzhen — the city that has become the world&apos;s reference for
-              precision board manufacturing — to the same tolerances as professional
+              partner in Shenzhen - the city that has become the world&apos;s reference for
+              precision board manufacturing - to the same tolerances as professional
               electronics.
             </p>
             <p>
               We do not pretend to plate gold ourselves in a back room. We chose this
               workflow because it puts the right tools in the right hands: industrial
               metallurgy where it belongs, and design, finishing, packaging, and
-              correspondence with you where they belong — here, in our atelier.
+              correspondence with you where they belong - here, in our atelier.
             </p>
             <p>
               Wood pieces are cut and engraved entirely in-house.

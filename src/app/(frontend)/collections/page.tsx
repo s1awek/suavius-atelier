@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { getPayloadClient } from '@/lib/payload'
-import { Breadcrumbs } from '@/components/Breadcrumbs'
 
 export const revalidate = 600
 
@@ -22,7 +21,6 @@ export default async function CollectionsIndexPage() {
 
   return (
     <section className="max-w-7xl mx-auto px-6 py-16 md:py-20">
-      <Breadcrumbs items={[{ label: 'Collections' }]} className="mb-8" />
       <header className="max-w-3xl mb-14">
         <p className="text-xs uppercase tracking-[0.3em] text-copper mb-4">Browse by theme</p>
         <h1 className="font-display text-4xl md:text-5xl text-dark leading-tight">
