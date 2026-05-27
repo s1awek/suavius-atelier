@@ -38,6 +38,7 @@ export function ProductPurchasePanel({
 
   const items = useCart((s) => s.items)
   const [mounted, setMounted] = useState(false)
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- SSR hydration guard: cart state is client-only, so reconcile after mount
   useEffect(() => setMounted(true), [])
 
   if (!selected) {

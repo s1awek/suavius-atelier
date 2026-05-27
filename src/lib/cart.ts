@@ -92,8 +92,12 @@ export const useCart = create<CartState>()(
           .filter((i): i is Record<string, unknown> => typeof i === 'object' && i !== null)
           .filter((i) => typeof i.variantSku === 'string')
           .filter((i) => {
-            const snap = (i as any).snapshot
-            return snap && typeof snap.stock === 'number'
+            const snap = i.snapshot
+            return (
+              typeof snap === 'object' &&
+              snap !== null &&
+              typeof (snap as Record<string, unknown>).stock === 'number'
+            )
           }) as unknown as CartItem[]
         return { items }
       },

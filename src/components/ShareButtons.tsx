@@ -13,6 +13,7 @@ export function ShareButtons({ url, title, imageUrl }: Props) {
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- navigator is client-only; detect Web Share support after mount
     setCanNativeShare(typeof navigator !== 'undefined' && typeof navigator.share === 'function')
   }, [])
 

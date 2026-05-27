@@ -8,6 +8,7 @@ export function CartButton() {
   const open = useCart((s) => s.open)
   const [mounted, setMounted] = useState(false)
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- SSR hydration guard: cart count must render 0 on the server (persisted store is client-only) and update after mount
   useEffect(() => setMounted(true), [])
 
   const count = mounted ? cartItemCount(items) : 0

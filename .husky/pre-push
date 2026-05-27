@@ -1,0 +1,4 @@
+# Hard gate before any push (= before any Vercel deploy): the whole project must
+# lint clean and type-check clean, or the push is blocked. These are exactly the
+# checks that fail a production build, so a broken build never reaches Vercel.
+pnpm lint && pnpm typecheck

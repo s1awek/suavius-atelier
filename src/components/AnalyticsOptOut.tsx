@@ -24,6 +24,7 @@ export function AnalyticsOptOut() {
       setGpc(isGpcActive())
     }
     sync()
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- consent state is client-only; read it after mount and flag the component ready
     setReady(true)
     window.addEventListener(ANALYTICS_CONSENT_EVENT, sync)
     return () => window.removeEventListener(ANALYTICS_CONSENT_EVENT, sync)

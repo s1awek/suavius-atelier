@@ -9,12 +9,16 @@ export function CookieConsent() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
+    // localStorage is client-only, so the consent banner's visibility can only be
+    // resolved after mount (it must stay hidden during SSR to avoid a hydration flash).
+    /* eslint-disable react-hooks/set-state-in-effect */
     try {
       const v = localStorage.getItem(STORAGE_KEY)
       if (!v) setVisible(true)
     } catch {
       setVisible(true)
     }
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [])
 
   const accept = () => {
