@@ -6,11 +6,17 @@ import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { Product } from '@/payload-types'
 import { getPayloadClient } from '@/lib/payload'
 import { ProductCard } from '@/components/ProductCard'
+import { ProductFilters } from '@/components/ProductFilters'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
+import {
+  buildProductSort,
+  buildProductWhere,
+  hasActiveFilters,
+  parseProductFilters,
+} from '@/lib/product-query'
 
 type Params = { slug: string }
-
-export const revalidate = 600
+type SearchParams = Promise<Record<string, string | string[] | undefined>>
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://suaviusatelier.com'
@@ -43,8 +49,15 @@ export async function generateMetadata({
   }
 }
 
-export default async function CollectionPage({ params }: { params: Promise<Params> }) {
+export default async function CollectionPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<Params>
+  searchParams: SearchParams
+}) {
   const { slug } = await params
+  const filters = parseProductFilters(await searchParams)
   const c = await fetchCollection(slug)
   if (!c) {
     await applyRedirect(`/collections/${slug}`)
@@ -52,9 +65,29 @@ export default async function CollectionPage({ params }: { params: Promise<Param
   }
 
   const hero = typeof c.heroImage === 'object' && c.heroImage ? c.heroImage : null
-  const products = (c.products ?? []).filter(
+
+  // The collection curates its own products (hasMany, manually ordered). With no
+  // active filters we preserve that curated order; once the visitor searches,
+  // filters or re-sorts, we re-query products scoped to this collection's ids so
+  // the same query layer applies consistently across listings.
+  const curated = (c.products ?? []).filter(
     (p): p is Product => typeof p === 'object' && p !== null,
   )
+  const filtered = hasActiveFilters(filters)
+
+  let products = curated
+  if (filtered && curated.length > 0) {
+    const payload = await getPayloadClient()
+    const result = await payload.find({
+      collection: 'products',
+      where: buildProductWhere(filters, { id: { in: curated.map((p) => p.id) } }),
+      sort: buildProductSort(filters),
+      limit: 100,
+    })
+    products = result.docs
+  } else if (filtered) {
+    products = []
+  }
 
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org/',
@@ -123,10 +156,13 @@ export default async function CollectionPage({ params }: { params: Promise<Param
         </div>
       </header>
 
+      {curated.length > 0 && <ProductFilters />}
+
       {products.length === 0 ? (
         <p className="text-ink-muted text-center py-12">
-          Pieces in this collection are being prepared. Subscribe to the journal to know when
-          they are released.
+          {filtered
+            ? 'No pieces in this collection match these filters. Try widening your search.'
+            : 'Pieces in this collection are being prepared. Subscribe to the journal to know when they are released.'}
         </p>
       ) : (
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">

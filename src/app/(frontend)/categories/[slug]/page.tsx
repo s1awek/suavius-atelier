@@ -3,11 +3,17 @@ import { notFound } from 'next/navigation'
 import { applyRedirect } from '@/lib/redirects'
 import { getPayloadClient } from '@/lib/payload'
 import { ProductCard } from '@/components/ProductCard'
+import { ProductFilters } from '@/components/ProductFilters'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
+import {
+  buildProductSort,
+  buildProductWhere,
+  hasActiveFilters,
+  parseProductFilters,
+} from '@/lib/product-query'
 
 type Params = { slug: string }
-
-export const revalidate = 300
+type SearchParams = Promise<Record<string, string | string[] | undefined>>
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://suaviusatelier.com'
@@ -28,8 +34,15 @@ export async function generateMetadata({
   return { title: category ? category.title : 'Category not found' }
 }
 
-export default async function CategoryPage({ params }: { params: Promise<Params> }) {
+export default async function CategoryPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<Params>
+  searchParams: SearchParams
+}) {
   const { slug } = await params
+  const filters = parseProductFilters(await searchParams)
   const payload = await getPayloadClient()
 
   const catResult = await payload.find({
@@ -45,14 +58,9 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
 
   const products = await payload.find({
     collection: 'products',
-    where: {
-      and: [
-        { status: { equals: 'active' } },
-        { category: { equals: category.id } },
-      ],
-    },
+    where: buildProductWhere(filters, { category: { equals: category.id } }),
+    sort: buildProductSort(filters),
     limit: 100,
-    sort: '-updatedAt',
   })
 
   const breadcrumbJsonLd = {
@@ -90,8 +98,14 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
         )}
       </div>
 
+      <ProductFilters />
+
       {products.docs.length === 0 ? (
-        <p className="text-ink-muted">No products in this category yet.</p>
+        <p className="text-ink-muted">
+          {hasActiveFilters(filters)
+            ? 'No pieces in this category match these filters. Try widening your search.'
+            : 'No products in this category yet.'}
+        </p>
       ) : (
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {products.docs.map((p) => (

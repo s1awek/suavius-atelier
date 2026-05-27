@@ -1,20 +1,34 @@
 import type { Metadata } from 'next'
 import { getPayloadClient } from '@/lib/payload'
 import { ProductCard } from '@/components/ProductCard'
+import { ProductFilters } from '@/components/ProductFilters'
+import {
+  buildProductSort,
+  buildProductWhere,
+  hasActiveFilters,
+  parseProductFilters,
+} from '@/lib/product-query'
 
 export const metadata: Metadata = { title: 'Shop' }
 
-export const revalidate = 300
+type SearchParams = Promise<Record<string, string | string[] | undefined>>
 
-export default async function ProductsPage() {
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams: SearchParams
+}) {
+  const filters = parseProductFilters(await searchParams)
   const payload = await getPayloadClient()
 
   const result = await payload.find({
     collection: 'products',
-    where: { status: { equals: 'active' } },
+    where: buildProductWhere(filters),
+    sort: buildProductSort(filters),
     limit: 100,
-    sort: '-updatedAt',
   })
+
+  const filtered = hasActiveFilters(filters)
 
   return (
     <section className="max-w-7xl mx-auto px-6 py-16">
@@ -23,8 +37,14 @@ export default async function ProductsPage() {
         <h1 className="text-4xl md:text-5xl">Shop</h1>
       </div>
 
+      <ProductFilters />
+
       {result.docs.length === 0 ? (
-        <p className="text-ink-muted">No products available yet.</p>
+        <p className="text-ink-muted">
+          {filtered
+            ? 'No pieces match these filters. Try widening your search.'
+            : 'No products available yet.'}
+        </p>
       ) : (
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {result.docs.map((p, i) => (
