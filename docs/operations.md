@@ -78,9 +78,11 @@ added by hand. Two layers apply them:
 1. **Hard 301/308 via middleware + Vercel Edge Config** (`src/middleware.ts`). The redirect
    map is mirrored into Edge Config by the Redirects collection hooks (`lib/edge-config-redirects.ts`).
    This is the SEO-correct path and needs these env vars:
-   - `EDGE_CONFIG` — read connection string, auto-injected when the Edge Config store is
-     connected to the project.
-   - `EDGE_CONFIG_ID`, `VERCEL_API_TOKEN`, `VERCEL_TEAM_ID` — for writes (the Vercel REST API).
+   - `EDGE_CONFIG` — read connection string (also contains the `ecfg_…` id), auto-injected
+     when the Edge Config store is connected to the project.
+   - `EDGE_TOKEN` — a Vercel API token, used for writes via the Vercel REST API.
+   - `VERCEL_TEAM_ID` — the team id (`team_…`), required for team-owned Edge Configs.
+
    After connecting the store, seed it once: `pnpm exec tsx scripts/sync-redirects-edge-config.ts`
    (with the prod `DATABASE_URL` + the write env vars).
 2. **In-page fallback** (`lib/redirects.ts` `applyRedirect`, called from dynamic pages on a

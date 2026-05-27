@@ -16,13 +16,20 @@ export const EDGE_CONFIG_REDIRECTS_KEY = 'redirects'
 export type RedirectEntry = { to: string; permanent: boolean }
 export type RedirectMap = Record<string, RedirectEntry>
 
+/** The Edge Config id (ecfg_…) lives inside the auto-injected EDGE_CONFIG connection
+ *  string; fall back to an explicit EDGE_CONFIG_ID if someone sets one. */
+function getEdgeConfigId(): string | undefined {
+  const fromConn = process.env.EDGE_CONFIG?.match(/edge-config\.vercel\.com\/(ecfg_[^/?]+)/)?.[1]
+  return fromConn ?? process.env.EDGE_CONFIG_ID
+}
+
 export async function syncRedirectsToEdgeConfig(payload: Payload): Promise<void> {
-  const edgeConfigId = process.env.EDGE_CONFIG_ID
-  const token = process.env.VERCEL_API_TOKEN
+  const edgeConfigId = getEdgeConfigId()
+  const token = process.env.EDGE_TOKEN ?? process.env.VERCEL_API_TOKEN
   const teamId = process.env.VERCEL_TEAM_ID
 
   if (!edgeConfigId || !token) {
-    payload.logger.info('[redirects] Edge Config write skipped (EDGE_CONFIG_ID / VERCEL_API_TOKEN not set)')
+    payload.logger.info('[redirects] Edge Config write skipped (EDGE_CONFIG / EDGE_TOKEN not set)')
     return
   }
 
