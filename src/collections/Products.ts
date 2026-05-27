@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { notifyStockRestock } from './hooks/notifyStockRestock'
+import { productRevalidate } from './hooks/revalidate'
 
 export const Products: CollectionConfig = {
   slug: 'products',
@@ -11,7 +12,8 @@ export const Products: CollectionConfig = {
     read: () => true,
   },
   hooks: {
-    afterChange: [notifyStockRestock],
+    afterChange: [notifyStockRestock, productRevalidate.afterChange],
+    afterDelete: [productRevalidate.afterDelete],
   },
   fields: [
     {
