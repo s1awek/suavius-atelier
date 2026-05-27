@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Inter } from 'next/font/google'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { CartDrawer } from '@/components/CartDrawer'
+import { SearchOverlay } from '@/components/SearchOverlay'
 import { CookieConsent } from '@/components/CookieConsent'
 import { TestModeBanner } from '@/components/TestModeBanner'
 import { AnalyticsGate } from '@/components/AnalyticsGate'
@@ -80,6 +81,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
         <main className="flex-1">{props.children}</main>
         <Footer />
         <CartDrawer />
+        <SearchOverlay />
         <CookieConsent />
         <AnalyticsGate />
       </body>

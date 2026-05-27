@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { getPayloadClient } from '@/lib/payload'
 import { CartButton } from './CartButton'
+import { SearchButton } from './SearchButton'
 import { MobileMenu } from './MobileMenu'
 
 export async function Header() {
@@ -53,9 +54,11 @@ export async function Header() {
           <Link href="/contact" className="hover:text-copper transition-colors">
             Contact
           </Link>
+          <SearchButton />
           <CartButton />
         </nav>
         <div className="flex md:hidden items-center gap-4">
+          <SearchButton />
           <CartButton />
           <MobileMenu storeName={storeName} email="orders@suaviusatelier.com" />
         </div>
