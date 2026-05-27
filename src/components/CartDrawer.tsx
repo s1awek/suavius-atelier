@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useCart, cartTotal } from '@/lib/cart'
 import { formatPrice } from '@/lib/format'
@@ -95,19 +96,30 @@ export function CartDrawer() {
                 const atLimit = item.quantity >= item.snapshot.stock
                 return (
                   <li key={`${item.productId}::${item.variantSku}`} className="flex gap-4">
-                    <div className="w-20 h-20 bg-warm-mid relative flex-shrink-0">
+                    <Link
+                      href={`/products/${item.snapshot.slug}`}
+                      onClick={close}
+                      aria-label={item.snapshot.title}
+                      className="group w-20 h-20 bg-warm-mid relative flex-shrink-0 block overflow-hidden"
+                    >
                       {item.snapshot.imageUrl && (
                         <Image
                           src={item.snapshot.imageUrl}
                           alt={item.snapshot.title}
                           fill
                           sizes="80px"
-                          className="object-cover"
+                          className="object-cover group-hover:scale-105 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
                         />
                       )}
-                    </div>
+                    </Link>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{item.snapshot.title}</p>
+                      <Link
+                        href={`/products/${item.snapshot.slug}`}
+                        onClick={close}
+                        className="text-sm font-medium truncate block hover:text-copper"
+                      >
+                        {item.snapshot.title}
+                      </Link>
                       {item.snapshot.variantName && item.snapshot.variantName !== 'Standard' && (
                         <p className="text-xs text-ink-muted mt-0.5">{item.snapshot.variantName}</p>
                       )}

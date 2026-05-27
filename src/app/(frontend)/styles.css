@@ -16,6 +16,11 @@
 
   /* Sensible defaults overrides */
   --default-font-family: var(--font-body);
+
+  /* Motion baseline: slightly longer + eased-out for a considered, premium feel.
+     Applies to every `transition-*` utility that doesn't set its own duration. */
+  --default-transition-duration: 250ms;
+  --default-transition-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 @layer base {
@@ -43,6 +48,31 @@
     display: block;
     max-width: 100%;
     height: auto;
+  }
+
+  /* Drop the native (blue) clear/decoration on search inputs - we provide our own. */
+  input[type='search']::-webkit-search-cancel-button,
+  input[type='search']::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  /* Every link and button gets a smooth hover transition by default, so hover
+     states never snap. Elements with an explicit `transition-*` utility override
+     this. Covers current and future markup without per-element classes. */
+  a,
+  button {
+    transition-property: color, background-color, border-color, text-decoration-color,
+      fill, stroke, opacity;
+    transition-duration: var(--default-transition-duration, 250ms);
+    transition-timing-function: var(--default-transition-timing-function, cubic-bezier(0.33, 1, 0.68, 1));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    a,
+    button {
+      transition-duration: 0.01ms;
+    }
   }
 }
 
