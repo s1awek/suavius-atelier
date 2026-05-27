@@ -1,7 +1,8 @@
 // Force production mode BEFORE importing Payload: in dev mode Payload tries to
 // drizzle-push the schema, which is destructive against a real DB and poisons the
 // Neon pooler. This script only reads/updates existing rows, so push is never wanted.
-process.env.NODE_ENV = 'production'
+// (Object.assign, not direct assignment: process.env.NODE_ENV is typed read-only.)
+Object.assign(process.env, { NODE_ENV: 'production' })
 
 import 'dotenv/config'
 import { getPayload } from 'payload'
