@@ -26,8 +26,8 @@ export default async function ProductsPage() {
         <p className="text-ink-muted">No products available yet.</p>
       ) : (
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {result.docs.map((p) => (
-            <ProductCard key={p.id} product={p} />
+          {result.docs.map((p, i) => (
+            <ProductCard key={p.id} product={p} priority={i < 3} />
           ))}
         </div>
       )}
