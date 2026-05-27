@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { Page } from '@/payload-types'
 import { getPayloadClient } from '@/lib/payload'
+import { NOINDEX_SLUGS } from '@/lib/seo'
 
 type Params = { slug: string }
 
@@ -24,6 +25,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }) 
   return {
     title: page.seoTitle ?? page.title,
     description: page.seoDescription ?? undefined,
+    ...(NOINDEX_SLUGS.has(slug) ? { robots: { index: false, follow: true } } : {}),
   }
 }
 

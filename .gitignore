@@ -47,5 +47,8 @@ next-env.d.ts
 .env*
 /.workspace/
 
+# inspector screenshots (tools/inspect.mjs)
+/tools/live/
+
 # Claude Code local runtime (locks, scheduled tasks, agent state)
 /.claude/

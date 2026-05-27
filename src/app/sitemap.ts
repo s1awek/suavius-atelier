@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { getPayloadClient } from '@/lib/payload'
+import { NOINDEX_SLUGS } from '@/lib/seo'
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://suaviusatelier.com'
@@ -56,7 +57,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }))
 
   const pageEntries: MetadataRoute.Sitemap = pages.docs
-    .filter((pg) => pg.slug)
+    .filter((pg) => pg.slug && !NOINDEX_SLUGS.has(pg.slug))
     .map((pg) => ({
       url: `${SITE_URL}/${pg.slug}`,
       lastModified: pg.updatedAt ? new Date(pg.updatedAt) : undefined,

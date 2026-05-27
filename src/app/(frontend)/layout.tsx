@@ -5,8 +5,7 @@ import { Footer } from '@/components/Footer'
 import { CartDrawer } from '@/components/CartDrawer'
 import { CookieConsent } from '@/components/CookieConsent'
 import { TestModeBanner } from '@/components/TestModeBanner'
-import { Analytics } from '@vercel/analytics/next'
-import { SpeedInsights } from '@vercel/speed-insights/next'
+import { AnalyticsGate } from '@/components/AnalyticsGate'
 import './styles.css'
 
 const cormorant = Cormorant_Garamond({
@@ -82,8 +81,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
         <Footer />
         <CartDrawer />
         <CookieConsent />
-        <Analytics />
-        <SpeedInsights />
+        <AnalyticsGate />
       </body>
     </html>
   )

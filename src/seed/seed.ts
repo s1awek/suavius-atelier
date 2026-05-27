@@ -1,4 +1,5 @@
 import 'dotenv/config'
+import { pathToFileURL } from 'node:url'
 import { getPayload } from 'payload'
 import config from '../payload.config.js'
 import type { Category, Media, Page, Product } from '../payload-types.js'
@@ -80,7 +81,7 @@ const PRODUCTS: ProductSeed[] = [
   },
 ]
 
-type ContentBlock = { type: 'h2' | 'p'; text: string }
+export type ContentBlock = { type: 'h2' | 'p'; text: string }
 
 type PageSeed = {
   slug: string
@@ -90,7 +91,7 @@ type PageSeed = {
   blocks: ContentBlock[]
 }
 
-const PAGES: PageSeed[] = [
+export const PAGES: PageSeed[] = [
   {
     slug: 'about',
     title: 'About',
@@ -183,7 +184,7 @@ const PAGES: PageSeed[] = [
       { type: 'p', text: 'The data controller is Wellmade Sławomir Kasprzak, with correspondence address in Bielawa, Poland. You can reach us for any privacy matter at orders@suaviusatelier.com.' },
       { type: 'h2', text: 'What we collect' },
       { type: 'p', text: 'When you place an order, we collect your name, email address, shipping address, and phone number. Payment details (card number, expiry, CVC) are entered directly with Stripe and never reach our servers. We store a reference to the Stripe payment intent so we can match your order to the payment.' },
-      { type: 'p', text: 'We do not currently use any analytics, advertising, or behavioural tracking tools. We do not build profiles of visitors.' },
+      { type: 'p', text: 'We use Vercel Web Analytics and Speed Insights, a privacy-friendly, cookieless analytics service that measures aggregate traffic and page performance. It does not set cookies, does not collect personal data, and does not track you across other websites or build advertising profiles. We use no other analytics, advertising, or behavioural tracking tools. You can switch analytics off at any time using the "Disable analytics" control in the site footer, and we automatically honour your browser\'s Global Privacy Control signal.' },
       { type: 'h2', text: 'Legal basis and purpose' },
       { type: 'p', text: 'We process your data on the following legal bases: (a) performance of the contract of sale (Art. 6(1)(b) GDPR), in order to dispatch the goods, send order confirmations, and handle returns or complaints; (b) compliance with legal obligations (Art. 6(1)(c) GDPR), in particular bookkeeping and tax retention rules.' },
       { type: 'h2', text: 'Retention' },
@@ -205,13 +206,13 @@ const PAGES: PageSeed[] = [
     title: 'Cookie Policy',
     seoDescription: 'How Suavius Atelier uses cookies and similar technologies.',
     blocks: [
-      { type: 'p', text: 'We use a minimal set of cookies, only what is needed to make the shop work. We do not use analytics, advertising, or behavioural tracking cookies.' },
+      { type: 'p', text: 'We use a minimal set of cookies, only what is needed to make the shop work. Our analytics is cookieless, so we set no analytics, advertising, or behavioural tracking cookies.' },
       { type: 'h2', text: 'Essential cookies' },
       { type: 'p', text: 'A small set of essential cookies and localStorage entries are required to operate the shop: they remember what is in your cart between page loads and let our payment provider keep a secure session with you during checkout. These cannot be disabled without breaking core shop features.' },
       { type: 'h2', text: 'Third-party cookies' },
       { type: 'p', text: 'When you proceed to checkout, you are redirected to Stripe, which sets its own cookies to detect fraud and keep your session secure. Stripe is a separate data controller for those cookies. See Stripe Privacy Center at stripe.com/privacy for details.' },
       { type: 'h2', text: 'Analytics and tracking' },
-      { type: 'p', text: 'We do not currently use Google Analytics, Facebook Pixel, or any similar tracking. If we add a privacy-friendly analytics tool in the future, this page will be updated and we will ask for your consent before any non-essential cookies are set.' },
+      { type: 'p', text: 'We use Vercel Web Analytics and Speed Insights to measure aggregate traffic and page performance. This service is cookieless and privacy-friendly: it sets no cookies, collects no personal data, and does not track you across other websites. We do not use Google Analytics, Facebook Pixel, or any advertising or behavioural-profiling tools. You can switch analytics off at any time using the "Disable analytics" control in the site footer, and we automatically honour your browser\'s Global Privacy Control signal.' },
       { type: 'h2', text: 'How to disable cookies' },
       { type: 'p', text: 'You can block or delete cookies in your browser settings. Disabling essential cookies will prevent the shopping cart and checkout from working. See the help pages of your browser for instructions.' },
       { type: 'h2', text: 'Contact' },
@@ -252,7 +253,7 @@ function richTextDoc(text: string) {
   }
 }
 
-function richTextFromBlocks(blocks: ContentBlock[]) {
+export function richTextFromBlocks(blocks: ContentBlock[]) {
   return {
     root: {
       type: 'root',
@@ -424,7 +425,15 @@ async function run() {
   process.exit(0)
 }
 
-run().catch((err) => {
-  console.error(err)
-  process.exit(1)
-})
+// Only run the full seed when this file is executed directly, not when another
+// module imports PAGES / richTextFromBlocks from it (e.g. scripts/update-legal-pages.ts).
+const isMain =
+  typeof process.argv[1] === 'string' &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+
+if (isMain) {
+  run().catch((err) => {
+    console.error(err)
+    process.exit(1)
+  })
+}

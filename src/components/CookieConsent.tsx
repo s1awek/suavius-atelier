@@ -33,8 +33,8 @@ export function CookieConsent() {
       className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:bottom-6 md:max-w-md z-40 bg-warm border border-warm-mid shadow-lg p-5"
     >
       <p className="text-sm leading-relaxed text-ink">
-        This site uses essential cookies for the shopping cart and checkout. We do not track you
-        or use analytics.{' '}
+        This site uses essential cookies for the shopping cart and checkout, plus privacy-friendly,
+        cookieless analytics (no personal data, no cross-site tracking) to measure traffic.{' '}
         <Link href="/cookies" className="underline hover:text-copper">
           Learn more
         </Link>

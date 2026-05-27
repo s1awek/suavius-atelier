@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { getPayloadClient } from '@/lib/payload'
 import { PaymentBadges } from './PaymentBadges'
 import { NewsletterForm } from './NewsletterForm'
+import { AnalyticsOptOut } from './AnalyticsOptOut'
 
 export async function Footer() {
   const payload = await getPayloadClient()
@@ -128,6 +129,9 @@ export async function Footer() {
               <Link href="/cookies" className="hover:text-copper">
                 Cookie Policy
               </Link>
+            </li>
+            <li>
+              <AnalyticsOptOut />
             </li>
           </ul>
         </div>

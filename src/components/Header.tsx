@@ -31,10 +31,10 @@ export async function Header() {
             width={260}
             height={34}
             priority
-            className="h-6 sm:h-7 md:h-8 w-auto max-w-[60vw]"
+            className="h-6 sm:h-7 lg:h-8 w-auto max-w-[60vw]"
           />
         </Link>
-        <nav className="hidden md:flex items-center gap-7 text-sm">
+        <nav className="hidden md:flex items-center gap-4 lg:gap-7 text-sm">
           <Link href="/products" className="hover:text-copper transition-colors">
             Shop
           </Link>
