@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { applyRedirect } from '@/lib/redirects'
 import Image from 'next/image'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { Product } from '@/payload-types'
@@ -45,7 +46,10 @@ export async function generateMetadata({
 export default async function CollectionPage({ params }: { params: Promise<Params> }) {
   const { slug } = await params
   const c = await fetchCollection(slug)
-  if (!c) notFound()
+  if (!c) {
+    await applyRedirect(`/collections/${slug}`)
+    notFound()
+  }
 
   const hero = typeof c.heroImage === 'object' && c.heroImage ? c.heroImage : null
   const products = (c.products ?? []).filter(

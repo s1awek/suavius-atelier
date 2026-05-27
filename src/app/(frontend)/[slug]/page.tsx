@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { applyRedirect } from '@/lib/redirects'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { Page } from '@/payload-types'
 import { getPayloadClient } from '@/lib/payload'
@@ -47,7 +48,10 @@ export async function generateMetadata({
 export default async function StaticPage({ params }: { params: Promise<Params> }) {
   const { slug } = await params
   const page = await fetchPage(slug)
-  if (!page) notFound()
+  if (!page) {
+    await applyRedirect(`/${slug}`)
+    notFound()
+  }
 
   return (
     <article className="max-w-7xl mx-auto px-6 py-16">

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { applyRedirect } from '@/lib/redirects'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { Media, Product } from '@/payload-types'
 import { getPayloadClient, formatPrice } from '@/lib/payload'
@@ -90,7 +91,10 @@ export async function generateMetadata({
 export default async function ProductPage({ params }: { params: Promise<Params> }) {
   const { slug } = await params
   const product = await fetchProduct(slug)
-  if (!product) notFound()
+  if (!product) {
+    await applyRedirect(`/products/${slug}`)
+    notFound()
+  }
 
   const images: Media[] = (product.images ?? [])
     .map((row) => row.image)

@@ -77,6 +77,7 @@ export interface Config {
     'stock-alerts': StockAlert;
     'newsletter-subscribers': NewsletterSubscriber;
     collections: Collection;
+    redirects: Redirect;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -94,6 +95,7 @@ export interface Config {
     'stock-alerts': StockAlertsSelect<false> | StockAlertsSelect<true>;
     'newsletter-subscribers': NewsletterSubscribersSelect<false> | NewsletterSubscribersSelect<true>;
     collections: CollectionsSelect<false> | CollectionsSelect<true>;
+    redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -513,6 +515,29 @@ export interface Collection {
   createdAt: string;
 }
 /**
+ * URL redirects (site-relative paths, e.g. /products/old -> /products/new). Auto-created on slug changes; editable by hand.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "redirects".
+ */
+export interface Redirect {
+  id: number;
+  /**
+   * Source path to redirect from, e.g. /products/old-slug
+   */
+  from: string;
+  /**
+   * Destination path, e.g. /products/new-slug
+   */
+  to: string;
+  /**
+   * On = permanent (308/301), off = temporary (307/302). Keep on for slug changes so search engines update.
+   */
+  permanent?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -575,6 +600,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'collections';
         value: number | Collection;
+      } | null)
+    | ({
+        relationTo: 'redirects';
+        value: number | Redirect;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -832,6 +861,17 @@ export interface CollectionsSelect<T extends boolean = true> {
   order?: T;
   seoTitle?: T;
   seoDescription?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "redirects_select".
+ */
+export interface RedirectsSelect<T extends boolean = true> {
+  from?: T;
+  to?: T;
+  permanent?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { categoryRevalidate } from './hooks/revalidate'
+import { syncSlugRedirect } from './hooks/redirect'
 
 export const Categories: CollectionConfig = {
   slug: 'categories',
@@ -11,7 +12,7 @@ export const Categories: CollectionConfig = {
     read: () => true,
   },
   hooks: {
-    afterChange: [categoryRevalidate.afterChange],
+    afterChange: [categoryRevalidate.afterChange, syncSlugRedirect((s) => `/categories/${s}`)],
     afterDelete: [categoryRevalidate.afterDelete],
   },
   fields: [

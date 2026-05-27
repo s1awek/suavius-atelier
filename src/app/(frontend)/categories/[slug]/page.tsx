@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { applyRedirect } from '@/lib/redirects'
 import { getPayloadClient } from '@/lib/payload'
 import { ProductCard } from '@/components/ProductCard'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
@@ -37,7 +38,10 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
     limit: 1,
   })
   const category = catResult.docs[0]
-  if (!category) notFound()
+  if (!category) {
+    await applyRedirect(`/categories/${slug}`)
+    notFound()
+  }
 
   const products = await payload.find({
     collection: 'products',

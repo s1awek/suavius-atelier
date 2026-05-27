@@ -18,6 +18,7 @@ import { ContactMessages } from './collections/ContactMessages'
 import { StockAlerts } from './collections/StockAlerts'
 import { NewsletterSubscribers } from './collections/NewsletterSubscribers'
 import { Collections as DesignCollections } from './collections/Collections'
+import { Redirects } from './collections/Redirects'
 import { Settings } from './globals/Settings'
 
 const filename = fileURLToPath(import.meta.url)
@@ -30,7 +31,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Categories, Products, Orders, Pages, ContactMessages, StockAlerts, NewsletterSubscribers, DesignCollections],
+  collections: [Users, Media, Categories, Products, Orders, Pages, ContactMessages, StockAlerts, NewsletterSubscribers, DesignCollections, Redirects],
   globals: [Settings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

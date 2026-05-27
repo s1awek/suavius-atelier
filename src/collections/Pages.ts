@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { pageRevalidate } from './hooks/revalidate'
+import { syncSlugRedirect } from './hooks/redirect'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -11,7 +12,7 @@ export const Pages: CollectionConfig = {
     read: () => true,
   },
   hooks: {
-    afterChange: [pageRevalidate.afterChange],
+    afterChange: [pageRevalidate.afterChange, syncSlugRedirect((s) => `/${s}`)],
     afterDelete: [pageRevalidate.afterDelete],
   },
   fields: [

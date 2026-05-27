@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { notifyStockRestock } from './hooks/notifyStockRestock'
 import { productRevalidate } from './hooks/revalidate'
+import { syncSlugRedirect } from './hooks/redirect'
 
 export const Products: CollectionConfig = {
   slug: 'products',
@@ -12,7 +13,11 @@ export const Products: CollectionConfig = {
     read: () => true,
   },
   hooks: {
-    afterChange: [notifyStockRestock, productRevalidate.afterChange],
+    afterChange: [
+      notifyStockRestock,
+      productRevalidate.afterChange,
+      syncSlugRedirect((s) => `/products/${s}`),
+    ],
     afterDelete: [productRevalidate.afterDelete],
   },
   fields: [
