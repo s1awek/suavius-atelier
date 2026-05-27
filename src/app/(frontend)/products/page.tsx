@@ -1,7 +1,8 @@
+import type { Metadata } from 'next'
 import { getPayloadClient } from '@/lib/payload'
 import { ProductCard } from '@/components/ProductCard'
 
-export const metadata = { title: 'Shop' }
+export const metadata: Metadata = { title: 'Shop' }
 
 export const revalidate = 300
 

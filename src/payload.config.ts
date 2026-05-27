@@ -1,6 +1,8 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { s3Storage } from '@payloadcms/storage-s3'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
+import nodemailer from 'nodemailer'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
@@ -32,6 +34,20 @@ export default buildConfig({
   globals: [Settings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
+  // Payload's own emails (admin password reset, verification) go through SMTP.
+  // skipVerify + a pre-built (lazy) transport means no SMTP connection at boot/build,
+  // so this never hangs or fails the Vercel build; mail is sent only when triggered.
+  email: nodemailerAdapter({
+    defaultFromName: 'Suavius Atelier',
+    defaultFromAddress: process.env.SMTP_USER || 'orders@suaviusatelier.com',
+    skipVerify: true,
+    transport: nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT),
+      secure: Number(process.env.SMTP_PORT) === 465,
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASSWORD },
+    }),
+  }),
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

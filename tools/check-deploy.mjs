@@ -95,6 +95,35 @@ async function waitForDeploy() {
   return { ok: false, url, status }
 }
 
+// Boilerplate build-log lines that are always present and not actionable.
+const BENIGN_LOG = [
+  /engines.*node/i, /engines.*pnpm/i, /corepack/i,
+  /SSL modes .* (are )?treated as aliases/i, /Download the React DevTools/i,
+  /(Skipping|Restoring|Storing|Created) build cache/i, /Build cache/i,
+  /Collecting build traces/i, /Compiled successfully/i, /deprecation/i,
+]
+// Surface warnings/errors from the build log even on a successful deploy, so a
+// noisy-but-passing build (e.g. a missing adapter, a Node warning) is still visible.
+function scanBuildLog(url) {
+  let logs = ''
+  try {
+    logs = vercel(`inspect ${url} --logs`)
+  } catch {
+    return []
+  }
+  const seen = new Set()
+  const out = []
+  for (const raw of logs.split('\n')) {
+    if (!/\b(error|warn|warning|✕|⨯|cannot|unable|failed|exited with)\b/i.test(raw)) continue
+    if (BENIGN_LOG.some((re) => re.test(raw))) continue
+    const msg = raw.replace(/^\S+\s+/, '').trim() // strip leading ISO timestamp
+    if (!msg || seen.has(msg)) continue
+    seen.add(msg)
+    out.push(msg)
+  }
+  return out.slice(-30)
+}
+
 // A failed request is benign if it's a Next.js RSC prefetch abort or a favicon miss.
 function isBenign(req) {
   return /[?&]_rsc=/.test(req.url) || /favicon\.ico/.test(req.url) ||
@@ -161,25 +190,34 @@ async function checkLive() {
 
 async function main() {
   let deployFailed = false
+  let buildNotices = []
   if (!noWait) {
     const r = await waitForDeploy()
     deployFailed = !r.ok
+    if (!deployFailed && r.url) {
+      buildNotices = scanBuildLog(r.url)
+      console.log(`\n${line}\nBuild log warnings/errors: ${buildNotices.length}\n${line}`)
+      buildNotices.forEach((n) => console.log(`  ⚠ ${n}`))
+    }
   }
   if (deployFailed) {
     console.log(`\n${line}\nRESULT: ❌ deploy failed — fix the build before checking live.\n${line}`)
     process.exit(1)
   }
 
-  const problems = await checkLive()
+  const liveProblems = await checkLive()
   console.log(`\n${line}`)
-  if (problems === 0) {
-    console.log('RESULT: ✅ deploy ready and live site clean (no errors).')
+  if (liveProblems === 0 && buildNotices.length === 0) {
+    console.log('RESULT: ✅ deploy ready, build log clean, live site clean (no errors).')
     console.log(line)
     process.exit(0)
   }
-  console.log(`RESULT: ⚠ deploy ready but ${problems} live issue(s) above need attention.`)
+  const parts = []
+  if (buildNotices.length) parts.push(`${buildNotices.length} build-log warning(s)`)
+  if (liveProblems) parts.push(`${liveProblems} live issue(s)`)
+  console.log(`RESULT: ⚠ deploy ready but ${parts.join(' + ')} above need attention.`)
   console.log(line)
-  process.exit(2)
+  process.exit(liveProblems ? 2 : 0)
 }
 
 main().catch((err) => {
