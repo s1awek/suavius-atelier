@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { syncRedirectsToEdgeConfig } from '@/lib/edge-config-redirects'
 
 /**
  * Site-relative URL redirects. Rows are created automatically when a product / page /
@@ -18,6 +19,21 @@ export const Redirects: CollectionConfig = {
     create: ({ req }) => Boolean(req.user),
     update: ({ req }) => Boolean(req.user),
     delete: ({ req }) => Boolean(req.user),
+  },
+  hooks: {
+    // Keep the edge redirect map in sync on every change (no-op until Edge Config is set up).
+    afterChange: [
+      async ({ doc, req }) => {
+        await syncRedirectsToEdgeConfig(req.payload)
+        return doc
+      },
+    ],
+    afterDelete: [
+      async ({ doc, req }) => {
+        await syncRedirectsToEdgeConfig(req.payload)
+        return doc
+      },
+    ],
   },
   fields: [
     {

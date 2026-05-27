@@ -69,6 +69,27 @@ stay as a fallback. **Deploys are only for code changes; content lives in the DB
 Gotcha: editing **locally** only touches the dev Neon branch and never reaches prod (the
 prod build reads the prod branch). Real content is edited in the production admin.
 
+## Redirects
+
+`Redirects` collection (`from` -> `to`, `permanent`). Rows are auto-created when a
+product/page/collection/category slug changes (`collections/hooks/redirect.ts`) and can be
+added by hand. Two layers apply them:
+
+1. **Hard 301/308 via middleware + Vercel Edge Config** (`src/middleware.ts`). The redirect
+   map is mirrored into Edge Config by the Redirects collection hooks (`lib/edge-config-redirects.ts`).
+   This is the SEO-correct path and needs these env vars:
+   - `EDGE_CONFIG` — read connection string, auto-injected when the Edge Config store is
+     connected to the project.
+   - `EDGE_CONFIG_ID`, `VERCEL_API_TOKEN`, `VERCEL_TEAM_ID` — for writes (the Vercel REST API).
+   After connecting the store, seed it once: `pnpm exec tsx scripts/sync-redirects-edge-config.ts`
+   (with the prod `DATABASE_URL` + the write env vars).
+2. **In-page fallback** (`lib/redirects.ts` `applyRedirect`, called from dynamic pages on a
+   404). Works without Edge Config but is a soft redirect (200 + meta-refresh) because of
+   streaming. Middleware runs first, so once Edge Config is set up this rarely fires.
+
+If the Edge Config env vars are absent, the write is a no-op and only the soft fallback
+applies — nothing breaks.
+
 ## Neon pooler + `search_path` (the big one)
 
 Symptom: intermittent `relation "X" does not exist` (settings, pages, payload_migrations…)
