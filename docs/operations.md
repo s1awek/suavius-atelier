@@ -49,6 +49,26 @@ console/JS/network). Treat dev-console-clean + deploy:check-clean as the done ba
 Deploy cadence: batch related changes; deploy at sensible checkpoints. Don't deploy on
 every tiny edit (clutters Vercel), don't let changes pile up for weeks either.
 
+## Content editing & on-demand revalidation
+
+Public pages are statically prerendered / ISR-cached (each route sets `revalidate`).
+Editing content in the **production** admin (`/admin`, writes to the prod Neon branch)
+shows on the live site **immediately** — no redeploy. Payload `afterChange`/`afterDelete`
+hooks call `revalidatePath` for exactly the affected routes:
+
+- product → its page + `/products` + `/` + its category + any collections that include it
+- collection / category / page → own page + relevant listings + `/`
+- Settings global → whole-tree layout revalidation (header/footer everywhere)
+- slug/category change revalidates both the old and the new path
+
+Code: hooks in `src/collections/hooks/revalidate.ts` (factory `makeHooks(resolver)` →
+afterChange + afterDelete), helper `src/lib/revalidate.ts` (lazy `next/cache` import,
+every call guarded — a safe no-op in CLI/seed contexts). Time-based `revalidate` windows
+stay as a fallback. **Deploys are only for code changes; content lives in the DB.**
+
+Gotcha: editing **locally** only touches the dev Neon branch and never reaches prod (the
+prod build reads the prod branch). Real content is edited in the production admin.
+
 ## Neon pooler + `search_path` (the big one)
 
 Symptom: intermittent `relation "X" does not exist` (settings, pages, payload_migrations…)
