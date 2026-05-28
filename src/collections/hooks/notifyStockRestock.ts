@@ -1,5 +1,6 @@
 import type { CollectionAfterChangeHook } from 'payload'
 import { sendStockRestockNotification } from '@/lib/email'
+import { isPublished } from './published'
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://suaviusatelier.com'
@@ -29,6 +30,8 @@ export const notifyStockRestock: CollectionAfterChangeHook = async ({
   req,
 }) => {
   if (operation !== 'update' || !previousDoc) return
+  // Don't email customers from a draft save — only when the restock is published live.
+  if (!isPublished(doc)) return
 
   const prevVariants = getVariants(previousDoc)
   const nextVariants = getVariants(doc)

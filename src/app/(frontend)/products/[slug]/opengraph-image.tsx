@@ -15,9 +15,7 @@ export default async function ProductOGImage({
   const [payload, fonts] = await Promise.all([getPayloadClient(), getCormorantFonts()])
   const result = await payload.find({
     collection: 'products',
-    where: {
-      and: [{ slug: { equals: slug } }, { status: { equals: 'active' } }],
-    },
+    where: { slug: { equals: slug } },
     limit: 1,
     depth: 2,
   })

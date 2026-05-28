@@ -11,7 +11,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [products, categories, pages, designCollections] = await Promise.all([
     payload.find({
       collection: 'products',
-      where: { status: { equals: 'active' } },
       limit: 1000,
       depth: 0,
     }),

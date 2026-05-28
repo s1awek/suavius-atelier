@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { draftMode } from 'next/headers'
 import { applyRedirect } from '@/lib/redirects'
 import Image from 'next/image'
 import { RichText } from '@payloadcms/richtext-lexical/react'
@@ -22,12 +23,17 @@ const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://suaviusatelier.com'
 
 async function fetchCollection(slug: string) {
+  const { isEnabled: draft } = await draftMode()
   const payload = await getPayloadClient()
   const result = await payload.find({
     collection: 'collections',
     where: { slug: { equals: slug } },
     limit: 1,
     depth: 2,
+    // Draft mode resolves the latest version (and its curated products) past the
+    // published-only gate; the public sees the published version only.
+    draft,
+    overrideAccess: draft,
   })
   return result.docs[0] ?? null
 }

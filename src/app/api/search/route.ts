@@ -55,12 +55,7 @@ export async function GET(req: Request) {
   // Resting state: featured pieces first, newest as fallback.
   const featured = await payload.find({
     collection: 'products',
-    where: {
-      and: [
-        { status: { equals: 'active' } },
-        { or: [{ isBestseller: { equals: true } }, { isNew: { equals: true } }] },
-      ],
-    },
+    where: { or: [{ isBestseller: { equals: true } }, { isNew: { equals: true } }] },
     limit: SUGGESTION_LIMIT,
     depth: 1,
     sort: '-updatedAt',
@@ -70,7 +65,6 @@ export async function GET(req: Request) {
   if (docs.length < SUGGESTION_LIMIT) {
     const newest = await payload.find({
       collection: 'products',
-      where: { status: { equals: 'active' } },
       limit: SUGGESTION_LIMIT,
       depth: 1,
       sort: '-updatedAt',

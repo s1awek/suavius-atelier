@@ -1,5 +1,6 @@
 import * as migration_20260527_084438_initial from './20260527_084438_initial';
 import * as migration_20260527_153518_add_redirects from './20260527_153518_add_redirects';
+import * as migration_20260528_075929_drafts_no_catalog_status from './20260528_075929_drafts_no_catalog_status';
 
 export const migrations = [
   {
@@ -10,6 +11,11 @@ export const migrations = [
   {
     up: migration_20260527_153518_add_redirects.up,
     down: migration_20260527_153518_add_redirects.down,
-    name: '20260527_153518_add_redirects'
+    name: '20260527_153518_add_redirects',
+  },
+  {
+    up: migration_20260528_075929_drafts_no_catalog_status.up,
+    down: migration_20260528_075929_drafts_no_catalog_status.down,
+    name: '20260528_075929_drafts_no_catalog_status'
   },
 ];

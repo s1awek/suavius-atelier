@@ -205,6 +205,8 @@ export interface Category {
   createdAt: string;
 }
 /**
+ * Preview will auto-save your edits as a draft so you always see the latest version (you can disable the confirmation prompt with the "don't ask again" checkbox).
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products".
  */
@@ -281,9 +283,9 @@ export interface Product {
   seoTitle?: string | null;
   seoDescription?: string | null;
   seoImage?: (number | null) | Media;
-  status: 'draft' | 'active' | 'archived';
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -360,6 +362,8 @@ export interface Order {
   createdAt: string;
 }
 /**
+ * Preview will auto-save your edits as a draft so you always see the latest version (you can disable the confirmation prompt with the "don't ask again" checkbox).
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
@@ -389,6 +393,7 @@ export interface Page {
   seoDescription?: string | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * Messages submitted through the public contact form.
@@ -462,7 +467,7 @@ export interface NewsletterSubscriber {
   createdAt: string;
 }
 /**
- * Curated design themes (Botanical, Sport, Abstract, Regional). Each entry becomes a /collections/[slug] landing page.
+ * Curated design themes (Botanical, Sport, Abstract, Regional). Each entry becomes a /collections/[slug] landing page. Preview will auto-save your edits as a draft so you always see the latest version.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections".
@@ -513,6 +518,7 @@ export interface Collection {
   seoDescription?: string | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * URL redirects (site-relative paths, e.g. /products/old -> /products/new). Auto-created on slug changes; editable by hand.
@@ -741,9 +747,9 @@ export interface ProductsSelect<T extends boolean = true> {
   seoTitle?: T;
   seoDescription?: T;
   seoImage?: T;
-  status?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -801,6 +807,7 @@ export interface PagesSelect<T extends boolean = true> {
   seoDescription?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -863,6 +870,7 @@ export interface CollectionsSelect<T extends boolean = true> {
   seoDescription?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

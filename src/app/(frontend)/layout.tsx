@@ -6,6 +6,7 @@ import { CartDrawer } from '@/components/CartDrawer'
 import { SearchOverlay } from '@/components/SearchOverlay'
 import { CookieConsent } from '@/components/CookieConsent'
 import { TestModeBanner } from '@/components/TestModeBanner'
+import { DraftPreviewBanner } from '@/components/DraftPreviewBanner'
 import { AnalyticsGate } from '@/components/AnalyticsGate'
 import './styles.css'
 
@@ -76,6 +77,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
         />
+        <DraftPreviewBanner />
         <TestModeBanner />
         <Header />
         <main className="flex-1">{props.children}</main>

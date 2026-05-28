@@ -58,7 +58,7 @@ async function main() {
     await payload.update({
       collection: 'products',
       id: product.id,
-      data: { images: mergedImages },
+      data: { images: mergedImages, _status: 'published' },
     })
 
     payload.logger.info(`  ✓ ${product.slug}: ${current.length} → ${mergedImages.length} images`)

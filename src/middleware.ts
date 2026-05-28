@@ -9,7 +9,13 @@ import { EDGE_CONFIG_REDIRECTS_KEY } from '@/lib/edge-config-redirects'
  * this no-ops and the in-page `applyRedirect` fallback (soft redirect) still applies.
  */
 export async function middleware(req: NextRequest): Promise<NextResponse> {
-  if (!process.env.EDGE_CONFIG) return NextResponse.next()
+  // Expose current pathname to server components (DraftPreviewBanner uses it to
+  // resolve which document is being previewed).
+  const requestHeaders = new Headers(req.headers)
+  requestHeaders.set('x-pathname', req.nextUrl.pathname)
+  const passThrough = NextResponse.next({ request: { headers: requestHeaders } })
+
+  if (!process.env.EDGE_CONFIG) return passThrough
 
   try {
     const map = await get<RedirectMap>(EDGE_CONFIG_REDIRECTS_KEY)
@@ -21,7 +27,7 @@ export async function middleware(req: NextRequest): Promise<NextResponse> {
     // Edge Config unreachable — fall through to normal rendering
   }
 
-  return NextResponse.next()
+  return passThrough
 }
 
 export const config = {

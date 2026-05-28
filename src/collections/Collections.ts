@@ -1,16 +1,27 @@
 import type { CollectionConfig } from 'payload'
 import { collectionRevalidate } from './hooks/revalidate'
 import { syncSlugRedirect } from './hooks/redirect'
+import { authenticatedOrPublished } from '@/access/authenticatedOrPublished'
+import { generatePreviewPath } from '@/lib/preview'
 
 export const Collections: CollectionConfig = {
   slug: 'collections',
+  versions: { drafts: { autosave: false }, maxPerDoc: 20 },
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'slug', 'order', 'updatedAt'],
-    description: 'Curated design themes (Botanical, Sport, Abstract, Regional). Each entry becomes a /collections/[slug] landing page.',
+    defaultColumns: ['title', 'slug', 'order', '_status', 'updatedAt'],
+    description:
+      'Curated design themes (Botanical, Sport, Abstract, Regional). Each entry becomes a /collections/[slug] landing page. Preview will auto-save your edits as a draft so you always see the latest version.',
+    preview: (doc) =>
+      doc?.slug ? generatePreviewPath('collections', String(doc.slug)) : null,
+    components: {
+      edit: {
+        PreviewButton: '@/components/admin/PreviewWithSaveButton#PreviewWithSaveButton',
+      },
+    },
   },
   access: {
-    read: () => true,
+    read: authenticatedOrPublished,
   },
   hooks: {
     afterChange: [collectionRevalidate.afterChange, syncSlugRedirect((s) => `/collections/${s}`)],

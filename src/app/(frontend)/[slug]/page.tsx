@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { draftMode } from 'next/headers'
 import { applyRedirect } from '@/lib/redirects'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { Page } from '@/payload-types'
@@ -12,11 +13,16 @@ type Params = { slug: string }
 export const revalidate = 600
 
 async function fetchPage(slug: string): Promise<Page | null> {
+  const { isEnabled: draft } = await draftMode()
   const payload = await getPayloadClient()
   const result = await payload.find({
     collection: 'pages',
     where: { slug: { equals: slug } },
     limit: 1,
+    // In draft mode return the latest (unpublished) version and bypass the
+    // published-only access gate; otherwise the public sees published only.
+    draft,
+    overrideAccess: draft,
   })
   return result.docs[0] ?? null
 }

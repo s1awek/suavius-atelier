@@ -23,6 +23,7 @@ import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { PriceCell as PriceCell_5f4598cde5ccff61871e267c42cb1c7e } from '@/components/admin/PriceCell'
 import { PriceDescription as PriceDescription_2f2fe86f13f0fbe9f830b1bf9aa98e55 } from '@/components/admin/PriceDescription'
+import { PreviewWithSaveButton as PreviewWithSaveButton_c00eae65fde978ccc78de1ac5c096117 } from '@/components/admin/PreviewWithSaveButton'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
@@ -53,6 +54,7 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@/components/admin/PriceCell#PriceCell": PriceCell_5f4598cde5ccff61871e267c42cb1c7e,
   "@/components/admin/PriceDescription#PriceDescription": PriceDescription_2f2fe86f13f0fbe9f830b1bf9aa98e55,
+  "@/components/admin/PreviewWithSaveButton#PreviewWithSaveButton": PreviewWithSaveButton_c00eae65fde978ccc78de1ac5c096117,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

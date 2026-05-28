@@ -2,15 +2,30 @@ import type { CollectionConfig } from 'payload'
 import { notifyStockRestock } from './hooks/notifyStockRestock'
 import { productRevalidate } from './hooks/revalidate'
 import { syncSlugRedirect } from './hooks/redirect'
+import { authenticatedOrPublished } from '@/access/authenticatedOrPublished'
+import { generatePreviewPath } from '@/lib/preview'
 
 export const Products: CollectionConfig = {
   slug: 'products',
+  // Visibility is a single axis: Payload drafts (`_status: draft|published`). Public
+  // queries that don't pass `draft: true` automatically filter to published versions,
+  // so we don't carry a second status field.
+  versions: { drafts: { autosave: false }, maxPerDoc: 20 },
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'slug', 'material', 'price', 'totalStock', 'status', 'updatedAt'],
+    defaultColumns: ['title', 'slug', 'material', 'price', 'totalStock', '_status', 'updatedAt'],
+    description:
+      'Preview will auto-save your edits as a draft so you always see the latest version (you can disable the confirmation prompt with the "don\'t ask again" checkbox).',
+    preview: (doc) =>
+      doc?.slug ? generatePreviewPath('products', String(doc.slug)) : null,
+    components: {
+      edit: {
+        PreviewButton: '@/components/admin/PreviewWithSaveButton#PreviewWithSaveButton',
+      },
+    },
   },
   access: {
-    read: () => true,
+    read: authenticatedOrPublished,
   },
   hooks: {
     afterChange: [
@@ -218,20 +233,6 @@ export const Products: CollectionConfig = {
           ],
         },
       ],
-    },
-    {
-      name: 'status',
-      type: 'select',
-      required: true,
-      defaultValue: 'draft',
-      options: [
-        { label: 'Draft', value: 'draft' },
-        { label: 'Active', value: 'active' },
-        { label: 'Archived', value: 'archived' },
-      ],
-      admin: {
-        position: 'sidebar',
-      },
     },
   ],
 }

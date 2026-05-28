@@ -206,6 +206,7 @@ async function main() {
         seoDescription:
           'Suavius Atelier is a small design studio in Bielawa, Poland, making PCB and wood objects for the desk - in small batches, with honest materials, designed to outlast trends.',
         content: richTextFromBlocks(ABOUT_BLOCKS),
+        _status: 'published',
       },
     })
     payload.logger.info('  ✓ About updated')
@@ -262,6 +263,7 @@ async function main() {
       order: c.order,
       seoTitle: c.seoTitle,
       seoDescription: c.seoDescription,
+      _status: 'published' as const,
     }
     if (existing.docs.length > 0) {
       await payload.update({

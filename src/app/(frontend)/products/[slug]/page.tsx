@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { draftMode } from 'next/headers'
 import { applyRedirect } from '@/lib/redirects'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { Media, Product } from '@/payload-types'
@@ -17,15 +18,28 @@ export const revalidate = 300
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://suaviusatelier.com'
 
-async function fetchProduct(slug: string): Promise<Product | null> {
+// Prerender published products so they stay SSG (ISR via `revalidate`). Reading
+// draftMode() then only forces dynamic rendering when the preview cookie is present.
+export async function generateStaticParams() {
   const payload = await getPayloadClient()
   const result = await payload.find({
     collection: 'products',
-    where: {
-      and: [{ slug: { equals: slug } }, { status: { equals: 'active' } }],
-    },
+    limit: 1000,
+    depth: 0,
+  })
+  return result.docs.flatMap((p) => (p.slug ? [{ slug: p.slug }] : []))
+}
+
+async function fetchProduct(slug: string): Promise<Product | null> {
+  const { isEnabled: draft } = await draftMode()
+  const payload = await getPayloadClient()
+  const result = await payload.find({
+    collection: 'products',
+    where: { slug: { equals: slug } },
     limit: 1,
     depth: 2,
+    draft,
+    overrideAccess: draft,
   })
   return result.docs[0] ?? null
 }
@@ -37,7 +51,6 @@ async function fetchRelated(currentId: number, categoryId: number | null): Promi
     collection: 'products',
     where: {
       and: [
-        { status: { equals: 'active' } },
         { category: { equals: categoryId } },
         { id: { not_equals: currentId } },
       ],

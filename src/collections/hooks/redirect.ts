@@ -1,4 +1,5 @@
 import type { CollectionAfterChangeHook } from 'payload'
+import { isPublished } from './published'
 
 /**
  * Keeps SEO-friendly 301s in sync when a document's slug changes. `pathFor` maps a slug to
@@ -14,6 +15,9 @@ import type { CollectionAfterChangeHook } from 'payload'
 export function syncSlugRedirect(pathFor: (slug: string) => string): CollectionAfterChangeHook {
   return async ({ doc, previousDoc, operation, req }) => {
     if (operation !== 'update') return doc
+    // Only mint a redirect once the new slug is actually live. Slug changes saved to a
+    // draft aren't public yet; the redirect is created when that draft is published.
+    if (!isPublished(doc)) return doc
 
     const oldSlug = typeof previousDoc?.slug === 'string' ? previousDoc.slug : undefined
     const newSlug =

@@ -107,10 +107,11 @@ export function hasActiveFilters(f: ProductFilters): boolean {
 /**
  * Build a Payload `where` clause from the parsed filters. `base` is merged in
  * as an additional constraint (e.g. category membership, or an id list for a
- * collection) and is ANDed with the active-status + filter conditions.
+ * collection) and is ANDed with the filter conditions. Visibility (drafts) is
+ * handled by Payload itself when the caller does not pass `draft: true`.
  */
 export function buildProductWhere(filters: ProductFilters, base?: Where): Where {
-  const and: Where[] = [{ status: { equals: 'active' } }]
+  const and: Where[] = []
 
   if (base) and.push(base)
   if (filters.q) and.push({ title: { like: filters.q } })

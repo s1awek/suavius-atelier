@@ -5,6 +5,7 @@ import type {
   PayloadRequest,
 } from 'payload'
 import { revalidatePaths, revalidateLayout } from '@/lib/revalidate'
+import { isPublished } from './published'
 
 type Doc = Record<string, unknown>
 
@@ -89,6 +90,10 @@ function makeHooks(resolve: (doc: Doc, req: PayloadRequest) => string[] | Promis
 } {
   return {
     afterChange: async ({ doc, previousDoc, req }) => {
+      // Pure draft churn (neither the new nor the previous version is published) never
+      // touches the public site, so there's nothing to purge. Publishing, editing a
+      // published doc, or unpublishing all leave at least one published version in play.
+      if (!isPublished(doc) && !isPublished(previousDoc)) return doc
       const paths = [
         ...(await resolve(doc as Doc, req)),
         ...(previousDoc ? await resolve(previousDoc as Doc, req) : []),

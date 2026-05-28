@@ -12,7 +12,6 @@ export default async function HomePage() {
   const [featured, collections] = await Promise.all([
     payload.find({
       collection: 'products',
-      where: { status: { equals: 'active' } },
       limit: 6,
       sort: '-updatedAt',
     }),

@@ -55,6 +55,7 @@ async function run() {
         seoTitle: def.seoTitle ?? null,
         seoDescription: def.seoDescription ?? null,
         content: richTextFromBlocks(def.blocks),
+        _status: 'published',
       },
     })
     payload.logger.info(`  - updated: ${slug} (id ${existing.id})`)

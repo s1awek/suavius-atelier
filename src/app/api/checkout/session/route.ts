@@ -46,12 +46,7 @@ export async function POST(req: Request) {
 
   const products = await payload.find({
     collection: 'products',
-    where: {
-      and: [
-        { id: { in: items.map((i) => i.productId) } },
-        { status: { equals: 'active' } },
-      ],
-    },
+    where: { id: { in: items.map((i) => i.productId) } },
     limit: items.length,
     depth: 1,
   })

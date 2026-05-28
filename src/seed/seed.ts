@@ -370,7 +370,7 @@ async function run() {
         compareAtPrice: p.compareAtPrice,
         description: richTextDoc(p.description),
         images: [{ image: media.id }],
-        status: 'active',
+        _status: 'published',
         weightGrams: p.weightGrams,
         dimensions: p.dimensions,
         variants: [
@@ -416,6 +416,7 @@ async function run() {
         seoTitle: pg.seoTitle,
         seoDescription: pg.seoDescription,
         content: richTextFromBlocks(pg.blocks),
+        _status: 'published',
       },
     })
     payload.logger.info(`  + created: ${pg.slug}`)

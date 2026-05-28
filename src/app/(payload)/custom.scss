@@ -1,0 +1,15 @@
+/*
+ * Larger admin UI fonts/spacing.
+ *
+ * Payload's `base()` is a SCSS function ($baseline-px * multiplier) that resolves
+ * at compile time, so overriding the runtime CSS vars --base-px / --base-body-size
+ * doesn't actually move any text — the compiled stylesheet already has the pixel
+ * values baked in. The simplest cross-cutting fix is `zoom` on the admin shell:
+ * it re-scales every element (px and rem) proportionally without having to chase
+ * ~50 selectors. Scoped to the admin route group via this file's import path.
+ *
+ * Tweak the multiplier below to taste (1.10 = subtle, 1.20 = noticeable, 1.30 = large).
+ */
+body {
+  zoom: 1.18;
+}
