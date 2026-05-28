@@ -97,12 +97,14 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"products_id" integer
   );
   
-  ALTER TABLE "products" ALTER COLUMN "_status" SET DATA TYPE text;
-  ALTER TABLE "products" ALTER COLUMN "_status" SET DEFAULT 'draft'::text;
+  -- Drop the legacy products.status column (active/draft/archived enum) before
+  -- rebuilding the enum type and re-using the name for the new Payload _status
+  -- enum. drizzle-kit generated this as a series of ALTER _status ... statements
+  -- that assume _status already exists (it does on the dev DB from yesterday's
+  -- dev-push, but not on prod), so we replace them with the explicit sequence.
+  ALTER TABLE "products" DROP COLUMN "status";
   DROP TYPE "public"."enum_products_status";
   CREATE TYPE "public"."enum_products_status" AS ENUM('draft', 'published');
-  ALTER TABLE "products" ALTER COLUMN "_status" SET DEFAULT 'draft'::"public"."enum_products_status";
-  ALTER TABLE "products" ALTER COLUMN "_status" SET DATA TYPE "public"."enum_products_status" USING "_status"::"public"."enum_products_status";
   ALTER TABLE "products_images" ALTER COLUMN "image_id" DROP NOT NULL;
   ALTER TABLE "products_variants" ALTER COLUMN "name" DROP NOT NULL;
   ALTER TABLE "products_variants" ALTER COLUMN "sku" DROP NOT NULL;
@@ -168,8 +170,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "_collections_v_rels_products_id_idx" ON "_collections_v_rels" USING btree ("products_id");
   CREATE INDEX "products__status_idx" ON "products" USING btree ("_status");
   CREATE INDEX "pages__status_idx" ON "pages" USING btree ("_status");
-  CREATE INDEX "collections__status_idx" ON "collections" USING btree ("_status");
-  ALTER TABLE "products" DROP COLUMN "status";`)
+  CREATE INDEX "collections__status_idx" ON "collections" USING btree ("_status");`)
 
   // Existing rows were live before drafts were introduced; keep them visible by
   // marking everything as published. Without this, ADD COLUMN _status DEFAULT 'draft'
