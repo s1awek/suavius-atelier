@@ -13,6 +13,7 @@ type Props = {
   variantSku: string
   variantName: string
   stock: number
+  quantity?: number
   disabled?: boolean
   disabledLabel?: string
   label?: string
@@ -28,6 +29,7 @@ export function AddToCartButton({
   variantSku,
   variantName,
   stock,
+  quantity = 1,
   disabled = false,
   disabledLabel = 'Out of stock',
   label = 'Add to cart',
@@ -39,16 +41,20 @@ export function AddToCartButton({
       type="button"
       disabled={disabled}
       onClick={() => {
-        add({
-          productId,
-          variantSku,
-          snapshot: { title, slug, price, imageUrl, currency, variantName, stock },
-        })
+        add(
+          {
+            productId,
+            variantSku,
+            snapshot: { title, slug, price, imageUrl, currency, variantName, stock },
+          },
+          quantity,
+        )
         track('add_to_cart', {
           productId,
           variantSku,
           title,
-          value: price / 100,
+          quantity,
+          value: (price * quantity) / 100,
           currency,
         })
       }}

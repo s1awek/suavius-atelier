@@ -34,6 +34,7 @@ export function ProductPurchasePanel({
   variants,
 }: Props) {
   const [selectedSku, setSelectedSku] = useState<string>(variants[0]?.sku ?? '')
+  const [quantity, setQuantity] = useState(1)
   const selected = variants.find((v) => v.sku === selectedSku) ?? variants[0]
 
   const items = useCart((s) => s.items)
@@ -60,6 +61,8 @@ export function ProductPurchasePanel({
   const showSelector = variants.length > 1
   const outOfStock = selected.stock <= 0
   const atLimit = !outOfStock && remaining <= 0
+  const maxQuantity = Math.max(1, remaining)
+  const effectiveQuantity = Math.min(quantity, maxQuantity)
 
   return (
     <div>
@@ -74,7 +77,10 @@ export function ProductPurchasePanel({
                 <button
                   key={v.sku}
                   type="button"
-                  onClick={() => setSelectedSku(v.sku)}
+                  onClick={() => {
+                    setSelectedSku(v.sku)
+                    setQuantity(1)
+                  }}
                   disabled={vOut}
                   className={[
                     'px-4 py-2 text-sm border transition-colors cursor-pointer',
@@ -93,6 +99,35 @@ export function ProductPurchasePanel({
         </div>
       )}
 
+      {!outOfStock && !atLimit && (
+        <div className="mt-8">
+          <p className="text-xs uppercase tracking-wider text-ink-muted mb-3">Quantity</p>
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+              disabled={effectiveQuantity <= 1}
+              className="w-10 h-10 border border-warm-mid hover:border-dark transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-warm-mid"
+              aria-label="Decrease quantity"
+            >
+              −
+            </button>
+            <span className="text-base w-8 text-center tabular-nums" aria-live="polite">
+              {effectiveQuantity}
+            </span>
+            <button
+              type="button"
+              onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))}
+              disabled={effectiveQuantity >= maxQuantity}
+              className="w-10 h-10 border border-warm-mid hover:border-dark transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-warm-mid"
+              aria-label="Increase quantity"
+            >
+              +
+            </button>
+          </div>
+        </div>
+      )}
+
       <AddToCartButton
         productId={productId}
         title={title}
@@ -103,6 +138,7 @@ export function ProductPurchasePanel({
         variantSku={selected.sku}
         variantName={selected.name}
         stock={selected.stock}
+        quantity={effectiveQuantity}
         disabled={outOfStock || atLimit}
         disabledLabel={outOfStock ? 'Out of stock' : 'Stock limit reached'}
       />
