@@ -15,6 +15,17 @@ export const checkoutRatelimit = redis
     })
   : null
 
+// Customer file uploads (personalization artwork). Tighter than checkout: uploads are the
+// most abuse-prone public surface, so cap them aggressively per IP.
+export const uploadRatelimit = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(8, '5 m'),
+      analytics: true,
+      prefix: 'rl:upload',
+    })
+  : null
+
 export const contactRatelimit = redis
   ? new Ratelimit({
       redis,

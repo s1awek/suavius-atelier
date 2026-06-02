@@ -1,10 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { AddToCartButton } from './AddToCartButton'
 import { PaymentBadges } from './PaymentBadges'
-import { StockAlertForm } from './StockAlertForm'
-import { useCart } from '@/lib/cart'
+import { StockAlertDialog } from './StockAlertDialog'
+import { PersonalizationFields, type PdpPersonalization, type PersonalizationState } from './PersonalizationFields'
+import { useCart, variantQuantityInCart } from '@/lib/cart'
+import { formatPrice } from '@/lib/format'
 
 type Variant = {
   name: string
@@ -20,9 +22,14 @@ type Props = {
   imageUrl: string | null
   currency?: string
   variants: Variant[]
+  personalizations?: PdpPersonalization[]
 }
 
-const CONTACT_EMAIL = 'orders@suaviusatelier.com'
+const EMPTY_PERSONALIZATION: PersonalizationState = {
+  personalizations: [],
+  valid: true,
+  priceDelta: 0,
+}
 
 export function ProductPurchasePanel({
   productId,
@@ -32,10 +39,14 @@ export function ProductPurchasePanel({
   imageUrl,
   currency = 'EUR',
   variants,
+  personalizations = [],
 }: Props) {
   const [selectedSku, setSelectedSku] = useState<string>(variants[0]?.sku ?? '')
   const [quantity, setQuantity] = useState(1)
+  const [pState, setPState] = useState<PersonalizationState>(EMPTY_PERSONALIZATION)
   const selected = variants.find((v) => v.sku === selectedSku) ?? variants[0]
+
+  const handlePersonalizationChange = useCallback((s: PersonalizationState) => setPState(s), [])
 
   const items = useCart((s) => s.items)
   const [mounted, setMounted] = useState(false)
@@ -54,15 +65,22 @@ export function ProductPurchasePanel({
     )
   }
 
-  const cartQuantity = mounted
-    ? items.find((i) => i.productId === productId && i.variantSku === selected.sku)?.quantity ?? 0
-    : 0
+  const cartQuantity = mounted ? variantQuantityInCart(items, productId, selected.sku) : 0
   const remaining = Math.max(0, selected.stock - cartQuantity)
   const showSelector = variants.length > 1
   const outOfStock = selected.stock <= 0
   const atLimit = !outOfStock && remaining <= 0
   const maxQuantity = Math.max(1, remaining)
   const effectiveQuantity = Math.min(quantity, maxQuantity)
+
+  const unitPrice = price + pState.priceDelta
+  const hasPersonalization = personalizations.length > 0
+  // Block add-to-cart only on a genuine validation miss (required unfilled, over-limit, upload
+  // in-flight/failed) — plain products and fully-valid personalization both pass.
+  const personalizationBlocks = hasPersonalization && !pState.valid
+  // Can the customer actually add to cart right now? Out-of-stock and stock-limit-reached both
+  // swap the CTA for the waitlist instead of a dead disabled button.
+  const purchasable = !outOfStock && !atLimit
 
   return (
     <div>
@@ -128,22 +146,58 @@ export function ProductPurchasePanel({
         </div>
       )}
 
-      <AddToCartButton
-        productId={productId}
-        title={title}
-        slug={slug}
-        price={price}
-        imageUrl={imageUrl}
-        currency={currency}
-        variantSku={selected.sku}
-        variantName={selected.name}
-        stock={selected.stock}
-        quantity={effectiveQuantity}
-        disabled={outOfStock || atLimit}
-        disabledLabel={outOfStock ? 'Out of stock' : 'Stock limit reached'}
-      />
+      {hasPersonalization && purchasable && (
+        <PersonalizationFields
+          productId={productId}
+          options={personalizations}
+          onChange={handlePersonalizationChange}
+        />
+      )}
 
-      {!outOfStock && mounted && (
+      {purchasable && (
+        <>
+          {hasPersonalization && pState.priceDelta > 0 && (
+            <div className="mt-6 space-y-2.5 border-t border-warm-mid pt-4 text-sm">
+              <div className="flex justify-between text-ink-muted">
+                <span>Product</span>
+                <span>{formatPrice(price, currency)}</span>
+              </div>
+              <div className="flex justify-between text-ink-muted">
+                <span>Personalization</span>
+                <span>+{formatPrice(pState.priceDelta, currency)}</span>
+              </div>
+              <div className="flex justify-between pt-1.5">
+                <span className="text-ink-muted">Item price</span>
+                <span className="text-base">{formatPrice(unitPrice, currency)}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Extra breathing room above the CTA when dense personalization fields sit right
+              above it and no price breakdown separates them. */}
+          <div className={hasPersonalization && pState.priceDelta === 0 ? 'pt-5' : ''}>
+            <AddToCartButton
+              productId={productId}
+              title={title}
+              slug={slug}
+              price={price}
+              imageUrl={imageUrl}
+              currency={currency}
+              variantSku={selected.sku}
+              variantName={selected.name}
+              stock={selected.stock}
+              quantity={effectiveQuantity}
+              personalization={pState.personalizations}
+              disabled={personalizationBlocks}
+              disabledLabel="Complete personalization"
+            />
+          </div>
+        </>
+      )}
+
+      {/* Stock-level hint only while the variant is actually purchasable — never alongside
+          the "Stock limit reached" / out-of-stock states (those would contradict it). */}
+      {!outOfStock && !atLimit && mounted && (
         <p
           className={`text-xs mt-3 ${
             selected.stock <= 3 ? 'text-copper' : 'text-ink-muted'
@@ -158,21 +212,21 @@ export function ProductPurchasePanel({
       )}
 
       {outOfStock && (
-        <StockAlertForm
+        <StockAlertDialog
           productId={productId}
           variantSku={selected.sku}
           variantName={selected.name}
+          reason="out-of-stock"
         />
       )}
 
-      {atLimit && !outOfStock && (
-        <p className="text-xs text-ink-muted mt-3 leading-relaxed">
-          You have all available units. Need more?{' '}
-          <a href={`mailto:${CONTACT_EMAIL}`} className="underline hover:text-copper">
-            Email us
-          </a>{' '}
-          and we will make a small batch for you.
-        </p>
+      {atLimit && (
+        <StockAlertDialog
+          productId={productId}
+          variantSku={selected.sku}
+          variantName={selected.name}
+          reason="at-limit"
+        />
       )}
 
       <div className="mt-6 pt-6 border-t border-warm-mid">

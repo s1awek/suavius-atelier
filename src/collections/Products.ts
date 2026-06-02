@@ -215,6 +215,46 @@ export const Products: CollectionConfig = {
           ],
         },
         {
+          label: 'Personalization',
+          fields: [
+            {
+              name: 'personalizations',
+              type: 'array',
+              labels: { singular: 'Personalization', plural: 'Personalizations' },
+              admin: {
+                description:
+                  'Pin personalization options from the global library. Order matters — this is the order shown on the product page.',
+              },
+              fields: [
+                {
+                  name: 'option',
+                  type: 'relationship',
+                  relationTo: 'personalization-options',
+                  required: true,
+                },
+                {
+                  name: 'required',
+                  type: 'checkbox',
+                  admin: {
+                    description: 'Require this option for this product (overrides the library default)',
+                  },
+                },
+                {
+                  name: 'priceModifierOverride',
+                  type: 'number',
+                  admin: {
+                    description:
+                      'Override the library price modifier for this product (minor units). Leave empty to inherit.',
+                    components: {
+                      Description: '@/components/admin/PriceDescription#PriceDescription',
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        {
           label: 'SEO',
           fields: [
             {

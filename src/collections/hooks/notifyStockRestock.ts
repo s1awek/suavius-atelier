@@ -36,11 +36,17 @@ export const notifyStockRestock: CollectionAfterChangeHook = async ({
   const prevVariants = getVariants(previousDoc)
   const nextVariants = getVariants(doc)
 
+  // Notify on any stock INCREASE to a positive value — not only the 0 -> positive transition.
+  // This covers both genuinely out-of-stock subscribers and "stock limit reached" subscribers
+  // (who joined the waitlist while holding all current units in their cart and want to know
+  // when MORE are made). Only people who explicitly joined the waitlist are ever emailed, and
+  // each is marked notified after one send, so a stock bump never spams.
   const restocked: Variant[] = []
   for (const next of nextVariants) {
     if (next.stock <= 0) continue
     const prev = prevVariants.find((p) => p.sku === next.sku)
-    if (!prev || prev.stock > 0) continue
+    const prevStock = prev?.stock ?? 0
+    if (next.stock <= prevStock) continue
     restocked.push(next)
   }
 

@@ -1,6 +1,9 @@
 import * as migration_20260527_084438_initial from './20260527_084438_initial';
 import * as migration_20260527_153518_add_redirects from './20260527_153518_add_redirects';
 import * as migration_20260528_075929_drafts_no_catalog_status from './20260528_075929_drafts_no_catalog_status';
+import * as migration_20260602_142301_add_personalization from './20260602_142301_add_personalization';
+import * as migration_20260602_145307_draft_orders from './20260602_145307_draft_orders';
+import * as migration_20260602_154818_add_stock_alert_consent from './20260602_154818_add_stock_alert_consent';
 
 export const migrations = [
   {
@@ -16,6 +19,21 @@ export const migrations = [
   {
     up: migration_20260528_075929_drafts_no_catalog_status.up,
     down: migration_20260528_075929_drafts_no_catalog_status.down,
-    name: '20260528_075929_drafts_no_catalog_status'
+    name: '20260528_075929_drafts_no_catalog_status',
+  },
+  {
+    up: migration_20260602_142301_add_personalization.up,
+    down: migration_20260602_142301_add_personalization.down,
+    name: '20260602_142301_add_personalization',
+  },
+  {
+    up: migration_20260602_145307_draft_orders.up,
+    down: migration_20260602_145307_draft_orders.down,
+    name: '20260602_145307_draft_orders',
+  },
+  {
+    up: migration_20260602_154818_add_stock_alert_consent.up,
+    down: migration_20260602_154818_add_stock_alert_consent.down,
+    name: '20260602_154818_add_stock_alert_consent'
   },
 ];

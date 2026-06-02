@@ -51,6 +51,23 @@ export const StockAlerts: CollectionConfig = {
       admin: { readOnly: true, date: { pickerAppearance: 'dayAndTime' } },
     },
     {
+      name: 'consentedAt',
+      type: 'date',
+      admin: {
+        readOnly: true,
+        date: { pickerAppearance: 'dayAndTime' },
+        description: 'Timestamp when the subscriber accepted the Privacy Policy',
+      },
+    },
+    {
+      name: 'consentText',
+      type: 'text',
+      admin: {
+        readOnly: true,
+        description: 'Exact consent wording shown at signup (snapshot for legal evidence)',
+      },
+    },
+    {
       name: 'ip',
       type: 'text',
       admin: { readOnly: true },

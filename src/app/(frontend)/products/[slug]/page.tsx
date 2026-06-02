@@ -6,6 +6,7 @@ import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { Media, Product } from '@/payload-types'
 import { getPayloadClient, formatPrice } from '@/lib/payload'
 import { ProductPurchasePanel } from '@/components/ProductPurchasePanel'
+import type { PdpPersonalization } from '@/components/PersonalizationFields'
 import { ProductGallery, type GalleryImage } from '@/components/ProductGallery'
 import { RelatedProducts } from '@/components/RelatedProducts'
 import { Breadcrumbs, type Crumb } from '@/components/Breadcrumbs'
@@ -59,6 +60,50 @@ async function fetchRelated(currentId: number, categoryId: number | null): Promi
     depth: 1,
   })
   return result.docs
+}
+
+/**
+ * Resolve a product's pinned personalization rows into the flat shape the client panel needs.
+ * The relationship is populated at depth 2, so `option` is the full library doc; we apply the
+ * per-product `required` / `priceModifierOverride` overrides here. Modifiers stay advisory —
+ * the checkout recomputes them authoritatively (anti-tampering).
+ */
+function resolvePersonalizations(product: Product): PdpPersonalization[] {
+  const rows = product.personalizations ?? []
+  const out: PdpPersonalization[] = []
+  for (const row of rows) {
+    if (typeof row.option !== 'object' || row.option === null) continue
+    const opt = row.option
+    const base =
+      typeof row.priceModifierOverride === 'number'
+        ? row.priceModifierOverride
+        : typeof opt.priceModifier === 'number'
+          ? opt.priceModifier
+          : 0
+    out.push({
+      optionId: opt.id,
+      label: opt.label,
+      inputType: opt.inputType,
+      helpText: opt.helpText,
+      maxChars: opt.maxChars,
+      required: row.required ?? opt.defaultRequired ?? false,
+      basePriceModifier: base,
+      presentation: opt.presentation,
+      choices: (opt.choices ?? []).map((c) => ({
+        label: c.label,
+        value: c.value,
+        priceModifier: typeof c.priceModifier === 'number' ? c.priceModifier : 0,
+      })),
+      fileConfig: opt.fileConfig
+        ? {
+            allowedTypes: opt.fileConfig.allowedTypes ?? [],
+            maxSizeMB: typeof opt.fileConfig.maxSizeMB === 'number' ? opt.fileConfig.maxSizeMB : 10,
+            uploadInstructions: opt.fileConfig.uploadInstructions,
+          }
+        : null,
+    })
+  }
+  return out
 }
 
 function fallbackDescription(product: Product): string {
@@ -229,6 +274,7 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
               sku: v.sku,
               stock: typeof v.stock === 'number' ? v.stock : 0,
             }))}
+            personalizations={resolvePersonalizations(product)}
           />
 
           {(product.weightGrams ||

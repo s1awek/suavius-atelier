@@ -24,10 +24,17 @@ function getTransport(): Transporter {
   return cached
 }
 
+export type OrderPersonalization = {
+  label: string
+  value: string
+  fileUrl?: string | null
+}
+
 export type OrderConfirmationItem = {
   title: string
   quantity: number
   priceAtPurchase: number
+  personalizations?: OrderPersonalization[]
 }
 
 export type OrderConfirmationInput = {
@@ -58,8 +65,9 @@ function renderCustomerEmail(input: OrderConfirmationInput): string {
           <td style="padding:12px 0;border-bottom:1px solid #e8e0d0;color:#2c2825;font-family:Georgia,serif;">
             ${escapeHtml(it.title)}
             <span style="color:#8c7b6b;"> &times; ${it.quantity}</span>
+            ${renderPersonalizationLines(it.personalizations, false)}
           </td>
-          <td style="padding:12px 0;border-bottom:1px solid #e8e0d0;color:#2c2825;text-align:right;font-family:Georgia,serif;">
+          <td style="padding:12px 0;border-bottom:1px solid #e8e0d0;color:#2c2825;text-align:right;font-family:Georgia,serif;vertical-align:top;">
             ${formatPrice(it.priceAtPurchase * it.quantity, currency)}
           </td>
         </tr>`,
@@ -117,7 +125,11 @@ function renderCustomerEmail(input: OrderConfirmationInput): string {
 function renderAdminEmail(input: OrderConfirmationInput): string {
   const { orderId, customerEmail, customerName, items, total, currency } = input
   const itemList = items
-    .map((it) => `- ${escapeHtml(it.title)} x ${it.quantity} (${formatPrice(it.priceAtPurchase * it.quantity, currency)})`)
+    .map((it) => {
+      const head = `- ${escapeHtml(it.title)} x ${it.quantity} (${formatPrice(it.priceAtPurchase * it.quantity, currency)})`
+      const pers = renderPersonalizationLines(it.personalizations, true)
+      return pers ? `${head}${pers}` : head
+    })
     .join('<br>')
 
   return `<!DOCTYPE html>
@@ -127,6 +139,28 @@ function renderAdminEmail(input: OrderConfirmationInput): string {
 <p>${itemList}</p>
 <p><strong>Total: ${formatPrice(total, currency)}</strong></p>
 </body></html>`
+}
+
+/**
+ * Renders the personalization choices under a line item.
+ * `withFileLink` true (admin email) turns uploads into a clickable download link so the
+ * owner can grab the artwork; false (customer email) just confirms what they chose.
+ */
+function renderPersonalizationLines(
+  personalizations: OrderPersonalization[] | undefined,
+  withFileLink: boolean,
+): string {
+  if (!personalizations || personalizations.length === 0) return ''
+  const lines = personalizations
+    .map((p) => {
+      const label = `<span style="color:#8c7b6b;">${escapeHtml(p.label)}:</span>`
+      if (withFileLink && p.fileUrl) {
+        return `${label} <a href="${escapeHtml(p.fileUrl)}" style="color:#b87333;text-decoration:underline;">${escapeHtml(p.value || 'Download file')}</a>`
+      }
+      return `${label} ${escapeHtml(p.value)}`
+    })
+    .join('<br>')
+  return `<div style="margin-top:6px;font-size:13px;line-height:1.5;color:#2c2825;">${lines}</div>`
 }
 
 function escapeHtml(s: string): string {

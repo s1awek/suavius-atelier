@@ -19,6 +19,11 @@ import { StockAlerts } from './collections/StockAlerts'
 import { NewsletterSubscribers } from './collections/NewsletterSubscribers'
 import { Collections as DesignCollections } from './collections/Collections'
 import { Redirects } from './collections/Redirects'
+import { PersonalizationOptions } from './collections/PersonalizationOptions'
+import {
+  PersonalizationUploads,
+  PERSONALIZATION_UPLOADS_PREFIX,
+} from './collections/PersonalizationUploads'
 import { Settings } from './globals/Settings'
 
 const filename = fileURLToPath(import.meta.url)
@@ -31,7 +36,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Categories, Products, Orders, Pages, ContactMessages, StockAlerts, NewsletterSubscribers, DesignCollections, Redirects],
+  collections: [Users, Media, Categories, Products, Orders, Pages, ContactMessages, StockAlerts, NewsletterSubscribers, DesignCollections, Redirects, PersonalizationOptions, PersonalizationUploads],
   globals: [Settings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
@@ -63,6 +68,9 @@ export default buildConfig({
       collections: {
         media: {
           prefix: 'media',
+        },
+        'personalization-uploads': {
+          prefix: PERSONALIZATION_UPLOADS_PREFIX,
         },
       },
       bucket: process.env.R2_BUCKET || '',

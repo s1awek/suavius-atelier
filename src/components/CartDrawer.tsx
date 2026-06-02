@@ -3,7 +3,15 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { useCart, cartTotal } from '@/lib/cart'
+import {
+  useCart,
+  cartTotal,
+  cartProductSubtotal,
+  cartPersonalizationSubtotal,
+  lineUnitPrice,
+  linePersonalizationTotal,
+  variantQuantityInCart,
+} from '@/lib/cart'
 import { formatPrice } from '@/lib/format'
 import { track } from '@vercel/analytics'
 
@@ -25,6 +33,8 @@ export function CartDrawer() {
   }, [isOpen, close])
 
   const total = cartTotal(items)
+  const productSubtotal = cartProductSubtotal(items)
+  const personalizationSubtotal = cartPersonalizationSubtotal(items)
 
   async function handleCheckout() {
     setError(null)
@@ -43,6 +53,16 @@ export function CartDrawer() {
             productId: i.productId,
             variantSku: i.variantSku,
             quantity: i.quantity,
+            // Server recomputes price; it only needs what the customer chose.
+            ...(i.personalization && i.personalization.length > 0
+              ? {
+                  personalization: i.personalization.map((p) => ({
+                    optionId: p.optionId,
+                    value: p.value,
+                    fileId: p.fileRef?.uploadId,
+                  })),
+                }
+              : {}),
           })),
         }),
       })
@@ -93,9 +113,13 @@ export function CartDrawer() {
           ) : (
             <ul className="space-y-6">
               {items.map((item) => {
-                const atLimit = item.quantity >= item.snapshot.stock
+                // Stock is per variant, shared across its (differently personalized) lines.
+                const atLimit =
+                  variantQuantityInCart(items, item.productId, item.variantSku) >= item.snapshot.stock
+                const unit = lineUnitPrice(item)
+                const personalizationUnit = linePersonalizationTotal(item)
                 return (
-                  <li key={`${item.productId}::${item.variantSku}`} className="flex gap-4">
+                  <li key={item.lineId} className="flex gap-4">
                     <Link
                       href={`/products/${item.snapshot.slug}`}
                       onClick={close}
@@ -123,15 +147,44 @@ export function CartDrawer() {
                       {item.snapshot.variantName && item.snapshot.variantName !== 'Standard' && (
                         <p className="text-xs text-ink-muted mt-0.5">{item.snapshot.variantName}</p>
                       )}
-                      <p className="text-sm text-ink-muted mt-1">
-                        {formatPrice(item.snapshot.price, item.snapshot.currency)}
-                      </p>
-                      <div className="flex items-center gap-3 mt-2">
+                      {item.personalization && item.personalization.length > 0 && (
+                        <ul className="text-xs text-ink-muted mt-1.5 space-y-1">
+                          {item.personalization.map((p) => (
+                            <li key={p.optionId} className="truncate">
+                              <span className="text-ink">{p.label}:</span>{' '}
+                              {p.inputType === 'file'
+                                ? (p.fileRef?.originalName ?? p.fileRef?.filename ?? 'uploaded file')
+                                : p.inputType === 'choice'
+                                  ? (p.choiceLabel ?? p.value)
+                                  : p.value}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      {personalizationUnit > 0 ? (
+                        <div className="mt-2.5 text-xs space-y-1.5">
+                          <div className="flex justify-between text-ink-muted">
+                            <span>Product</span>
+                            <span>{formatPrice(item.snapshot.price, item.snapshot.currency)}</span>
+                          </div>
+                          <div className="flex justify-between text-ink-muted">
+                            <span>Personalization</span>
+                            <span>+{formatPrice(personalizationUnit, item.snapshot.currency)}</span>
+                          </div>
+                          <div className="flex justify-between text-ink pt-1.5">
+                            <span>Item price</span>
+                            <span>{formatPrice(unit, item.snapshot.currency)}</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-ink-muted mt-1.5">
+                          {formatPrice(unit, item.snapshot.currency)}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-3 mt-3.5">
                         <button
                           type="button"
-                          onClick={() =>
-                            updateQuantity(item.productId, item.variantSku, item.quantity - 1)
-                          }
+                          onClick={() => updateQuantity(item.lineId, item.quantity - 1)}
                           className="w-6 h-6 border border-warm-mid hover:bg-warm-mid cursor-pointer text-sm"
                           aria-label="Decrease quantity"
                         >
@@ -140,9 +193,7 @@ export function CartDrawer() {
                         <span className="text-sm w-6 text-center">{item.quantity}</span>
                         <button
                           type="button"
-                          onClick={() =>
-                            updateQuantity(item.productId, item.variantSku, item.quantity + 1)
-                          }
+                          onClick={() => updateQuantity(item.lineId, item.quantity + 1)}
                           disabled={atLimit}
                           className="w-6 h-6 border border-warm-mid hover:bg-warm-mid cursor-pointer text-sm disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                           aria-label="Increase quantity"
@@ -151,7 +202,7 @@ export function CartDrawer() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => remove(item.productId, item.variantSku)}
+                          onClick={() => remove(item.lineId)}
                           className="ml-auto text-xs text-ink-muted hover:text-copper cursor-pointer"
                         >
                           Remove
@@ -179,9 +230,23 @@ export function CartDrawer() {
 
         {items.length > 0 && (
           <footer className="border-t border-warm-mid px-6 py-5 space-y-4">
-            <div className="flex justify-between text-sm">
-              <span className="text-ink-muted">Subtotal</span>
-              <span>{formatPrice(total, items[0]?.snapshot.currency)}</span>
+            <div className="space-y-2.5">
+              {personalizationSubtotal > 0 && (
+                <>
+                  <div className="flex justify-between text-sm text-ink-muted">
+                    <span>Products</span>
+                    <span>{formatPrice(productSubtotal, items[0]?.snapshot.currency)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-ink-muted">
+                    <span>Personalization</span>
+                    <span>+{formatPrice(personalizationSubtotal, items[0]?.snapshot.currency)}</span>
+                  </div>
+                </>
+              )}
+              <div className="flex justify-between text-sm pt-1">
+                <span className="text-ink-muted">Subtotal</span>
+                <span>{formatPrice(total, items[0]?.snapshot.currency)}</span>
+              </div>
             </div>
             <p className="text-xs text-ink-muted">Shipping and taxes calculated at checkout.</p>
             {error && <p className="text-xs text-red-700">{error}</p>}

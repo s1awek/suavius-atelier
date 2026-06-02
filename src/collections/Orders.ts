@@ -59,11 +59,24 @@ export const Orders: CollectionConfig = {
     {
       name: 'stripePaymentIntentId',
       type: 'text',
-      required: true,
+      // Not required: a draft order is created before payment (when the Stripe Checkout
+      // session is opened) and has no payment intent yet. The webhook fills this in when
+      // the session completes. Unique still holds — Postgres allows multiple NULLs.
       unique: true,
       index: true,
       admin: {
         readOnly: true,
+        description: 'Set by the Stripe webhook once payment succeeds',
+      },
+    },
+    {
+      name: 'stripeCheckoutSessionId',
+      type: 'text',
+      unique: true,
+      index: true,
+      admin: {
+        readOnly: true,
+        description: 'Stripe Checkout session that created this order (set when the draft is opened)',
       },
     },
     {
@@ -85,26 +98,30 @@ export const Orders: CollectionConfig = {
     {
       name: 'customer',
       type: 'group',
+      admin: {
+        description: 'Populated from the Stripe session when payment completes (empty on unpaid drafts)',
+      },
+      // Subfields are not required: the draft order exists before the customer enters their
+      // details into Stripe Checkout. The webhook fills these on payment. Paid orders always
+      // have them; unpaid drafts (later pruned in Phase 4) may not.
       fields: [
         {
           name: 'email',
           type: 'email',
-          required: true,
         },
         {
           name: 'name',
           type: 'text',
-          required: true,
         },
         {
           name: 'address',
           type: 'group',
           fields: [
-            { name: 'line1', type: 'text', required: true },
+            { name: 'line1', type: 'text' },
             { name: 'line2', type: 'text' },
-            { name: 'city', type: 'text', required: true },
-            { name: 'postalCode', type: 'text', required: true },
-            { name: 'country', type: 'text', required: true },
+            { name: 'city', type: 'text' },
+            { name: 'postalCode', type: 'text' },
+            { name: 'country', type: 'text' },
           ],
         },
       ],
@@ -162,6 +179,62 @@ export const Orders: CollectionConfig = {
               Cell: '@/components/admin/PriceCell#PriceCell',
             },
           },
+        },
+        {
+          name: 'personalizations',
+          type: 'array',
+          labels: { singular: 'Personalization', plural: 'Personalizations' },
+          admin: {
+            description:
+              'Snapshot of the personalization choices for this line, captured at checkout',
+          },
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                { name: 'optionLabel', type: 'text', admin: { width: '50%' } },
+                {
+                  name: 'inputType',
+                  type: 'text',
+                  admin: { width: '50%', description: 'text / textarea / choice / color / file' },
+                },
+              ],
+            },
+            {
+              name: 'value',
+              type: 'textarea',
+              admin: {
+                description: 'Customer-entered value, chosen value, or color',
+              },
+            },
+            {
+              name: 'choiceLabel',
+              type: 'text',
+              admin: {
+                description: 'Human-readable label of the chosen option (for choice inputs)',
+              },
+            },
+            {
+              name: 'priceModifier',
+              type: 'number',
+              defaultValue: 0,
+              admin: {
+                description: 'Price added by this personalization (minor units)',
+                components: {
+                  Description: '@/components/admin/PriceDescription#PriceDescription',
+                  Cell: '@/components/admin/PriceCell#PriceCell',
+                },
+              },
+            },
+            {
+              name: 'file',
+              type: 'relationship',
+              relationTo: 'personalization-uploads',
+              admin: {
+                description: 'Uploaded artwork for this personalization, if any',
+              },
+            },
+          ],
         },
       ],
     },

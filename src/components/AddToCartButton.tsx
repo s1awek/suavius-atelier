@@ -1,6 +1,6 @@
 'use client'
 
-import { useCart } from '@/lib/cart'
+import { useCart, type CartPersonalization } from '@/lib/cart'
 import { track } from '@vercel/analytics'
 
 type Props = {
@@ -14,6 +14,7 @@ type Props = {
   variantName: string
   stock: number
   quantity?: number
+  personalization?: CartPersonalization[]
   disabled?: boolean
   disabledLabel?: string
   label?: string
@@ -30,6 +31,7 @@ export function AddToCartButton({
   variantName,
   stock,
   quantity = 1,
+  personalization,
   disabled = false,
   disabledLabel = 'Out of stock',
   label = 'Add to cart',
@@ -41,11 +43,13 @@ export function AddToCartButton({
       type="button"
       disabled={disabled}
       onClick={() => {
+        const modifierTotal = personalization?.reduce((s, p) => s + (p.priceModifier || 0), 0) ?? 0
         add(
           {
             productId,
             variantSku,
             snapshot: { title, slug, price, imageUrl, currency, variantName, stock },
+            ...(personalization && personalization.length > 0 ? { personalization } : {}),
           },
           quantity,
         )
@@ -54,7 +58,8 @@ export function AddToCartButton({
           variantSku,
           title,
           quantity,
-          value: (price * quantity) / 100,
+          personalized: (personalization?.length ?? 0) > 0,
+          value: ((price + modifierTotal) * quantity) / 100,
           currency,
         })
       }}

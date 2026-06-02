@@ -78,6 +78,8 @@ export interface Config {
     'newsletter-subscribers': NewsletterSubscriber;
     collections: Collection;
     redirects: Redirect;
+    'personalization-options': PersonalizationOption;
+    'personalization-uploads': PersonalizationUpload;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -96,6 +98,8 @@ export interface Config {
     'newsletter-subscribers': NewsletterSubscribersSelect<false> | NewsletterSubscribersSelect<true>;
     collections: CollectionsSelect<false> | CollectionsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
+    'personalization-options': PersonalizationOptionsSelect<false> | PersonalizationOptionsSelect<true>;
+    'personalization-uploads': PersonalizationUploadsSelect<false> | PersonalizationUploadsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -280,6 +284,23 @@ export interface Product {
     heightMm?: number | null;
     depthMm?: number | null;
   };
+  /**
+   * Pin personalization options from the global library. Order matters — this is the order shown on the product page.
+   */
+  personalizations?:
+    | {
+        option: number | PersonalizationOption;
+        /**
+         * Require this option for this product (overrides the library default)
+         */
+        required?: boolean | null;
+        /**
+         * Override the library price modifier for this product (minor units). Leave empty to inherit.
+         */
+        priceModifierOverride?: number | null;
+        id?: string | null;
+      }[]
+    | null;
   seoTitle?: string | null;
   seoDescription?: string | null;
   seoImage?: (number | null) | Media;
@@ -288,22 +309,113 @@ export interface Product {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Reusable personalization fields (engraving text, color, file upload, etc.) that products can pin and optionally override.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personalization-options".
+ */
+export interface PersonalizationOption {
+  id: number;
+  /**
+   * Shown to the customer, e.g. "Laser engraving" or "Number of sides"
+   */
+  label: string;
+  /**
+   * How the customer fills this option in on the product page
+   */
+  inputType: 'text' | 'textarea' | 'choice' | 'color' | 'file';
+  /**
+   * Optional hint shown under the field on the product page
+   */
+  helpText?: string | null;
+  /**
+   * Production method tag (for filtering / future workflows, e.g. screen printing)
+   */
+  method?: ('engraving' | 'printing' | 'special-order' | 'other') | null;
+  /**
+   * Max characters allowed (text / long text only)
+   */
+  maxChars?: number | null;
+  /**
+   * Selectable options, each with an optional price modifier
+   */
+  choices?:
+    | {
+        label: string;
+        /**
+         * Stable machine value (e.g. "1-side")
+         */
+        value: string;
+        /**
+         * Added price (minor units)
+         */
+        priceModifier?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * How choices are rendered on the product page
+   */
+  presentation?: ('dropdown' | 'radio' | 'swatch') | null;
+  /**
+   * Base price added when this option is used (minor units). For choices, use the per-choice modifier instead.
+   */
+  priceModifier?: number | null;
+  /**
+   * Upload constraints (file upload only)
+   */
+  fileConfig?: {
+    /**
+     * MIME types accepted for upload (enforced server-side)
+     */
+    allowedTypes?: ('image/png' | 'image/jpeg' | 'image/svg+xml' | 'application/pdf')[] | null;
+    /**
+     * Max upload size in megabytes (enforced server-side)
+     */
+    maxSizeMB?: number | null;
+    /**
+     * Guidance shown next to the upload field (e.g. "300 DPI, vector preferred")
+     */
+    uploadInstructions?: string | null;
+  };
+  /**
+   * Whether this option is required by default (a product can override this)
+   */
+  defaultRequired?: boolean | null;
+  /**
+   * Reserved for the future quote-request flow (no online payment). Not active yet — leave off.
+   */
+  quoteOnly?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "orders".
  */
 export interface Order {
   id: number;
-  stripePaymentIntentId: string;
+  /**
+   * Set by the Stripe webhook once payment succeeds
+   */
+  stripePaymentIntentId?: string | null;
+  /**
+   * Stripe Checkout session that created this order (set when the draft is opened)
+   */
+  stripeCheckoutSessionId?: string | null;
   status: 'pending' | 'paid' | 'fulfilled' | 'shipped' | 'cancelled';
-  customer: {
-    email: string;
-    name: string;
-    address: {
-      line1: string;
+  /**
+   * Populated from the Stripe session when payment completes (empty on unpaid drafts)
+   */
+  customer?: {
+    email?: string | null;
+    name?: string | null;
+    address?: {
+      line1?: string | null;
       line2?: string | null;
-      city: string;
-      postalCode: string;
-      country: string;
+      city?: string | null;
+      postalCode?: string | null;
+      country?: string | null;
     };
   };
   customerEmailDenorm?: string | null;
@@ -319,6 +431,35 @@ export interface Order {
          * Snapshot of price (minor units) at the time of purchase
          */
         priceAtPurchase: number;
+        /**
+         * Snapshot of the personalization choices for this line, captured at checkout
+         */
+        personalizations?:
+          | {
+              optionLabel?: string | null;
+              /**
+               * text / textarea / choice / color / file
+               */
+              inputType?: string | null;
+              /**
+               * Customer-entered value, chosen value, or color
+               */
+              value?: string | null;
+              /**
+               * Human-readable label of the chosen option (for choice inputs)
+               */
+              choiceLabel?: string | null;
+              /**
+               * Price added by this personalization (minor units)
+               */
+              priceModifier?: number | null;
+              /**
+               * Uploaded artwork for this personalization, if any
+               */
+              file?: (number | null) | PersonalizationUpload;
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
       }[]
     | null;
@@ -360,6 +501,47 @@ export interface Order {
   discountAmount?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * Inbox for files customers upload on product pages. Entries appear here automatically — open one to download the artwork (e.g. to send for engraving). You do not create entries here by hand. To define a NEW personalization (engraving, file upload, color, etc.), use "Personalization Options" instead, then pin it on a product.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personalization-uploads".
+ */
+export interface PersonalizationUpload {
+  id: number;
+  /**
+   * Original filename as uploaded by the customer
+   */
+  originalName?: string | null;
+  /**
+   * Product this upload was attached to (best-effort, for context)
+   */
+  relatedProduct?: (number | null) | Product;
+  /**
+   * SHA-256 of the stored bytes — set by the upload endpoint for integrity, dedup, and abuse fingerprinting
+   */
+  checksum?: string | null;
+  /**
+   * Whether the stored file passed server-side sanitization (e.g. SVG script/handler stripping)
+   */
+  sanitized?: boolean | null;
+  /**
+   * Malware-scan result. Reserved — no scanner is wired up yet (defaults to "skipped").
+   */
+  scanStatus?: ('skipped' | 'pending' | 'clean' | 'flagged') | null;
+  prefix?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * Preview will auto-save your edits as a draft so you always see the latest version (you can disable the confirmation prompt with the "don't ask again" checkbox).
@@ -439,6 +621,14 @@ export interface StockAlert {
    */
   notified?: boolean | null;
   notifiedAt?: string | null;
+  /**
+   * Timestamp when the subscriber accepted the Privacy Policy
+   */
+  consentedAt?: string | null;
+  /**
+   * Exact consent wording shown at signup (snapshot for legal evidence)
+   */
+  consentText?: string | null;
   ip?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -610,6 +800,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'redirects';
         value: number | Redirect;
+      } | null)
+    | ({
+        relationTo: 'personalization-options';
+        value: number | PersonalizationOption;
+      } | null)
+    | ({
+        relationTo: 'personalization-uploads';
+        value: number | PersonalizationUpload;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -744,6 +942,14 @@ export interface ProductsSelect<T extends boolean = true> {
         heightMm?: T;
         depthMm?: T;
       };
+  personalizations?:
+    | T
+    | {
+        option?: T;
+        required?: T;
+        priceModifierOverride?: T;
+        id?: T;
+      };
   seoTitle?: T;
   seoDescription?: T;
   seoImage?: T;
@@ -757,6 +963,7 @@ export interface ProductsSelect<T extends boolean = true> {
  */
 export interface OrdersSelect<T extends boolean = true> {
   stripePaymentIntentId?: T;
+  stripeCheckoutSessionId?: T;
   status?: T;
   customer?:
     | T
@@ -781,6 +988,17 @@ export interface OrdersSelect<T extends boolean = true> {
         variantSku?: T;
         quantity?: T;
         priceAtPurchase?: T;
+        personalizations?:
+          | T
+          | {
+              optionLabel?: T;
+              inputType?: T;
+              value?: T;
+              choiceLabel?: T;
+              priceModifier?: T;
+              file?: T;
+              id?: T;
+            };
         id?: T;
       };
   shippingCost?: T;
@@ -835,6 +1053,8 @@ export interface StockAlertsSelect<T extends boolean = true> {
   email?: T;
   notified?: T;
   notifiedAt?: T;
+  consentedAt?: T;
+  consentText?: T;
   ip?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -882,6 +1102,61 @@ export interface RedirectsSelect<T extends boolean = true> {
   permanent?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personalization-options_select".
+ */
+export interface PersonalizationOptionsSelect<T extends boolean = true> {
+  label?: T;
+  inputType?: T;
+  helpText?: T;
+  method?: T;
+  maxChars?: T;
+  choices?:
+    | T
+    | {
+        label?: T;
+        value?: T;
+        priceModifier?: T;
+        id?: T;
+      };
+  presentation?: T;
+  priceModifier?: T;
+  fileConfig?:
+    | T
+    | {
+        allowedTypes?: T;
+        maxSizeMB?: T;
+        uploadInstructions?: T;
+      };
+  defaultRequired?: T;
+  quoteOnly?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personalization-uploads_select".
+ */
+export interface PersonalizationUploadsSelect<T extends boolean = true> {
+  originalName?: T;
+  relatedProduct?: T;
+  checksum?: T;
+  sanitized?: T;
+  scanStatus?: T;
+  prefix?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

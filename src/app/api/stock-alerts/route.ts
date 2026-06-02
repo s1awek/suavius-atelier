@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server'
 import { getPayloadClient } from '@/lib/payload'
 import { contactRatelimit, enforceRatelimit, getClientIp } from '@/lib/ratelimit'
+import { STOCK_ALERT_CONSENT_TEXT } from '@/lib/stock-alert-consent'
 
 type IncomingBody = {
   productId?: number
   variantSku?: string
   email?: string
   website?: string
+  consent?: boolean
 }
 
 export async function POST(req: Request) {
@@ -43,8 +45,15 @@ export async function POST(req: Request) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ error: 'Valid email is required' }, { status: 400 })
   }
+  if (body.consent !== true) {
+    return NextResponse.json(
+      { error: 'You must accept the Privacy Policy to join the waitlist' },
+      { status: 400 },
+    )
+  }
 
   const payload = await getPayloadClient()
+  const consentedAt = new Date().toISOString()
 
   const product = await payload.findByID({
     collection: 'products',
@@ -78,6 +87,8 @@ export async function POST(req: Request) {
       variantSku,
       email,
       notified: false,
+      consentedAt,
+      consentText: STOCK_ALERT_CONSENT_TEXT,
       ip,
     },
   })
