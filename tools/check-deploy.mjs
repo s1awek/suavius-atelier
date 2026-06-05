@@ -9,11 +9,13 @@
  *   node tools/check-deploy.mjs --no-wait       # skip deploy polling, just check the live site
  *   node tools/check-deploy.mjs --url=https://staging.example.com
  *
- * Env overrides: VERCEL_PROJECT (default suavius-atelier), VERCEL_SCOPE (team slug, must be
- * set in the environment), DEPLOY_CHECK_URL (default https://suaviusatelier.com).
+ * Env overrides (read from the environment or a local gitignored .env): VERCEL_PROJECT
+ * (default suavius-atelier), VERCEL_SCOPE (team slug, no default - keep it out of the repo),
+ * DEPLOY_CHECK_URL (default https://suaviusatelier.com).
  *
  * Exit codes: 0 = all good, 1 = deploy failed, 2 = deploy ok but live checks found errors.
  */
+import 'dotenv/config'
 import { execSync } from 'node:child_process'
 import { chromium } from 'playwright'
 
