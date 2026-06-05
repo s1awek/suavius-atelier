@@ -5,11 +5,13 @@ session where several of these gotchas cost real time.
 
 ## Stack
 
-- **Hosting:** Vercel (project `suavius-atelier`, team `s1aweks-projects`). Push to `main`
+- **Hosting:** Vercel (project + team configured in the Vercel dashboard; the deploy-check
+  script reads them from `VERCEL_PROJECT` / `VERCEL_SCOPE`). Push to `main`
   auto-deploys to production.
-- **Database:** Neon Postgres, **two separate branches**:
-  - dev branch `ep-damp-mouse-alyr3gr5` / `neondb` — used by local dev (loaded from `.env`)
-  - production branch `ep-twilight-silence-al9qe8z7` / `neondb` — used by Vercel
+- **Database:** Neon Postgres, **two separate branches** (endpoint ids live only in the
+  respective `DATABASE_URL`, not in the repo):
+  - dev branch — used by local dev (loaded from `.env`)
+  - production branch — used by Vercel
   - The prod connection string is kept (commented) in `.env` as `DATABASE_URL_PRODUCTION`,
     for reference only. Vercel's real `DATABASE_URL` is a Sensitive env var (unreadable).
 - **Storage:** Cloudflare R2 (product images). **Payments:** Stripe. **Email:** SMTP
@@ -100,7 +102,7 @@ the pooled connection (`-pooler` host) reuses PgBouncer backends whose `search_p
 doesn't include `public`, so unqualified table names don't resolve. It's intermittent, so
 deploys "sometimes" pass.
 
-Fix applied: `ALTER ROLE neondb_owner SET search_path TO "$user", public;` on the prod
+Fix applied: `ALTER ROLE <db_owner_role> SET search_path TO "$user", public;` on the prod
 branch (persists across compute restarts, applies to new backends). If bad backends are
 already warm in the pool, they clear when the Neon compute **autosuspends** (~5 min idle)
 or via "Restart compute" in the Neon console — a cold start spawns fresh backends.

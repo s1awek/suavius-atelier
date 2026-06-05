@@ -47,7 +47,7 @@ Klucze:
 
 Procedura:
 1. Neon Console → Project → Branches → production branch → Connection details →
-   "Reset password" na roli `neondb_owner`.
+   "Reset password" na roli właściciela bazy (domyślna rola ownera w Neon).
 2. Skopiuj nowy connection string (z poolerem, `?sslmode=verify-full&channel_binding=require`).
 3. Vercel → Production env → `DATABASE_URL` → update.
 4. Vercel → Redeploy production (NIE robić tylko env update bez redeploy - stare instancje

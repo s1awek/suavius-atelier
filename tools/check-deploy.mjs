@@ -9,8 +9,8 @@
  *   node tools/check-deploy.mjs --no-wait       # skip deploy polling, just check the live site
  *   node tools/check-deploy.mjs --url=https://staging.example.com
  *
- * Env overrides: VERCEL_PROJECT (default suavius-atelier), VERCEL_SCOPE (default
- * s1aweks-projects), DEPLOY_CHECK_URL (default https://suaviusatelier.com).
+ * Env overrides: VERCEL_PROJECT (default suavius-atelier), VERCEL_SCOPE (team slug, must be
+ * set in the environment), DEPLOY_CHECK_URL (default https://suaviusatelier.com).
  *
  * Exit codes: 0 = all good, 1 = deploy failed, 2 = deploy ok but live checks found errors.
  */
@@ -18,7 +18,7 @@ import { execSync } from 'node:child_process'
 import { chromium } from 'playwright'
 
 const PROJECT = process.env.VERCEL_PROJECT ?? 'suavius-atelier'
-const SCOPE = process.env.VERCEL_SCOPE ?? 's1aweks-projects'
+const SCOPE = process.env.VERCEL_SCOPE ?? ''
 const SITE = process.env.DEPLOY_CHECK_URL ?? 'https://suaviusatelier.com'
 const ROUTES = [
   '/', '/products', '/collections', '/bespoke', '/materials',
@@ -44,7 +44,7 @@ function sh(cmd) {
   }
 }
 function vercel(sub) {
-  return sh(`vercel ${sub} --scope ${SCOPE}`)
+  return sh(`vercel ${sub}${SCOPE ? ` --scope ${SCOPE}` : ''}`)
 }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
