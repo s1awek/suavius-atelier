@@ -16,7 +16,7 @@ export async function Footer() {
     <footer className="border-t border-warm-mid bg-warm-mid/30 mt-24">
       <div className="max-w-7xl mx-auto px-6 py-14 border-b border-warm-mid grid gap-8 md:grid-cols-[1.4fr_1fr] items-center">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-copper mb-3">
+          <p className="text-xs uppercase tracking-[0.25em] text-copper mb-3">
             Atelier journal
           </p>
           <h3 className="font-display text-2xl md:text-3xl text-dark leading-tight">

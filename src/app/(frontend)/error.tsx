@@ -16,9 +16,9 @@ export default function GlobalError({
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-32 text-center">
-      <p className="text-xs uppercase tracking-[0.2em] text-copper mb-6">Something went wrong</p>
-      <h1 className="font-display text-5xl md:text-6xl mb-6">A small misfire.</h1>
-      <p className="text-ink-muted leading-relaxed mb-10">
+      <p className="text-xs uppercase tracking-[0.25em] text-copper mb-6">Something went wrong</p>
+      <h1 className="font-display text-5xl md:text-6xl text-dark mb-6">A small misfire.</h1>
+      <p className="text-ink leading-relaxed mb-10">
         We hit an unexpected error. Try again, and if it persists, write to{' '}
         <a href="mailto:orders@suaviusatelier.com" className="underline hover:text-copper">
           orders@suaviusatelier.com

@@ -91,10 +91,10 @@ export default async function CategoryPage({
         className="mb-8"
       />
       <div className="mb-12">
-        <p className="text-xs uppercase tracking-[0.2em] text-copper mb-4">Category</p>
-        <h1 className="text-4xl md:text-5xl">{category.title}</h1>
+        <p className="text-xs uppercase tracking-[0.25em] text-copper mb-4">Category</p>
+        <h1 className="text-4xl md:text-5xl text-dark">{category.title}</h1>
         {category.description && (
-          <p className="mt-4 max-w-2xl text-ink-muted">{category.description}</p>
+          <p className="mt-4 max-w-2xl text-lg text-ink leading-relaxed">{category.description}</p>
         )}
       </div>
 

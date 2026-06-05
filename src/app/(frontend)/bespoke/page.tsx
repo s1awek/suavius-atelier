@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
+import { ContactForm } from '@/components/ContactForm'
 
 export const metadata: Metadata = {
   title: 'Bespoke & Custom Orders',
@@ -13,11 +13,11 @@ export default function BespokePage() {
     <article className="max-w-7xl mx-auto px-6 py-16 md:py-24">
       <Breadcrumbs home items={[{ label: 'Bespoke' }]} className="mb-8" />
       <header className="max-w-3xl mb-16">
-        <p className="text-xs uppercase tracking-[0.3em] text-copper mb-4">Commissions</p>
+        <p className="text-xs uppercase tracking-[0.25em] text-copper mb-4">Commissions</p>
         <h1 className="font-display text-4xl md:text-5xl text-dark leading-tight">
           One piece, made for you.
         </h1>
-        <p className="mt-6 text-lg text-ink-muted leading-relaxed">
+        <p className="mt-6 text-lg text-ink leading-relaxed">
           We accept a small number of bespoke commissions each month. Wedding gifts, corporate
           editions, monogrammed wood pieces, custom artwork on PCB - if it can be drawn and
           fabricated to our standards, we will quote it.
@@ -28,7 +28,7 @@ export default function BespokePage() {
         <div>
           <p className="font-display text-3xl text-copper mb-3">01</p>
           <h3 className="font-display text-xl text-dark mb-2">Write to us</h3>
-          <p className="text-ink-muted text-sm leading-relaxed">
+          <p className="text-ink text-base leading-relaxed">
             Send your idea, a sketch or reference image, the quantity, and when you need it
             by. The more we know, the more useful our first reply will be.
           </p>
@@ -36,7 +36,7 @@ export default function BespokePage() {
         <div>
           <p className="font-display text-3xl text-copper mb-3">02</p>
           <h3 className="font-display text-xl text-dark mb-2">Proposal &amp; quote</h3>
-          <p className="text-ink-muted text-sm leading-relaxed">
+          <p className="text-ink text-base leading-relaxed">
             Within two business days we send a written proposal: design direction, materials,
             unit price, total, and a realistic timeline. There is no charge for this stage.
           </p>
@@ -44,7 +44,7 @@ export default function BespokePage() {
         <div>
           <p className="font-display text-3xl text-copper mb-3">03</p>
           <h3 className="font-display text-xl text-dark mb-2">Make &amp; deliver</h3>
-          <p className="text-ink-muted text-sm leading-relaxed">
+          <p className="text-ink text-base leading-relaxed">
             Once you approve a digital proof, we begin. PCB commissions ship in three to four
             weeks. Wood commissions in one to two. Tracked and insured worldwide.
           </p>
@@ -89,30 +89,33 @@ export default function BespokePage() {
             <h2 className="font-display text-3xl md:text-4xl text-dark leading-tight mb-6">
               Start a commission.
             </h2>
-            <p className="text-ink-muted leading-relaxed mb-8">
-              Use the contact form, or write directly. Please include the briefest possible
-              description, any references, quantity, deadline, and budget if you have one in
-              mind.
+            <p className="text-ink leading-relaxed mb-8">
+              Tell us what you would like made. We take a small number of commissions each
+              month and reply to every enquiry personally.
             </p>
-            <Link
-              href="/contact?subject=Bespoke%20enquiry"
-              className="inline-flex items-center px-6 py-3 bg-dark text-warm hover:bg-copper transition-colors text-sm tracking-wide"
-            >
-              Open contact form
-            </Link>
+            <div className="text-sm space-y-2 border-t border-warm-mid pt-8">
+              <p className="text-xs uppercase tracking-[0.25em] text-ink-muted mb-3">Prefer email</p>
+              <p>
+                <a href="mailto:orders@suaviusatelier.com" className="hover:text-copper">
+                  orders@suaviusatelier.com
+                </a>
+              </p>
+              <p className="text-ink-muted">Reply within two business days.</p>
+              <p className="text-ink-muted pt-4 text-xs leading-relaxed">
+                For commissions above 100 units or with a deadline under three weeks, please
+                mention it in the first line so we can prioritise the reply.
+              </p>
+            </div>
           </div>
-          <div className="text-sm space-y-2">
-            <p className="text-xs uppercase tracking-[0.25em] text-ink-muted mb-3">Direct</p>
-            <p>
-              <a href="mailto:orders@suaviusatelier.com" className="hover:text-copper">
-                orders@suaviusatelier.com
-              </a>
-            </p>
-            <p className="text-ink-muted">Reply within two business days.</p>
-            <p className="text-ink-muted pt-4 text-xs leading-relaxed">
-              For commissions above 100 units or with a deadline under three weeks, please
-              mention it in the first line so we can prioritise the reply.
-            </p>
+          <div>
+            <ContactForm
+              fixedSubject="Bespoke enquiry"
+              submitLabel="Send enquiry"
+              successTitle="Enquiry received"
+              successBody="Thank you - your commission enquiry is in. We reply within two business days with design direction, materials, and a quote."
+              messageLabel="Your idea"
+              messageHint="Include a short description, any references, quantity, deadline, and a budget if you have one in mind."
+            />
           </div>
         </div>
       </section>
@@ -124,7 +127,7 @@ function BespokeItem({ title, body }: { title: string; body: string }) {
   return (
     <div>
       <h3 className="font-display text-xl text-dark mb-2">{title}</h3>
-      <p className="text-ink-muted text-sm leading-relaxed">{body}</p>
+      <p className="text-ink text-base leading-relaxed">{body}</p>
     </div>
   )
 }

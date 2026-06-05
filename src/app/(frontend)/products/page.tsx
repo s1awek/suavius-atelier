@@ -33,8 +33,8 @@ export default async function ProductsPage({
   return (
     <section className="max-w-7xl mx-auto px-6 py-16">
       <div className="mb-12">
-        <p className="text-xs uppercase tracking-[0.2em] text-copper mb-4">All pieces</p>
-        <h1 className="text-4xl md:text-5xl">Shop</h1>
+        <p className="text-xs uppercase tracking-[0.25em] text-copper mb-4">All pieces</p>
+        <h1 className="text-4xl md:text-5xl text-dark">Shop</h1>
       </div>
 
       <ProductFilters />

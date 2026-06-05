@@ -28,13 +28,13 @@ export default async function HomePage() {
       <section className="max-w-7xl mx-auto px-6 pt-20 pb-16 md:pt-32 md:pb-24">
         <div className="grid gap-12 md:grid-cols-2 items-center">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-copper mb-6">
+            <p className="text-xs uppercase tracking-[0.25em] text-copper mb-6">
               Hand-designed in our atelier
             </p>
-            <h1 className="text-5xl md:text-6xl leading-[1.05]">
+            <h1 className="text-5xl md:text-6xl text-dark leading-[1.05]">
               Circuits, wood, and a quiet kind of craft.
             </h1>
-            <p className="mt-6 text-lg text-ink-muted max-w-md">
+            <p className="mt-6 text-lg text-ink max-w-md">
               PCB coasters with ENIG copper finish and laser-engraved wood pieces - designed
               to last, made in small batches.
             </p>
@@ -122,13 +122,13 @@ export default async function HomePage() {
         <section className="max-w-7xl mx-auto px-6 py-16 md:py-20 border-t border-warm-mid">
           <div className="flex items-end justify-between mb-10 md:mb-14 gap-6">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-copper mb-3">
+              <p className="text-xs uppercase tracking-[0.25em] text-copper mb-3">
                 In production
               </p>
               <h2 className="font-display text-3xl md:text-4xl text-dark leading-tight">
                 The first four collections.
               </h2>
-              <p className="mt-3 text-ink-muted max-w-xl text-sm md:text-base">
+              <p className="mt-3 text-ink-muted max-w-xl text-base">
                 Sixteen designs across four themes. Drawn here, fabricated by partners,
                 arriving soon.
               </p>
@@ -187,7 +187,7 @@ export default async function HomePage() {
       {featured.docs.length > 0 && (
         <section className="max-w-7xl mx-auto px-6 py-16">
           <div className="flex items-end justify-between mb-10">
-            <h2 className="text-3xl md:text-4xl">Featured</h2>
+            <h2 className="text-3xl md:text-4xl text-dark">Featured</h2>
             <Link
               href="/products"
               className="text-sm text-copper hover:text-dark transition-colors"
@@ -204,9 +204,9 @@ export default async function HomePage() {
       )}
 
       <section className="max-w-4xl mx-auto px-6 py-24 text-center">
-        <p className="text-xs uppercase tracking-[0.2em] text-copper mb-6">Material & process</p>
-        <h2 className="text-3xl md:text-4xl mb-6">Why a PCB makes a beautiful coaster</h2>
-        <p className="text-lg text-ink-muted">
+        <p className="text-xs uppercase tracking-[0.25em] text-copper mb-6">Material & process</p>
+        <h2 className="text-3xl md:text-4xl text-dark mb-6">Why a PCB makes a beautiful coaster</h2>
+        <p className="text-lg text-ink">
           We start with FR4 laminate - the same fiberglass-epoxy used in fine electronics -
           plate it with gold-over-nickel (ENIG), then print designs with UV silkscreen. The
           result is a small object that catches light like a circuit board and survives daily

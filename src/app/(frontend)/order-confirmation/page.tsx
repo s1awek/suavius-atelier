@@ -19,8 +19,8 @@ export default async function OrderConfirmationPage({
   if (!sessionId) {
     return (
       <section className="max-w-2xl mx-auto px-6 py-24 text-center">
-        <h1 className="font-display text-4xl">Order confirmation</h1>
-        <p className="mt-4 text-ink-muted">No session id provided.</p>
+        <h1 className="font-display text-4xl md:text-5xl text-dark">Order confirmation</h1>
+        <p className="mt-4 text-ink">No session id provided.</p>
         <Link
           href="/"
           className="mt-8 inline-block px-6 py-3 bg-dark text-warm hover:bg-copper transition-colors text-sm"
@@ -46,10 +46,10 @@ export default async function OrderConfirmationPage({
         currency={(session.currency ?? 'eur').toUpperCase()}
         isPaid={isPaid}
       />
-      <h1 className="font-display text-4xl">
+      <h1 className="font-display text-4xl md:text-5xl text-dark">
         {isPaid ? 'Thank you for your order' : 'Order received'}
       </h1>
-      <p className="mt-4 text-ink-muted">
+      <p className="mt-4 text-ink">
         {isPaid
           ? 'We received your payment and will start preparing your order shortly.'
           : 'Your payment is processing. You will get an email confirmation once it completes.'}
@@ -62,7 +62,7 @@ export default async function OrderConfirmationPage({
 
       {session.line_items?.data && session.line_items.data.length > 0 && (
         <div className="mt-12 border-t border-warm-mid pt-8">
-          <h2 className="font-display text-2xl">Items</h2>
+          <h2 className="font-display text-2xl text-dark">Items</h2>
           <ul className="mt-6 space-y-4">
             {session.line_items.data.map((item) => (
               <li key={item.id} className="flex justify-between text-sm">

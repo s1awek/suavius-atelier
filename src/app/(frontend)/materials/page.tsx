@@ -13,13 +13,13 @@ export default function MaterialsPage() {
     <article className="max-w-7xl mx-auto px-6 py-16 md:py-24">
       <Breadcrumbs home items={[{ label: 'Materials' }]} className="mb-8" />
       <header className="max-w-3xl mb-16">
-        <p className="text-xs uppercase tracking-[0.3em] text-copper mb-4">
+        <p className="text-xs uppercase tracking-[0.25em] text-copper mb-4">
           Materials & Process
         </p>
         <h1 className="font-display text-4xl md:text-5xl text-dark leading-tight">
           A piece of the future, finished like an heirloom.
         </h1>
-        <p className="mt-6 text-lg text-ink-muted leading-relaxed">
+        <p className="mt-6 text-lg text-ink leading-relaxed">
           Every Suavius Atelier object starts as a drawing in our studio and ends in your hand
           as something quietly engineered. Here is how we make it, and what it is actually
           made of.
@@ -28,7 +28,7 @@ export default function MaterialsPage() {
 
       <section className="grid md:grid-cols-[1fr_2fr] gap-8 md:gap-16 mb-20 md:mb-24">
         <div>
-          <p className="text-xs uppercase tracking-[0.25em] text-ink-muted mb-3">01</p>
+          <p className="text-xs uppercase tracking-[0.25em] text-copper mb-3">01</p>
           <h2 className="font-display text-3xl text-dark">FR4 fiberglass.</h2>
         </div>
         <div className="prose prose-lg max-w-none text-ink">
@@ -48,7 +48,7 @@ export default function MaterialsPage() {
 
       <section className="grid md:grid-cols-[1fr_2fr] gap-8 md:gap-16 mb-20 md:mb-24">
         <div>
-          <p className="text-xs uppercase tracking-[0.25em] text-ink-muted mb-3">02</p>
+          <p className="text-xs uppercase tracking-[0.25em] text-copper mb-3">02</p>
           <h2 className="font-display text-3xl text-dark">ENIG gold-plated copper.</h2>
         </div>
         <div className="prose prose-lg max-w-none text-ink">
@@ -68,7 +68,7 @@ export default function MaterialsPage() {
 
       <section className="grid md:grid-cols-[1fr_2fr] gap-8 md:gap-16 mb-20 md:mb-24">
         <div>
-          <p className="text-xs uppercase tracking-[0.25em] text-ink-muted mb-3">03</p>
+          <p className="text-xs uppercase tracking-[0.25em] text-copper mb-3">03</p>
           <h2 className="font-display text-3xl text-dark">UV silkscreen print.</h2>
         </div>
         <div className="prose prose-lg max-w-none text-ink">
@@ -89,7 +89,7 @@ export default function MaterialsPage() {
 
       <section className="grid md:grid-cols-[1fr_2fr] gap-8 md:gap-16 mb-20 md:mb-24">
         <div>
-          <p className="text-xs uppercase tracking-[0.25em] text-ink-muted mb-3">04</p>
+          <p className="text-xs uppercase tracking-[0.25em] text-copper mb-3">04</p>
           <h2 className="font-display text-3xl text-dark">Hardwood &amp; laser.</h2>
         </div>
         <div className="prose prose-lg max-w-none text-ink">
@@ -108,7 +108,7 @@ export default function MaterialsPage() {
 
       <section className="border-t border-warm-mid pt-16 mt-16">
         <div className="max-w-3xl">
-          <p className="text-xs uppercase tracking-[0.3em] text-copper mb-4">Where it&apos;s made</p>
+          <p className="text-xs uppercase tracking-[0.25em] text-copper mb-4">Where it&apos;s made</p>
           <h2 className="font-display text-3xl md:text-4xl text-dark leading-tight mb-6">
             Designed in Bielawa. Manufactured by people who do nothing else.
           </h2>

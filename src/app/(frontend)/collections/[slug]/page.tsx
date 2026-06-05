@@ -126,7 +126,7 @@ export default async function CollectionPage({
       <header className="grid md:grid-cols-2 gap-10 md:gap-16 items-center mb-16 md:mb-20">
         <div>
           {c.subtitle && (
-            <p className="text-xs uppercase tracking-[0.3em] text-copper mb-4">
+            <p className="text-xs uppercase tracking-[0.25em] text-copper mb-4">
               {c.subtitle}
             </p>
           )}

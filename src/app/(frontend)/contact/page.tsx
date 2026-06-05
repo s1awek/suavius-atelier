@@ -49,18 +49,18 @@ export default async function ContactPage() {
 
       <div className="grid gap-12 md:grid-cols-5">
         <section className="md:col-span-2">
-          <h2 className="font-display text-2xl mb-6">Write to us</h2>
+          <h2 className="font-display text-2xl text-dark mb-6">Write to us</h2>
           <ContactForm />
         </section>
 
         <aside className="md:col-span-3 space-y-8">
           <div>
-            <h2 className="font-display text-2xl mb-4">Where to find us</h2>
+            <h2 className="font-display text-2xl text-dark mb-4">Where to find us</h2>
             <LocationMap />
           </div>
 
           <div className="text-sm space-y-1.5">
-            <p className="text-xs uppercase tracking-wider text-ink-muted mb-2">Direct</p>
+            <p className="text-xs uppercase tracking-[0.25em] text-ink-muted mb-2">Direct</p>
             <p>
               <a href={`mailto:${PUBLIC_CONTACT_EMAIL}`} className="hover:text-copper">
                 {PUBLIC_CONTACT_EMAIL}

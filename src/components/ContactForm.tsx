@@ -4,7 +4,28 @@ import { useState } from 'react'
 
 type Status = 'idle' | 'sending' | 'sent' | 'error'
 
-export function ContactForm() {
+type ContactFormProps = {
+  /** When set, the subject is submitted as this fixed value and the visible subject input is hidden. */
+  fixedSubject?: string
+  /** Prefills the (still-editable) optional subject input. Ignored when `fixedSubject` is set. */
+  defaultSubject?: string
+  submitLabel?: string
+  successTitle?: string
+  successBody?: string
+  messageLabel?: string
+  /** Optional helper line under the message label, e.g. what to include. */
+  messageHint?: string
+}
+
+export function ContactForm({
+  fixedSubject,
+  defaultSubject,
+  submitLabel = 'Send message',
+  successTitle = 'Thank you',
+  successBody = 'Your message has been received. We typically respond within 1-2 business days.',
+  messageLabel = 'Message',
+  messageHint,
+}: ContactFormProps) {
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState<string | null>(null)
 
@@ -42,10 +63,8 @@ export function ContactForm() {
   if (status === 'sent') {
     return (
       <div className="border border-warm-mid p-8 bg-warm">
-        <h3 className="font-display text-2xl mb-3">Thank you</h3>
-        <p className="text-sm text-ink-muted leading-relaxed">
-          Your message has been received. We typically respond within 1-2 business days.
-        </p>
+        <h3 className="font-display text-2xl text-dark mb-3">{successTitle}</h3>
+        <p className="text-sm text-ink-muted leading-relaxed">{successBody}</p>
       </div>
     )
   }
@@ -90,23 +109,33 @@ export function ContactForm() {
         />
       </div>
 
-      <div>
-        <label htmlFor="contact-subject" className="block text-xs uppercase tracking-wider text-ink-muted mb-2">
-          Subject <span className="text-ink-muted/60 normal-case tracking-normal">(optional)</span>
-        </label>
-        <input
-          id="contact-subject"
-          name="subject"
-          type="text"
-          maxLength={200}
-          className="w-full px-4 py-3 bg-warm border border-warm-mid focus:border-dark focus:outline-none text-sm"
-        />
-      </div>
+      {fixedSubject ? (
+        <input type="hidden" name="subject" value={fixedSubject} />
+      ) : (
+        <div>
+          <label htmlFor="contact-subject" className="block text-xs uppercase tracking-wider text-ink-muted mb-2">
+            Subject <span className="text-ink-muted/60 normal-case tracking-normal">(optional)</span>
+          </label>
+          <input
+            id="contact-subject"
+            name="subject"
+            type="text"
+            maxLength={200}
+            defaultValue={defaultSubject}
+            className="w-full px-4 py-3 bg-warm border border-warm-mid focus:border-dark focus:outline-none text-sm"
+          />
+        </div>
+      )}
 
       <div>
         <label htmlFor="contact-message" className="block text-xs uppercase tracking-wider text-ink-muted mb-2">
-          Message
+          {messageLabel}
         </label>
+        {messageHint && (
+          <p id="contact-message-hint" className="text-xs text-ink-muted leading-relaxed mb-2 -mt-0.5">
+            {messageHint}
+          </p>
+        )}
         <textarea
           id="contact-message"
           name="message"
@@ -114,6 +143,7 @@ export function ContactForm() {
           minLength={10}
           maxLength={4000}
           rows={6}
+          aria-describedby={messageHint ? 'contact-message-hint' : undefined}
           className="w-full px-4 py-3 bg-warm border border-warm-mid focus:border-dark focus:outline-none text-sm resize-y"
         />
       </div>
@@ -125,7 +155,7 @@ export function ContactForm() {
         disabled={status === 'sending'}
         className="px-8 py-3 bg-dark text-warm hover:bg-copper transition-colors text-sm tracking-wide cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        {status === 'sending' ? 'Sending…' : 'Send message'}
+        {status === 'sending' ? 'Sending…' : submitLabel}
       </button>
     </form>
   )

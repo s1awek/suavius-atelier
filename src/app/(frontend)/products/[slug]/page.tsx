@@ -245,7 +245,7 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
         </div>
 
         <div>
-          <h1 className="text-4xl md:text-5xl">{product.title}</h1>
+          <h1 className="text-4xl md:text-5xl text-dark">{product.title}</h1>
 
           <div className="mt-4 text-xl">
             {onSale && (

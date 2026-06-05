@@ -108,7 +108,7 @@ export function StockAlertDialog({ productId, variantSku, variantName, reason = 
               <div className="px-6 py-7">
                 {status === 'sent' ? (
                   <div className="text-center py-4">
-                    <h3 className="font-display text-2xl mb-3">You are on the list</h3>
+                    <h3 className="font-display text-2xl text-dark mb-3">You are on the list</h3>
                     <p className="text-sm text-ink-muted leading-relaxed">
                       We will email you as soon as {pieceLabel} is back in stock.
                     </p>
@@ -122,7 +122,7 @@ export function StockAlertDialog({ productId, variantSku, variantName, reason = 
                   </div>
                 ) : (
                   <>
-                    <h3 className="font-display text-2xl mb-2">Join the waitlist</h3>
+                    <h3 className="font-display text-2xl text-dark mb-2">Join the waitlist</h3>
                     <p className="text-sm text-ink-muted leading-relaxed mb-5">{modalIntro}</p>
                     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                       <input

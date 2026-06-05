@@ -22,11 +22,11 @@ export default async function CollectionsIndexPage() {
   return (
     <section className="max-w-7xl mx-auto px-6 py-16 md:py-20">
       <header className="max-w-3xl mb-14">
-        <p className="text-xs uppercase tracking-[0.3em] text-copper mb-4">Browse by theme</p>
+        <p className="text-xs uppercase tracking-[0.25em] text-copper mb-4">Browse by theme</p>
         <h1 className="font-display text-4xl md:text-5xl text-dark leading-tight">
           Collections.
         </h1>
-        <p className="mt-6 text-lg text-ink-muted leading-relaxed">
+        <p className="mt-6 text-lg text-ink leading-relaxed">
           Each collection is a small body of work around a single idea. We design them in
           sets, release them in small batches, and retire them when they are done.
         </p>
@@ -60,7 +60,7 @@ export default async function CollectionsIndexPage() {
                   )}
                 </div>
                 {c.subtitle && (
-                  <p className="text-xs uppercase tracking-[0.25em] text-ink-muted mb-2">
+                  <p className="text-xs uppercase tracking-[0.25em] text-copper mb-2">
                     {c.subtitle}
                   </p>
                 )}
