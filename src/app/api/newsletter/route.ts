@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getPayloadClient } from '@/lib/payload'
 import { contactRatelimit, enforceRatelimit, getClientIp } from '@/lib/ratelimit'
 import { NEWSLETTER_CONSENT_TEXT } from '@/lib/newsletter-consent'
+import { subscribeEmail } from '@/lib/newsletter'
 
 type IncomingBody = {
   email?: string
@@ -42,41 +43,13 @@ export async function POST(req: Request) {
   }
 
   const payload = await getPayloadClient()
-  const consentedAt = new Date().toISOString()
 
-  const existing = await payload.find({
-    collection: 'newsletter-subscribers',
-    where: { email: { equals: email } },
-    limit: 1,
+  const result = await subscribeEmail(payload, {
+    email,
+    source: 'footer',
+    consentText: NEWSLETTER_CONSENT_TEXT,
+    ip,
   })
 
-  if (existing.docs.length > 0) {
-    const sub = existing.docs[0]
-    if (sub.unsubscribed) {
-      await payload.update({
-        collection: 'newsletter-subscribers',
-        id: sub.id,
-        data: {
-          unsubscribed: false,
-          consentedAt,
-          consentText: NEWSLETTER_CONSENT_TEXT,
-        },
-      })
-    }
-    return NextResponse.json({ ok: true, alreadySubscribed: !sub.unsubscribed })
-  }
-
-  await payload.create({
-    collection: 'newsletter-subscribers',
-    data: {
-      email,
-      source: 'footer',
-      unsubscribed: false,
-      consentedAt,
-      consentText: NEWSLETTER_CONSENT_TEXT,
-      ip,
-    },
-  })
-
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, alreadySubscribed: result.alreadyActive })
 }

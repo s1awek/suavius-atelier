@@ -5,6 +5,8 @@ import type { Order, PersonalizationUpload, Product } from '@/payload-types'
 import { getStripe } from '@/lib/stripe'
 import { getPayloadClient } from '@/lib/payload'
 import { sendOrderConfirmation, type OrderConfirmationItem } from '@/lib/email'
+import { subscribeEmail } from '@/lib/newsletter'
+import { CHECKOUT_CONSENT_TEXT } from '@/lib/newsletter-consent'
 
 export const runtime = 'nodejs'
 
@@ -128,6 +130,8 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     console.error('[stripe webhook] failed to finalize order', orderId, err)
     return
   }
+
+  await captureMarketingConsent(payload, session)
 
   const stockLines: StockLine[] = (order.items ?? []).map((i) => ({
     productId: typeof i.product === 'object' ? i.product.id : i.product,
@@ -323,6 +327,8 @@ async function handleLegacySnapshot(
     },
   })
 
+  await captureMarketingConsent(payload, session)
+
   try {
     await decrementStock(
       payload,
@@ -353,6 +359,33 @@ async function handleLegacySnapshot(
     )
   } catch (err) {
     console.error('[stripe webhook] order email failed', err)
+  }
+}
+
+/**
+ * If the customer ticked our newsletter checkbox in the cart before checkout, add
+ * them to the newsletter list. The opt-in intent travels via `metadata.newsletterOptIn`
+ * (set when the checkout session is created) and is paired here with the email Stripe
+ * collected on the hosted page. Stripe's own `consent_collection.promotions` is not
+ * available for PL accounts, hence our own checkbox. Called once per order from each
+ * finalize path, so a duplicate webhook delivery never re-runs this. Non-fatal: a
+ * failure here must not break order processing.
+ */
+async function captureMarketingConsent(
+  payload: Awaited<ReturnType<typeof getPayloadClient>>,
+  session: Stripe.Checkout.Session,
+) {
+  if (session.metadata?.newsletterOptIn !== '1') return
+  const email = session.customer_details?.email
+  if (!email) return
+  try {
+    await subscribeEmail(payload, {
+      email,
+      source: 'checkout',
+      consentText: CHECKOUT_CONSENT_TEXT,
+    })
+  } catch (err) {
+    console.error('[stripe webhook] newsletter opt-in capture failed', session.id, err)
   }
 }
 

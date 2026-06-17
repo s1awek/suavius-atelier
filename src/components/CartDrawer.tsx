@@ -24,6 +24,7 @@ export function CartDrawer() {
 
   const [isCheckingOut, setIsCheckingOut] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [newsletterOptIn, setNewsletterOptIn] = useState(false)
 
   useEffect(() => {
     if (!isOpen) return
@@ -64,6 +65,7 @@ export function CartDrawer() {
                 }
               : {}),
           })),
+          newsletterOptIn,
         }),
       })
       if (!res.ok) {
@@ -249,6 +251,21 @@ export function CartDrawer() {
               </div>
             </div>
             <p className="text-xs text-ink-muted">Shipping and taxes calculated at checkout.</p>
+            <label className="flex items-start gap-2 text-xs text-ink-muted leading-relaxed cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={newsletterOptIn}
+                onChange={(e) => setNewsletterOptIn(e.target.checked)}
+                className="mt-0.5 accent-copper cursor-pointer flex-shrink-0"
+              />
+              <span>
+                {"Yes, I'd love to hear about new products, special offers and other good things from Suavius Atelier. Unsubscribe anytime. See our "}
+                <Link href="/privacy" onClick={close} className="underline hover:text-copper">
+                  Privacy Policy
+                </Link>
+                .
+              </span>
+            </label>
             {error && <p className="text-xs text-red-700">{error}</p>}
             <button
               type="button"

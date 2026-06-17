@@ -37,13 +37,19 @@ export default async function OrderConfirmationPage({
 
   const isPaid = session.payment_status === 'paid'
   const email = session.customer_details?.email ?? null
+  const currency = (session.currency ?? 'eur').toUpperCase()
+  // Tax is inclusive (line + shipping prices already contain VAT), so we surface it as a
+  // note rather than an added line. Shipping is what turns the line subtotal into the total.
+  const shippingAmount = session.total_details?.amount_shipping ?? 0
+  const taxAmount = session.total_details?.amount_tax ?? 0
+  const discountAmount = session.total_details?.amount_discount ?? 0
 
   return (
     <section className="max-w-2xl mx-auto px-6 py-24">
       <ClearCartOnMount
         sessionId={sessionId}
         value={(session.amount_total ?? 0) / 100}
-        currency={(session.currency ?? 'eur').toUpperCase()}
+        currency={currency}
         isPaid={isPaid}
       />
       <h1 className="font-display text-4xl md:text-5xl text-dark">
@@ -69,17 +75,36 @@ export default async function OrderConfirmationPage({
                 <span>
                   {item.quantity} × {item.description}
                 </span>
-                <span>
-                  {formatPrice(item.amount_total, (session.currency ?? 'eur').toUpperCase())}
-                </span>
+                <span>{formatPrice(item.amount_total, currency)}</span>
               </li>
             ))}
           </ul>
-          <div className="mt-6 pt-4 border-t border-warm-mid flex justify-between text-sm font-medium">
-            <span>Total</span>
-            <span>
-              {formatPrice(session.amount_total ?? 0, (session.currency ?? 'eur').toUpperCase())}
-            </span>
+          <div className="mt-6 pt-4 border-t border-warm-mid space-y-2 text-sm">
+            <div className="flex justify-between text-ink-muted">
+              <span>Subtotal</span>
+              <span>{formatPrice(session.amount_subtotal ?? 0, currency)}</span>
+            </div>
+            {shippingAmount > 0 && (
+              <div className="flex justify-between text-ink-muted">
+                <span>Shipping</span>
+                <span>{formatPrice(shippingAmount, currency)}</span>
+              </div>
+            )}
+            {discountAmount > 0 && (
+              <div className="flex justify-between text-ink-muted">
+                <span>Discount</span>
+                <span>−{formatPrice(discountAmount, currency)}</span>
+              </div>
+            )}
+            <div className="flex justify-between pt-2 border-t border-warm-mid font-medium text-dark">
+              <span>Total</span>
+              <span>{formatPrice(session.amount_total ?? 0, currency)}</span>
+            </div>
+            {taxAmount > 0 && (
+              <p className="pt-1 text-xs text-ink-muted">
+                Includes {formatPrice(taxAmount, currency)} VAT. Shipping calculated at checkout.
+              </p>
+            )}
           </div>
         </div>
       )}

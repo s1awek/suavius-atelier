@@ -164,13 +164,14 @@ export async function POST(req: Request) {
     )
   }
 
-  let body: { items?: IncomingItem[] }
+  let body: { items?: IncomingItem[]; newsletterOptIn?: boolean }
   try {
     body = await req.json()
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
+  const newsletterOptIn = body.newsletterOptIn === true
   const items = body.items ?? []
   if (!Array.isArray(items) || items.length === 0) {
     return NextResponse.json({ error: 'Cart is empty' }, { status: 400 })
@@ -382,6 +383,10 @@ export async function POST(req: Request) {
     metadata: {
       orderId: String(draft.id),
       siteUrl,
+      // Customer-ticked newsletter opt-in (our own cart checkbox). Read back in the
+      // webhook and paired with the email Stripe collects. Stripe's native
+      // consent_collection.promotions is unavailable for PL accounts.
+      ...(newsletterOptIn ? { newsletterOptIn: '1' } : {}),
     },
   })
 
