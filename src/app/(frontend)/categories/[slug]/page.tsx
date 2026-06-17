@@ -31,7 +31,19 @@ export async function generateMetadata({
     limit: 1,
   })
   const category = result.docs[0]
-  return { title: category ? category.title : 'Category not found' }
+  if (!category) return { title: 'Category not found' }
+  const url = `${SITE_URL}/categories/${category.slug}`
+  const description =
+    category.description ??
+    `${category.title} from Suavius Atelier - hand-designed PCB and laser-engraved wood pieces, made in small batches.`
+  const brandedTitle = `${category.title} · Suavius Atelier`
+  return {
+    title: category.title,
+    description,
+    alternates: { canonical: url },
+    openGraph: { title: brandedTitle, description, url, type: 'website' },
+    twitter: { card: 'summary_large_image', title: brandedTitle, description },
+  }
 }
 
 export default async function CategoryPage({

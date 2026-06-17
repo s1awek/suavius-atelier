@@ -57,6 +57,10 @@ export const metadata = {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
   },
+  // Pinterest domain claim - unlocks product Rich Pins + analytics/ads attribution for the domain.
+  verification: {
+    other: { 'p:domain_verify': '50baf6f13edd79e4d3b751b701e45569' },
+  },
 }
 
 const orgJsonLd = {

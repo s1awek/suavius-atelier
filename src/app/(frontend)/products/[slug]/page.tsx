@@ -128,6 +128,18 @@ export async function generateMetadata({
   const title = product.seoTitle ?? product.title
   const description = product.seoDescription ?? fallbackDescription(product)
   const brandedTitle = `${title} · Suavius Atelier`
+
+  // Pinterest Rich Pins / product unfurls: price + availability. The canonical machine-readable
+  // product data is the schema.org/Product JSON-LD in the page body; these OG/product meta tags
+  // reinforce it for scrapers that read Open Graph. Price is stored in minor units (cents).
+  const priceAmount = (product.price / 100).toFixed(2)
+  const totalStock = (product.variants ?? []).reduce(
+    (sum, v) => sum + (typeof v.stock === 'number' ? v.stock : 0),
+    0,
+  )
+  const inStock = (product.variants ?? []).length === 0 || totalStock > 0
+  const availability = inStock ? 'in stock' : 'out of stock'
+
   return {
     title,
     description,
@@ -142,6 +154,15 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title: brandedTitle,
       description,
+    },
+    other: {
+      'product:price:amount': priceAmount,
+      'product:price:currency': 'EUR',
+      'product:availability': availability,
+      // Legacy aliases some scrapers (incl. Pinterest) still read.
+      'og:price:amount': priceAmount,
+      'og:price:currency': 'EUR',
+      'og:availability': inStock ? 'instock' : 'oos',
     },
   }
 }

@@ -46,12 +46,19 @@ export async function generateMetadata({
   const { slug } = await params
   const c = await fetchCollection(slug)
   if (!c) return { title: 'Collection not found' }
+  const url = `${SITE_URL}/collections/${c.slug}`
+  const title = c.seoTitle ?? `${c.title} Collection`
+  const description =
+    c.seoDescription ??
+    c.tagline ??
+    `${c.title} collection from Suavius Atelier - hand-designed PCB and wood pieces.`
+  const brandedTitle = `${title} · Suavius Atelier`
   return {
-    title: c.seoTitle ?? `${c.title} Collection`,
-    description:
-      c.seoDescription ??
-      c.tagline ??
-      `${c.title} collection from Suavius Atelier - hand-designed PCB and wood pieces.`,
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: { title: brandedTitle, description, url, type: 'website' },
+    twitter: { card: 'summary_large_image', title: brandedTitle, description },
   }
 }
 
