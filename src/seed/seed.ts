@@ -112,7 +112,8 @@ export const PAGES: PageSeed[] = [
     seoDescription: 'Worldwide shipping from Poland. 14-day returns on unused items.',
     blocks: [
       { type: 'h2', text: 'Shipping' },
-      { type: 'p', text: 'We ship from Poland. EU orders are dispatched within 2-3 business days and typically arrive in 3-7 working days. Worldwide orders take 7-14 working days depending on destination.' },
+      { type: 'p', text: 'We ship from Poland. Ready, in-stock pieces are dispatched within 2-3 business days and typically arrive in 3-7 working days within the EU, or 7-14 working days worldwide depending on destination.' },
+      { type: 'p', text: 'Made-to-order and personalized pieces take considerably longer than 2-3 days, because each is made by hand for your order. How long depends on the type of customization and other factors we cannot always predict in advance. We will keep you updated on your order, and you are always welcome to email us for an estimate before you buy.' },
       { type: 'p', text: 'Shipping costs are calculated at checkout based on destination and weight.' },
       { type: 'h2', text: 'Returns' },
       { type: 'p', text: 'You may return any unused item within 14 days of delivery for a full refund (excluding original shipping). Items must be in their original condition and packaging.' },
