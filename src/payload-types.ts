@@ -75,6 +75,7 @@ export interface Config {
     pages: Page;
     'contact-messages': ContactMessage;
     'stock-alerts': StockAlert;
+    'search-events': SearchEvent;
     'newsletter-subscribers': NewsletterSubscriber;
     collections: Collection;
     redirects: Redirect;
@@ -95,6 +96,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     'contact-messages': ContactMessagesSelect<false> | ContactMessagesSelect<true>;
     'stock-alerts': StockAlertsSelect<false> | StockAlertsSelect<true>;
+    'search-events': SearchEventsSelect<false> | SearchEventsSelect<true>;
     'newsletter-subscribers': NewsletterSubscribersSelect<false> | NewsletterSubscribersSelect<true>;
     collections: CollectionsSelect<false> | CollectionsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
@@ -634,6 +636,20 @@ export interface StockAlert {
   createdAt: string;
 }
 /**
+ * What visitors search for, and which queries return zero results. No personal data.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search-events".
+ */
+export interface SearchEvent {
+  id: number;
+  q: string;
+  resultCount?: number | null;
+  zeroResults?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Email subscribers for newsletter / new product announcements. Export from here to your email tool.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -788,6 +804,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'stock-alerts';
         value: number | StockAlert;
+      } | null)
+    | ({
+        relationTo: 'search-events';
+        value: number | SearchEvent;
       } | null)
     | ({
         relationTo: 'newsletter-subscribers';
@@ -1056,6 +1076,17 @@ export interface StockAlertsSelect<T extends boolean = true> {
   consentedAt?: T;
   consentText?: T;
   ip?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search-events_select".
+ */
+export interface SearchEventsSelect<T extends boolean = true> {
+  q?: T;
+  resultCount?: T;
+  zeroResults?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -49,6 +49,18 @@ export async function GET(req: Request) {
       depth: 1,
       sort: '-updatedAt',
     })
+    // Owned, cookieless search analytics: log the query + whether it found anything.
+    // Fire-and-forget so it never slows the response or breaks search on failure.
+    void payload
+      .create({
+        collection: 'search-events',
+        data: {
+          q: q.slice(0, 120),
+          resultCount: result.totalDocs,
+          zeroResults: result.totalDocs === 0,
+        },
+      })
+      .catch(() => {})
     return NextResponse.json({ items: result.docs.map(toResult) })
   }
 

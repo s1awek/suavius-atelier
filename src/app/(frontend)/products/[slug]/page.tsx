@@ -11,6 +11,8 @@ import { ProductGallery, type GalleryImage } from '@/components/ProductGallery'
 import { RelatedProducts } from '@/components/RelatedProducts'
 import { Breadcrumbs, type Crumb } from '@/components/Breadcrumbs'
 import { ShareButtons } from '@/components/ShareButtons'
+import { ViewItemTracker } from '@/components/ViewItemTracker'
+import { TrustShippingNote } from '@/components/TrustShippingNote'
 
 type Params = { slug: string }
 
@@ -194,6 +196,15 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
 
   const related = await fetchRelated(product.id, category?.id ?? null)
 
+  // Cheapest configured shipping rate for the "shipping from €X" hint (full cost at checkout).
+  const settings = await (await getPayloadClient()).findGlobal({ slug: 'settings' })
+  const shippingRates = (
+    (settings as { shippingZones?: Array<{ flatRate?: number | null }> }).shippingZones ?? []
+  )
+    .map((z) => z.flatRate)
+    .filter((r): r is number => typeof r === 'number' && r >= 0)
+  const shippingFrom = shippingRates.length ? Math.min(...shippingRates) : null
+
   const breadcrumbItems: Array<{ name: string; url: string }> = [
     { name: 'Shop', url: `${SITE_URL}/products` },
   ]
@@ -250,6 +261,14 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <ViewItemTracker
+        productId={product.id}
+        slug={product.slug ?? ''}
+        title={product.title}
+        price={product.price}
+        currency="EUR"
+        category={category?.title ?? null}
+      />
       <Breadcrumbs items={visibleBreadcrumbs} className="mb-8" />
       <div className="grid gap-12 md:grid-cols-2">
         <div>
@@ -297,6 +316,8 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
             }))}
             personalizations={resolvePersonalizations(product)}
           />
+
+          <TrustShippingNote shippingFrom={shippingFrom} currency="EUR" />
 
           {(product.weightGrams ||
             product.dimensions?.widthMm ||
