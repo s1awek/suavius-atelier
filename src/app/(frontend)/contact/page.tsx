@@ -47,34 +47,38 @@ export default async function ContactPage() {
         )}
       </header>
 
-      <div className="grid gap-12 md:grid-cols-5">
-        <section className="md:col-span-2">
-          <h2 className="font-display text-2xl text-dark mb-6">Write to us</h2>
-          <ContactForm />
-        </section>
+      {/* Primary action: contact form (hero) */}
+      <section className="max-w-2xl mb-16">
+        <h2 className="font-display text-2xl text-dark mb-6">Write to us</h2>
+        <ContactForm />
+      </section>
 
-        <aside className="md:col-span-3 space-y-8">
-          <div>
-            <h2 className="font-display text-2xl text-dark mb-4">Where to find us</h2>
+      {/* Supporting: location + direct details */}
+      <section className="border-t border-warm-mid pt-12">
+        <h2 className="font-display text-2xl text-dark mb-6">Where to find us</h2>
+        <div className="grid gap-8 md:gap-12 md:grid-cols-5">
+          <div className="md:col-span-3">
             <LocationMap />
           </div>
 
-          <div className="text-sm space-y-1.5">
-            <p className="text-xs uppercase tracking-[0.25em] text-ink-muted mb-2">Direct</p>
-            <p>
-              <a href={`mailto:${PUBLIC_CONTACT_EMAIL}`} className="hover:text-copper">
-                {PUBLIC_CONTACT_EMAIL}
-              </a>
-            </p>
-            <p className="text-ink-muted">Bielawa, Lower Silesia, Poland</p>
-          </div>
+          <aside className="md:col-span-2 space-y-8">
+            <div className="text-sm space-y-1.5">
+              <p className="text-xs uppercase tracking-[0.25em] text-ink-muted mb-2">Direct</p>
+              <p>
+                <a href={`mailto:${PUBLIC_CONTACT_EMAIL}`} className="hover:text-copper">
+                  {PUBLIC_CONTACT_EMAIL}
+                </a>
+              </p>
+              <p className="text-ink-muted">Bielawa, Lower Silesia, Poland</p>
+            </div>
 
-          <div className="text-xs text-ink-muted leading-relaxed border-t border-warm-mid pt-5">
-            We typically respond within 1-2 business days. For order-related questions, please
-            include your order number.
-          </div>
-        </aside>
-      </div>
+            <div className="text-xs text-ink-muted leading-relaxed border-t border-warm-mid pt-5">
+              We typically respond within 1-2 business days. For order-related questions, please
+              include your order number.
+            </div>
+          </aside>
+        </div>
+      </section>
     </article>
   )
 }
