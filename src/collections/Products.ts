@@ -80,6 +80,31 @@ export const Products: CollectionConfig = {
                 },
               ],
             },
+            {
+              name: 'video',
+              type: 'group',
+              admin: {
+                description:
+                  'Optional looping product video. Rendered as the second gallery tile (image 1 -> video -> rest images), click-to-play, muted autoplay loop.',
+              },
+              fields: [
+                {
+                  name: 'file',
+                  type: 'upload',
+                  relationTo: 'media',
+                  admin: { description: 'Web-optimized MP4 (H.264, muted, ~15s seamless loop).' },
+                },
+                {
+                  name: 'poster',
+                  type: 'upload',
+                  relationTo: 'media',
+                  admin: {
+                    description:
+                      'Poster frame shown before playback (also the gallery thumbnail). Falls back to the first product image if empty.',
+                  },
+                },
+              ],
+            },
           ],
         },
         {

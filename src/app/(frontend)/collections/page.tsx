@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { getPayloadClient } from '@/lib/payload'
+import { NewsletterForm } from '@/components/NewsletterForm'
 
 export const revalidate = 600
 
@@ -17,6 +18,8 @@ export default async function CollectionsIndexPage() {
     limit: 50,
     sort: 'order',
     depth: 1,
+    // Hide draft collections from the public index (see authenticatedOrPublished).
+    overrideAccess: false,
   })
 
   return (
@@ -33,7 +36,13 @@ export default async function CollectionsIndexPage() {
       </header>
 
       {result.docs.length === 0 ? (
-        <p className="text-ink-muted">Collections are being prepared. Check back soon.</p>
+        <div className="max-w-md">
+          <p className="text-ink-muted mb-6 leading-relaxed">
+            Collections are being prepared. Leave your email and we will tell you the moment the
+            first ones are released.
+          </p>
+          <NewsletterForm />
+        </div>
       ) : (
         <div className="grid gap-10 md:grid-cols-2">
           {result.docs.map((c) => {

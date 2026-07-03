@@ -9,6 +9,7 @@ import { getPayloadClient } from '@/lib/payload'
 import { ProductCard } from '@/components/ProductCard'
 import { ProductFilters } from '@/components/ProductFilters'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
+import { NewsletterForm } from '@/components/NewsletterForm'
 import {
   buildProductSort,
   buildProductWhere,
@@ -96,6 +97,8 @@ export default async function CollectionPage({
       where: buildProductWhere(filters, { id: { in: curated.map((p) => p.id) } }),
       sort: buildProductSort(filters),
       limit: 100,
+      // Keep drafts out of the filtered re-query too (see authenticatedOrPublished).
+      overrideAccess: false,
     })
     products = result.docs
   } else if (filtered) {
@@ -172,11 +175,22 @@ export default async function CollectionPage({
       {curated.length > 0 && <ProductFilters />}
 
       {products.length === 0 ? (
-        <p className="text-ink-muted text-center py-12">
-          {filtered
-            ? 'No pieces in this collection match these filters. Try widening your search.'
-            : 'Pieces in this collection are being prepared. Subscribe to the journal to know when they are released.'}
-        </p>
+        filtered ? (
+          <p className="text-ink-muted text-center py-12">
+            No pieces in this collection match these filters. Try widening your search.
+          </p>
+        ) : (
+          <div className="max-w-md mx-auto text-center py-12">
+            <p className="text-xs uppercase tracking-[0.25em] text-copper mb-4">Coming soon</p>
+            <p className="text-ink-muted mb-6 leading-relaxed">
+              Pieces in this collection are being prepared. Leave your email and we will tell you
+              the moment the first ones are released.
+            </p>
+            <div className="text-left">
+              <NewsletterForm />
+            </div>
+          </div>
+        )
       ) : (
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((p) => (

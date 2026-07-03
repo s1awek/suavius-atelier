@@ -75,6 +75,7 @@ export interface Config {
     pages: Page;
     'contact-messages': ContactMessage;
     'stock-alerts': StockAlert;
+    'product-interest': ProductInterest;
     'search-events': SearchEvent;
     'newsletter-subscribers': NewsletterSubscriber;
     collections: Collection;
@@ -96,6 +97,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     'contact-messages': ContactMessagesSelect<false> | ContactMessagesSelect<true>;
     'stock-alerts': StockAlertsSelect<false> | StockAlertsSelect<true>;
+    'product-interest': ProductInterestSelect<false> | ProductInterestSelect<true>;
     'search-events': SearchEventsSelect<false> | SearchEventsSelect<true>;
     'newsletter-subscribers': NewsletterSubscribersSelect<false> | NewsletterSubscribersSelect<true>;
     collections: CollectionsSelect<false> | CollectionsSelect<true>;
@@ -245,6 +247,19 @@ export interface Product {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Optional looping product video. Rendered as the second gallery tile (image 1 -> video -> rest images), click-to-play, muted autoplay loop.
+   */
+  video?: {
+    /**
+     * Web-optimized MP4 (H.264, muted, ~15s seamless loop).
+     */
+    file?: (number | null) | Media;
+    /**
+     * Poster frame shown before playback (also the gallery thumbnail). Falls back to the first product image if empty.
+     */
+    poster?: (number | null) | Media;
+  };
   /**
    * Price in minor units (e.g. 4900 = 49.00 PLN/EUR/USD)
    */
@@ -636,6 +651,36 @@ export interface StockAlert {
   createdAt: string;
 }
 /**
+ * People who registered interest in an upcoming option (e.g. gold-foil personalisation). Export and email them when it ships.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "product-interest".
+ */
+export interface ProductInterest {
+  id: number;
+  product?: (number | null) | Product;
+  /**
+   * Cached from product at signup time
+   */
+  productSlug?: string | null;
+  /**
+   * Which upcoming option this person wants
+   */
+  topic: 'gold-foil-personalization' | 'other';
+  email: string;
+  /**
+   * Timestamp when the visitor accepted the Privacy Policy
+   */
+  consentedAt?: string | null;
+  /**
+   * Exact consent wording shown at signup (snapshot for legal evidence)
+   */
+  consentText?: string | null;
+  ip?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * What visitors search for, and which queries return zero results. No personal data.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -806,6 +851,10 @@ export interface PayloadLockedDocument {
         value: number | StockAlert;
       } | null)
     | ({
+        relationTo: 'product-interest';
+        value: number | ProductInterest;
+      } | null)
+    | ({
         relationTo: 'search-events';
         value: number | SearchEvent;
       } | null)
@@ -940,6 +989,12 @@ export interface ProductsSelect<T extends boolean = true> {
         image?: T;
         id?: T;
       };
+  video?:
+    | T
+    | {
+        file?: T;
+        poster?: T;
+      };
   price?: T;
   compareAtPrice?: T;
   material?: T;
@@ -1073,6 +1128,21 @@ export interface StockAlertsSelect<T extends boolean = true> {
   email?: T;
   notified?: T;
   notifiedAt?: T;
+  consentedAt?: T;
+  consentText?: T;
+  ip?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "product-interest_select".
+ */
+export interface ProductInterestSelect<T extends boolean = true> {
+  product?: T;
+  productSlug?: T;
+  topic?: T;
+  email?: T;
   consentedAt?: T;
   consentText?: T;
   ip?: T;

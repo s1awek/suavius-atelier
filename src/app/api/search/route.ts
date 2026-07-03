@@ -48,6 +48,8 @@ export async function GET(req: Request) {
       limit: RESULT_LIMIT,
       depth: 1,
       sort: '-updatedAt',
+      // Public search must not return drafts (see authenticatedOrPublished).
+      overrideAccess: false,
     })
     // Owned, cookieless search analytics: log the query + whether it found anything.
     // Fire-and-forget so it never slows the response or breaks search on failure.
@@ -71,6 +73,7 @@ export async function GET(req: Request) {
     limit: SUGGESTION_LIMIT,
     depth: 1,
     sort: '-updatedAt',
+    overrideAccess: false,
   })
 
   let docs = featured.docs
@@ -80,6 +83,7 @@ export async function GET(req: Request) {
       limit: SUGGESTION_LIMIT,
       depth: 1,
       sort: '-updatedAt',
+      overrideAccess: false,
     })
     const seen = new Set(docs.map((d) => d.id))
     docs = [...docs, ...newest.docs.filter((d) => !seen.has(d.id))].slice(0, SUGGESTION_LIMIT)

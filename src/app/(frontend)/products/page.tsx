@@ -26,6 +26,9 @@ export default async function ProductsPage({
     where: buildProductWhere(filters),
     sort: buildProductSort(filters),
     limit: 100,
+    // Public listing: let the authenticatedOrPublished gate hide drafts (Local API defaults
+    // to overrideAccess: true, which would otherwise leak unpublished products).
+    overrideAccess: false,
   })
 
   const filtered = hasActiveFilters(filters)

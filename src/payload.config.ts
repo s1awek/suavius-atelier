@@ -16,6 +16,7 @@ import { Orders } from './collections/Orders'
 import { Pages } from './collections/Pages'
 import { ContactMessages } from './collections/ContactMessages'
 import { StockAlerts } from './collections/StockAlerts'
+import { ProductInterest } from './collections/ProductInterest'
 import { SearchEvents } from './collections/SearchEvents'
 import { NewsletterSubscribers } from './collections/NewsletterSubscribers'
 import { Collections as DesignCollections } from './collections/Collections'
@@ -37,7 +38,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Categories, Products, Orders, Pages, ContactMessages, StockAlerts, SearchEvents, NewsletterSubscribers, DesignCollections, Redirects, PersonalizationOptions, PersonalizationUploads],
+  collections: [Users, Media, Categories, Products, Orders, Pages, ContactMessages, StockAlerts, ProductInterest, SearchEvents, NewsletterSubscribers, DesignCollections, Redirects, PersonalizationOptions, PersonalizationUploads],
   globals: [Settings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

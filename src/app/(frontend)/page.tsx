@@ -14,12 +14,15 @@ export default async function HomePage() {
       collection: 'products',
       limit: 6,
       sort: '-updatedAt',
+      // Hide drafts on the public homepage (see authenticatedOrPublished).
+      overrideAccess: false,
     }),
     payload.find({
       collection: 'collections',
       limit: 4,
       sort: 'order',
       depth: 1,
+      overrideAccess: false,
     }),
   ])
 

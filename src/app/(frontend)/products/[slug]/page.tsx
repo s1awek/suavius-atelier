@@ -7,12 +7,14 @@ import type { Media, Product } from '@/payload-types'
 import { getPayloadClient, formatPrice } from '@/lib/payload'
 import { ProductPurchasePanel } from '@/components/ProductPurchasePanel'
 import type { PdpPersonalization } from '@/components/PersonalizationFields'
-import { ProductGallery, type GalleryImage } from '@/components/ProductGallery'
+import { ProductGallery, type GalleryImage, type GalleryVideo } from '@/components/ProductGallery'
 import { RelatedProducts } from '@/components/RelatedProducts'
 import { Breadcrumbs, type Crumb } from '@/components/Breadcrumbs'
 import { ShareButtons } from '@/components/ShareButtons'
 import { ViewItemTracker } from '@/components/ViewItemTracker'
 import { TrustShippingNote } from '@/components/TrustShippingNote'
+import { ProductSpecs } from '@/components/ProductSpecs'
+import { RegisterInterestDialog } from '@/components/RegisterInterestDialog'
 
 type Params = { slug: string }
 
@@ -29,6 +31,8 @@ export async function generateStaticParams() {
     collection: 'products',
     limit: 1000,
     depth: 0,
+    // Only prerender published products; drafts stay on-demand (and 404 publicly).
+    overrideAccess: false,
   })
   return result.docs.flatMap((p) => (p.slug ? [{ slug: p.slug }] : []))
 }
@@ -60,6 +64,8 @@ async function fetchRelated(currentId: number, categoryId: number | null): Promi
     },
     limit: 4,
     depth: 1,
+    // Related products are public: hide drafts (Local API defaults to overrideAccess: true).
+    overrideAccess: false,
   })
   return result.docs
 }
@@ -181,6 +187,19 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
     .map((row) => row.image)
     .filter((m): m is Media => typeof m === 'object' && m !== null)
 
+  const videoFile =
+    product.video && typeof product.video.file === 'object' ? product.video.file : null
+  const videoPoster =
+    product.video && typeof product.video.poster === 'object' ? product.video.poster : null
+  const video: GalleryVideo | null = videoFile?.url
+    ? {
+        id: videoFile.id,
+        url: videoFile.url,
+        poster: videoPoster?.url ?? images[0]?.url ?? '',
+        alt: videoFile.alt ?? `${product.title} video`,
+      }
+    : null
+
   const onSale =
     typeof product.compareAtPrice === 'number' && product.compareAtPrice > product.price
 
@@ -235,6 +254,21 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
         itemCondition: 'https://schema.org/NewCondition',
       },
     },
+    ...(video
+      ? [
+          {
+            '@context': 'https://schema.org/',
+            '@type': 'VideoObject',
+            name: `${product.title} - product video`,
+            description:
+              product.seoDescription ??
+              `A close-up look at the ${product.title} by Suavius Atelier, front and back.`,
+            thumbnailUrl: [video.poster].filter(Boolean),
+            contentUrl: video.url,
+            uploadDate: product.createdAt,
+          },
+        ]
+      : []),
     {
       '@context': 'https://schema.org/',
       '@type': 'BreadcrumbList',
@@ -280,6 +314,7 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
                 url: img.url,
                 alt: img.alt ?? product.title,
               }))}
+            video={video}
             productTitle={product.title}
           />
         </div>
@@ -319,36 +354,16 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
 
           <TrustShippingNote shippingFrom={shippingFrom} currency="EUR" />
 
-          {(product.weightGrams ||
-            product.dimensions?.widthMm ||
-            product.dimensions?.heightMm ||
-            product.dimensions?.depthMm) && (
-            <dl className="mt-12 grid grid-cols-2 gap-4 text-sm border-t border-warm-mid pt-6">
-              {product.weightGrams && (
-                <>
-                  <dt className="text-ink-muted">Weight</dt>
-                  <dd>{product.weightGrams} g</dd>
-                </>
-              )}
-              {(product.dimensions?.widthMm ||
-                product.dimensions?.heightMm ||
-                product.dimensions?.depthMm) && (
-                <>
-                  <dt className="text-ink-muted">Dimensions</dt>
-                  <dd>
-                    {[
-                      product.dimensions?.widthMm,
-                      product.dimensions?.heightMm,
-                      product.dimensions?.depthMm,
-                    ]
-                      .filter(Boolean)
-                      .join(' × ')}{' '}
-                    mm
-                  </dd>
-                </>
-              )}
-            </dl>
+          {product.material === 'wood' && (
+            <RegisterInterestDialog
+              productId={product.id}
+              topic="gold-foil-personalization"
+              title="Gold-foil personalisation"
+              blurb="Hand-pressed gold-foil monogramming for our wood pieces is on its way. Tell us you would like it and we will email you the moment it is ready. Your coaster ships plain in the meantime."
+            />
           )}
+
+          <ProductSpecs product={product} />
 
           <ShareButtons
             url={productUrl}

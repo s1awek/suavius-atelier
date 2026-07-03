@@ -73,6 +73,8 @@ export default async function CategoryPage({
     where: buildProductWhere(filters, { category: { equals: category.id } }),
     sort: buildProductSort(filters),
     limit: 100,
+    // Public category listing: hide drafts (see authenticatedOrPublished).
+    overrideAccess: false,
   })
 
   const breadcrumbJsonLd = {

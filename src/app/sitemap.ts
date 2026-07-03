@@ -8,15 +8,13 @@ const SITE_URL =
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const payload = await getPayloadClient()
 
+  // overrideAccess: false so the authenticatedOrPublished gate keeps unpublished drafts out of
+  // the sitemap (otherwise we would advertise URLs that 404 for the public).
   const [products, categories, pages, designCollections] = await Promise.all([
-    payload.find({
-      collection: 'products',
-      limit: 1000,
-      depth: 0,
-    }),
-    payload.find({ collection: 'categories', limit: 1000, depth: 0 }),
-    payload.find({ collection: 'pages', limit: 1000, depth: 0 }),
-    payload.find({ collection: 'collections', limit: 1000, depth: 0 }),
+    payload.find({ collection: 'products', limit: 1000, depth: 0, overrideAccess: false }),
+    payload.find({ collection: 'categories', limit: 1000, depth: 0, overrideAccess: false }),
+    payload.find({ collection: 'pages', limit: 1000, depth: 0, overrideAccess: false }),
+    payload.find({ collection: 'collections', limit: 1000, depth: 0, overrideAccess: false }),
   ])
 
   const staticEntries: MetadataRoute.Sitemap = [

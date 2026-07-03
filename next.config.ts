@@ -24,6 +24,11 @@ const csp = (() => {
   const imgSrc = ["'self'", 'data:', 'blob:']
   if (r2PublicHost) imgSrc.push(`https://${r2PublicHost}`)
 
+  // Product videos are served from R2; <video> is governed by media-src (falls back
+  // to default-src otherwise, which would block the R2 host).
+  const mediaSrc = ["'self'", 'blob:']
+  if (r2PublicHost) mediaSrc.push(`https://${r2PublicHost}`)
+
   const directives: Record<string, string[]> = {
     'default-src': ["'self'"],
     'script-src': [
@@ -36,6 +41,7 @@ const csp = (() => {
     ],
     'style-src': ["'self'", "'unsafe-inline'"],
     'img-src': imgSrc,
+    'media-src': mediaSrc,
     'font-src': ["'self'", 'data:'],
     'connect-src': [
       "'self'",
