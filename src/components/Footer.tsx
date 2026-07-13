@@ -144,6 +144,21 @@ export async function Footer() {
           <PaymentBadges variant="footer" />
         </div>
       </div>
+      <div className="border-t border-warm-mid bg-dark/[0.03]">
+        <div className="max-w-7xl mx-auto px-6 py-4 text-center">
+          <p className="text-xs tracking-wide text-ink-muted">
+            Designed &amp; built by{' '}
+            <a
+              href="https://wellmade.online"
+              target="_blank"
+              rel="noopener"
+              className="font-medium text-copper hover:text-dark underline underline-offset-4 decoration-copper/40 hover:decoration-dark transition-colors"
+            >
+              Wellmade Online
+            </a>
+          </p>
+        </div>
+      </div>
     </footer>
   )
 }
