@@ -212,6 +212,15 @@ export const Products: CollectionConfig = {
                 ],
               },
             },
+            {
+              name: 'etsyListingId',
+              type: 'number',
+              admin: {
+                position: 'sidebar',
+                description:
+                  'Etsy listing id (Shop B) this product maps to. Set once the listing is live; the stock sync pushes quantity to it and receipts against it decrement stock here.',
+              },
+            },
           ],
         },
         {

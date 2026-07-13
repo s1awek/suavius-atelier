@@ -7,6 +7,7 @@ import { getPayloadClient } from '@/lib/payload'
 import { sendOrderConfirmation, type OrderConfirmationItem } from '@/lib/email'
 import { subscribeEmail } from '@/lib/newsletter'
 import { CHECKOUT_CONSENT_TEXT } from '@/lib/newsletter-consent'
+import { adjustStock } from '@/lib/stock'
 
 export const runtime = 'nodejs'
 
@@ -139,7 +140,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     quantity: i.quantity,
   }))
   try {
-    await decrementStock(payload, stockLines)
+    await decrementStock(payload, stockLines, String(orderId))
   } catch (err) {
     console.error('[stripe webhook] stock decrement failed', err)
   }
@@ -333,6 +334,7 @@ async function handleLegacySnapshot(
     await decrementStock(
       payload,
       snapshot.map((s) => ({ productId: s.productId, variantSku: s.variantSku, quantity: s.quantity })),
+      String(order.id),
     )
   } catch (err) {
     console.error('[stripe webhook] stock decrement failed', err)
@@ -392,42 +394,21 @@ async function captureMarketingConsent(
 async function decrementStock(
   payload: Awaited<ReturnType<typeof getPayloadClient>>,
   lines: StockLine[],
+  ref?: string,
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = (payload.db as any).drizzle
-
+  // Single source of truth for stock movements lives in @/lib/stock. The webhook
+  // just maps order lines to signed decrements; adjustStock handles the atomic
+  // guard, the oversell clamp, and the audit log line.
   for (const line of lines) {
     if (!line.variantSku || !Number.isFinite(line.quantity) || line.quantity <= 0) continue
-
     try {
-      // Atomic decrement: only succeeds if there is enough stock.
-      // Postgres locks the row during UPDATE, so concurrent webhooks serialize.
-      const strict = await db.execute(sql`
-        UPDATE products_variants
-        SET stock = stock - ${line.quantity}::numeric
-        WHERE sku = ${line.variantSku} AND stock >= ${line.quantity}::numeric
-        RETURNING stock
-      `)
-
-      if (strict.rowCount === 0) {
-        // Either the SKU does not exist or there was not enough stock.
-        // Verify which case and, if a row exists, clamp to 0 atomically.
-        const clamp = await db.execute(sql`
-          UPDATE products_variants
-          SET stock = 0
-          WHERE sku = ${line.variantSku} AND stock > 0
-          RETURNING stock
-        `)
-        if (clamp.rowCount === 0) {
-          console.warn(
-            `[stripe webhook] stock decrement found no row or already zero for sku ${line.variantSku} (product ${line.productId})`,
-          )
-        } else {
-          console.warn(
-            `[stripe webhook] oversold sku ${line.variantSku} (product ${line.productId}): asked ${line.quantity}, clamped to 0`,
-          )
-        }
-      }
+      await adjustStock(payload, {
+        sku: line.variantSku,
+        delta: -line.quantity,
+        source: 'store-order',
+        reason: ref ? `order ${ref}` : `product ${line.productId}`,
+        ...(ref ? { externalRef: ref } : {}),
+      })
     } catch (err) {
       console.error(
         `[stripe webhook] failed to decrement stock for sku ${line.variantSku}`,

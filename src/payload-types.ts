@@ -75,6 +75,7 @@ export interface Config {
     pages: Page;
     'contact-messages': ContactMessage;
     'stock-alerts': StockAlert;
+    'stock-movements': StockMovement;
     'product-interest': ProductInterest;
     'search-events': SearchEvent;
     'newsletter-subscribers': NewsletterSubscriber;
@@ -97,6 +98,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     'contact-messages': ContactMessagesSelect<false> | ContactMessagesSelect<true>;
     'stock-alerts': StockAlertsSelect<false> | StockAlertsSelect<true>;
+    'stock-movements': StockMovementsSelect<false> | StockMovementsSelect<true>;
     'product-interest': ProductInterestSelect<false> | ProductInterestSelect<true>;
     'search-events': SearchEventsSelect<false> | SearchEventsSelect<true>;
     'newsletter-subscribers': NewsletterSubscribersSelect<false> | NewsletterSubscribersSelect<true>;
@@ -289,6 +291,10 @@ export interface Product {
    * Sum of all variant stocks (auto-calculated)
    */
   totalStock?: number | null;
+  /**
+   * Etsy listing id (Shop B) this product maps to. Set once the listing is live; the stock sync pushes quantity to it and receipts against it decrement stock here.
+   */
+  etsyListingId?: number | null;
   /**
    * Net product weight in grams (for shipping estimation)
    */
@@ -651,6 +657,36 @@ export interface StockAlert {
   createdAt: string;
 }
 /**
+ * Audit log of stock changes across channels. System-written, read-only.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "stock-movements".
+ */
+export interface StockMovement {
+  id: number;
+  sku: string;
+  /**
+   * Signed change applied (negative = sale, positive = restock).
+   */
+  delta: number;
+  /**
+   * Variant stock after the change.
+   */
+  newStock?: number | null;
+  source: 'store-order' | 'etsy-order' | 'manual' | 'restock' | 'seed';
+  /**
+   * Idempotency key of the originating event (Stripe order id, Etsy receipt id). Prevents double-counting on retry/re-poll.
+   */
+  externalRef?: string | null;
+  /**
+   * A decrement hit insufficient stock and was clamped to 0 (oversold).
+   */
+  clamped?: boolean | null;
+  reason?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * People who registered interest in an upcoming option (e.g. gold-foil personalisation). Export and email them when it ships.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -851,6 +887,10 @@ export interface PayloadLockedDocument {
         value: number | StockAlert;
       } | null)
     | ({
+        relationTo: 'stock-movements';
+        value: number | StockMovement;
+      } | null)
+    | ({
         relationTo: 'product-interest';
         value: number | ProductInterest;
       } | null)
@@ -1009,6 +1049,7 @@ export interface ProductsSelect<T extends boolean = true> {
         id?: T;
       };
   totalStock?: T;
+  etsyListingId?: T;
   weightGrams?: T;
   dimensions?:
     | T
@@ -1131,6 +1172,21 @@ export interface StockAlertsSelect<T extends boolean = true> {
   consentedAt?: T;
   consentText?: T;
   ip?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "stock-movements_select".
+ */
+export interface StockMovementsSelect<T extends boolean = true> {
+  sku?: T;
+  delta?: T;
+  newStock?: T;
+  source?: T;
+  externalRef?: T;
+  clamped?: T;
+  reason?: T;
   updatedAt?: T;
   createdAt?: T;
 }
