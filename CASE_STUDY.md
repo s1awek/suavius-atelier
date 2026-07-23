@@ -2,9 +2,9 @@
 
 A production e-commerce store for a boutique brand making hand-designed PCB coasters
 (FR4 + ENIG copper finish) and laser-engraved wood accessories. It is a real shop taking
-real orders, built deliberately to double as a portfolio piece: a modern headless-CMS
-commerce stack, self-hosted, on a single deploy, with the operational discipline of a
-product rather than a demo.
+real orders - live since May 2026 - built deliberately to double as a portfolio piece: a
+modern headless-CMS commerce stack, self-hosted, on a single deploy, with the operational
+discipline of a product rather than a demo.
 
 This document is a technical walkthrough of *how the system is built and why* - the
 external services, how payments and data flow, the security posture, and the deployment
@@ -24,6 +24,10 @@ want on an analogous project.
 - **Server-authoritative pricing.** The client submits *choices*, never prices. Every
   amount (base price, personalization upcharges, shipping, tax) is recomputed server-side
   before a Stripe session is created.
+- **One stock entry point.** Every movement - store order, Etsy sale, manual correction,
+  restock - goes through a single `adjustStock()` primitive: one conditional atomic
+  `UPDATE` on the source of truth plus an audit-log row carrying the source and an
+  external idempotency key.
 - **Product personalization** (engraving text, colour/style choices, customer artwork
   uploads) with hardened, content-sniffed, DOMPurify-sanitized file uploads.
 - **Content is live without a deploy.** Editing in the production admin revalidates exactly
@@ -46,7 +50,7 @@ want on an analogous project.
 | Redirects        | Vercel Edge Config (edge KV) + middleware                        |
 | Transactional email | SMTP via Nodemailer                                            |
 | Hosting / CDN    | Vercel                                                            |
-| Analytics        | Vercel Analytics + Speed Insights (cookieless)                   |
+| Analytics        | Vercel Analytics + Speed Insights (cookieless, opt-out gated)    |
 | Styling          | Tailwind CSS 4 (design tokens in `@theme`)                       |
 | Tooling          | pnpm, ESLint 9, Prettier, Husky, lint-staged, Renovate, Playwright |
 
@@ -86,8 +90,10 @@ GraphQL API are all just route groups in the same project.
   categories, bespoke/materials/contact pages, order confirmation, CMS-driven `[slug]`
   pages, and the draft-preview enter/exit routes).
 - `(payload)` - the Payload admin UI and its REST + GraphQL endpoints.
-- `api/` - bespoke endpoints the storefront calls: checkout session creation, the Stripe
-  webhook, newsletter, contact, product search, stock alerts, and personalization upload.
+- `api/` - bespoke endpoints: checkout session creation, the Stripe webhook, newsletter,
+  contact, product search, stock alerts, register-interest signups, personalization upload,
+  and a machine-to-machine stock adjustment endpoint (`/api/stock/adjust`) that the
+  multichannel sync runner posts to.
 
 ---
 
@@ -120,7 +126,7 @@ out backends whose `search_path` doesn't include `public`, producing intermitten
 doesn't lose a day to it.
 
 ### Cloudflare R2 - object storage
-Product imagery and customer artwork uploads live in R2 via `@payloadcms/storage-s3`
+Product imagery, product video and customer artwork uploads live in R2 via `@payloadcms/storage-s3`
 (R2 is S3-compatible). Two logical buckets-by-prefix are configured: `media/` for curated
 product images and a separate prefix for customer `personalization-uploads/`.
 
@@ -142,7 +148,7 @@ Serverless Redis backs sliding-window rate limits on the abuse-prone endpoints, 
 tuned per endpoint:
 - checkout session creation - tightest payment-abuse guard,
 - personalization file upload - tight, since it accepts binary data,
-- contact / newsletter / stock-alert forms - spam guard.
+- contact / newsletter / stock-alert / register-interest forms - spam guard.
 
 Client IP is derived from the forwarded headers; exceeding a limit returns `429` with a
 `Retry-After`.
@@ -162,7 +168,19 @@ and mail is only sent when actually triggered.
 
 ### Vercel Analytics & Speed Insights - measurement
 Cookieless analytics and real-user performance metrics, chosen specifically so the site
-needs no analytics cookie banner.
+needs no analytics cookie banner. Two things sit on top of the default integration:
+
+- **A consent gate.** Analytics and Speed Insights mount only after a client-side check
+  that the visitor has not opted out and the browser is not sending a Global Privacy
+  Control signal - nothing loads before that state is known.
+- **A funnel, not just pageviews.** Custom events cover
+  `view_item -> add_to_cart -> begin_checkout -> purchase`. `purchase` is deduplicated per
+  Stripe session id in `localStorage`, so refreshing the confirmation page cannot
+  double-count a sale (and it still fires, undeduplicated, when storage is unavailable).
+
+Search is measured first-party instead: every storefront query is written to a
+`SearchEvents` row with its result count and a `zeroResults` flag - no personal data,
+but a direct read on what visitors expect the catalogue to contain and don't find.
 
 ---
 
@@ -173,7 +191,7 @@ TypeScript types) and one global:
 
 | Collection | Purpose |
 |---|---|
-| **Products** | Catalogue items: pricing in minor units, `compareAtPrice`, material, variants (`sku` + `stock`), a virtual `totalStock`, pinned personalization options, shipping dimensions/weight, SEO fields. Drafts + version history. |
+| **Products** | Catalogue items: pricing in minor units, `compareAtPrice`, material, variants (`sku` + `stock`), a virtual `totalStock`, pinned personalization options, an optional looping product video rendered as the second gallery tile, shipping dimensions/weight, an `etsyListingId` for multichannel stock mapping, SEO fields. Drafts + version history. |
 | **Orders** | Created as a *draft* at checkout, finalized by the Stripe webhook. Stores customer + address, line items with a **personalization snapshot** and `priceAtPurchase`, shipping/tax/totals, currency, promo code, tracking. |
 | **Media** | Curated image library; R2-backed, URL-rewritten and cache-stamped. |
 | **Categories** | Product taxonomy (supports nesting). |
@@ -181,7 +199,10 @@ TypeScript types) and one global:
 | **Pages** | CMS-driven marketing/legal pages (About, Shipping, FAQ, Terms, Privacy…). Drafts + preview. |
 | **PersonalizationOptions** | Reusable library of personalization *types* (text, textarea, choice, colour, file) with per-option pricing, choice lists, presentation, and file-upload config. |
 | **PersonalizationUploads** | Customer-uploaded artwork (R2-backed), with checksum, sanitized flag, and a reserved scan-status field. Direct create is blocked - uploads only via the validated endpoint. |
+| **StockMovements** | Append-only audit log of every stock change: SKU, signed delta, resulting stock, source (`store-order` / `etsy-order` / `manual` / `restock` / `seed`), an `externalRef` idempotency key, and a `clamped` flag marking an oversell. System-written, read-only in the admin. |
 | **StockAlerts** | Back-in-stock waitlist; triggers email on restock. Stores GDPR consent timestamp + snapshot. |
+| **ProductInterest** | Register-interest signups for options that don't exist yet (e.g. gold-foil personalization), keyed by product + topic, with the consent snapshot. Kept separate from the newsletter so the per-product demand signal isn't lost to email dedup. |
+| **SearchEvents** | First-party search log: query, result count, `zeroResults` flag. No personal data. |
 | **NewsletterSubscribers** | Email list with source, unsubscribe flag and consent snapshot. |
 | **ContactMessages** | Contact-form submissions with IP/user-agent and a handled flag. |
 | **Redirects** | `from -> to` with permanent flag; auto-created on slug changes, mirrored to Edge Config. |
@@ -223,14 +244,57 @@ the stock all agree exactly once, even when webhooks retry or replicas race. The
      win; if zero rows update, another already processed it and this invocation bails before
      touching stock or email. **Exactly-once, enforced by the database.**
    - Real customer/shipping/tax/total/promo details are copied from the session onto the order.
-   - **Stock is decremented atomically per variant** (`… SET stock = stock - qty WHERE sku=? AND stock >= qty`), with oversell detection.
+   - **Stock is decremented through the shared `adjustStock()` engine** - one signed
+     adjustment per line, atomic, with oversell detection and an audit-log row (next section).
    - Confirmation email goes to the customer; a fulfilment copy goes to the store.
+   - If the customer ticked the newsletter checkbox in the cart, the opt-in travels through
+     Stripe session `metadata` and the subscription is created here with the exact consent
+     wording snapshotted. (Our own checkbox rather than Stripe's `consent_collection.promotions`,
+     which isn't available for PL accounts.)
 
 A legacy snapshot path is kept for backward compatibility, so the migration to draft orders
 didn't strand any in-flight sessions - a detail that matters when you change a payment flow
 on a live store.
 
-### 2. Personalization & secure uploads
+### 2. Stock as a single source of truth (multichannel)
+
+The same physical inventory is sold in more than one place - this store and an Etsy shop -
+so stock is the second thing (after money) that must not drift. Rather than letting each
+channel touch the numbers its own way, every movement funnels through one primitive:
+
+```ts
+adjustStock(payload, { sku, delta, source, reason?, externalRef? })
+```
+
+- **The variant row is the source of truth.** `adjustStock` issues a single conditional
+  `UPDATE` (`SET stock = stock - qty WHERE sku=? AND stock >= qty`), so the database
+  serializes concurrent callers - no application-level lock.
+- **Oversell is handled, not hidden.** If a decrement can't be satisfied (both channels sold
+  the last unit at once), stock clamps to `0` and the result is flagged `clamped`; the
+  made-to-order model absorbs it as longer processing time, and the flag is recorded rather
+  than silently swallowed.
+- **Every applied change is logged** to `StockMovements` with its source and, where the
+  originating event has an id, an `externalRef`. Log writes are best-effort: a failed audit
+  write can never roll back a stock change that already committed.
+- **Idempotent for pull-based channels.** A poller checks `hasMovement(source, externalRef)`
+  before adjusting, so re-reading the same Etsy receipt never double-decrements. The Stripe
+  path doesn't need it - the paid-claim already deduplicates upstream.
+- **Machines get their own door.** `/api/stock/adjust` accepts adjustments from the sync
+  runner, authenticated by a shared secret compared in constant time (`x-stock-secret`),
+  validating the source against a fixed enum and returning `skipped: duplicate` on a
+  replayed `externalRef`. It is deliberately not a session-authenticated route - no browser
+  path can reach it.
+
+Products carry an `etsyListingId`, which is what lets a listing on the other channel map
+back to the SKU whose stock just moved.
+
+Current state: the store side is complete and in production - orders, manual corrections
+and restocks all flow through `adjustStock` and land in the audit log. The always-on Etsy
+poller that will call `/api/stock/adjust` is the remaining piece; the contract it targets
+(idempotency key, source enum, shared-secret auth) is already built and testable, so the
+channel plugs in without reopening the stock engine.
+
+### 3. Personalization & secure uploads
 
 Personalization options are defined once in a reusable library and *pinned* onto products,
 so copy and pricing can change globally while historical orders stay readable via their
@@ -254,7 +318,7 @@ At checkout the server re-validates that every referenced upload and choice is l
 product before the price is computed. The uploaded artwork link is surfaced to the store in
 the order email for fulfilment.
 
-### 3. Content editing & on-demand revalidation
+### 4. Content editing & on-demand revalidation
 
 Public pages are statically prerendered / ISR-cached. Editing content in the **production
 admin** writes to the prod database and shows on the live site **immediately, with no
@@ -269,7 +333,7 @@ the affected routes:
 Deploys are reserved for code; content lives in the database. Time-based revalidation
 windows remain as a safety net.
 
-### 4. Drafts & preview
+### 5. Drafts & preview
 
 Products, Pages and Collections keep version history with drafts. Public read access is
 gated by an `authenticatedOrPublished` rule: anonymous visitors only ever see published
@@ -278,7 +342,7 @@ content; the storefront query is constrained to `_status: published`. The admin'
 Next.js Draft Mode, and renders the unpublished draft - so editors see exactly what will
 ship before they publish, without leaking drafts publicly.
 
-### 5. Redirects (two layers, no broken links on rename)
+### 6. Redirects (two layers, no broken links on rename)
 
 When a product/page/collection/category slug changes, a hook auto-creates a permanent
 redirect from the old path, collapses redirect chains, and clears stale redirects that would
@@ -303,11 +367,18 @@ Security here is layered and intentional, not an afterthought:
 - **Server-authoritative pricing** - the client cannot influence any amount.
 - **Exactly-once order processing** via a database compare-and-set; idempotent under
   webhook retries and multi-replica races.
+- **Machine endpoints authenticated separately from users** - the stock sync endpoint takes
+  a shared secret compared in constant time, returns `503` when unconfigured rather than
+  falling open, and is unreachable from any browser session. Stock changes are append-only
+  audited, so an adjustment can always be traced to a source and an originating event.
 - **Hardened uploads** - content sniffing, SVG sanitization, attachment disposition,
   origin isolation (detailed above).
 - **Per-endpoint rate limiting** on Upstash Redis.
-- **GDPR consent capture** - newsletter / stock-alert / contact flows snapshot the exact
-  consent wording, timestamp and IP at the moment of consent, so consent is provable later.
+- **GDPR consent capture** - newsletter (including the checkout opt-in) / stock-alert /
+  register-interest / contact flows snapshot the exact consent wording, timestamp and IP at
+  the moment of consent, so consent is provable later.
+- **Analytics behind an opt-out gate** honouring Global Privacy Control, with no personal
+  data in the first-party search log.
 - **Honeypot fields** on public forms for low-friction bot rejection.
 - Secrets live only in Vercel env vars (production `DATABASE_URL` is a sensitive, unreadable
   var); nothing sensitive is committed. A secret-rotation runbook lives in
@@ -350,6 +421,13 @@ Security here is layered and intentional, not an afterthought:
   webhook arriving to *exist*.
 - **Compare-and-set for finalization.** The simplest correct primitive for exactly-once: no
   distributed lock, no queue - just a conditional `UPDATE` the database serializes for you.
+- **One stock entry point instead of per-channel logic.** Adding a sales channel means
+  calling one function with a different `source`, not re-implementing atomicity, oversell
+  handling and audit logging a second time - and every channel's history lands in the same
+  log, so reconciliation is a query rather than an investigation.
+- **Demand measured before it's built.** Register-interest signups and a first-party
+  zero-result search log turn "should we make this?" into data the catalogue itself
+  collects.
 - **Local API over HTTP.** Co-locating the CMS in the Next app removes a network hop and an
   entire class of auth/CORS/latency problems for SSR reads.
 - **Direct-from-R2 images.** Offloads bandwidth from the app server and exploits R2's
@@ -367,6 +445,8 @@ Security here is layered and intentional, not an afterthought:
 - Designing and shipping a **real, correctness-critical payment flow** (idempotency,
   replay protection, server-authoritative pricing, stock integrity) rather than a happy-path
   demo.
+- Treating **shared inventory across sales channels** as a concurrency problem with one
+  audited entry point, rather than as glue code per integration.
 - Comfort across a **modern full-stack TypeScript surface**: Next.js App Router + React 19
   server components, a headless CMS, Postgres, S3-compatible storage, edge config and
   serverless Redis - wired together coherently on a single deploy.
