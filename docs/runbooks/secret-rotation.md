@@ -8,8 +8,8 @@ Procedura rotacji sekretów produkcyjnych. Trigger:
 Każda rotacja: **rotate → update Vercel env → redeploy → verify → revoke old**.
 Old secret zostawiamy aktywny do czasu pomyślnej weryfikacji nowego, potem revoke.
 
-Zakładamy hosting: Vercel (production env), DB: Neon, storage: Cloudflare R2, SMTP: SEOhost,
-płatności: Stripe, rate limit: Upstash.
+Zakładamy hosting: Vercel (production env), DB: Neon, storage: Cloudflare R2, SMTP: hosting
+poczty firmowej (patrz `SMTP_HOST` w env), płatności: Stripe, rate limit: Upstash.
 
 ---
 
@@ -82,7 +82,7 @@ Czas: ~10 min. Risk: low (read przez public URL nie zależy od kluczy).
 
 ---
 
-## 4. SMTP password (SEOhost orders@suaviusatelier.com)
+## 4. SMTP password (skrzynka nadawcza sklepu, `SMTP_USER`)
 
 **Wpływ:** order confirmation maile failują. Webhook nadal tworzy Order w DB (try/catch chroni).
 
@@ -90,7 +90,7 @@ Klucze:
 - `SMTP_PASSWORD`
 
 Procedura:
-1. SEOhost panel → Poczta → orders@suaviusatelier.com → Zmień hasło.
+1. Panel hostingu poczty → Poczta → skrzynka z `SMTP_USER` → Zmień hasło.
 2. Vercel → Production env → `SMTP_PASSWORD` → update.
 3. Vercel → Redeploy production.
 4. Verify: zrób testowy purchase (mała kwota), sprawdź czy customer dostaje confirmation +

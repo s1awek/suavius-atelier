@@ -6,7 +6,7 @@ export const runtime = 'nodejs'
 
 /**
  * Machine-to-machine stock adjustment endpoint. The always-on Etsy sync runner
- * (wherever it ends up hosted — Vercel Cron, a small worker, or SEOhost) posts
+ * (wherever it ends up hosted — Vercel Cron, a small worker, or shared hosting) posts
  * here to decrement the source of truth when a sale is detected on Etsy, and to
  * confirm pushes. Guarded by a shared secret, not a user session.
  *

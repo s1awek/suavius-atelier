@@ -12,11 +12,11 @@ session where several of these gotchas cost real time.
   respective `DATABASE_URL`, not in the repo):
   - dev branch — used by local dev (loaded from `.env`)
   - production branch — used by Vercel
-  - The prod connection string is kept (commented) in `.env` as `DATABASE_URL_PRODUCTION`,
-    for reference only. Vercel's real `DATABASE_URL` is a Sensitive env var (unreadable).
+  - Vercel's `DATABASE_URL` is a Sensitive env var (unreadable after saving). Pull the prod
+    string from the Neon console when a maintenance script genuinely needs it.
 - **Storage:** Cloudflare R2 (product images). **Payments:** Stripe. **Email:** SMTP
-  (SEOhost) via `src/lib/email.ts` (transactional) + Payload's nodemailer adapter
-  (admin/internal mail).
+  (provider + mailbox live in `SMTP_HOST` / `SMTP_USER`, not in the repo) via
+  `src/lib/email.ts` (transactional) + Payload's nodemailer adapter (admin/internal mail).
 
 ## Deploy flow
 
@@ -116,7 +116,7 @@ land on an empty-`search_path` backend.
 ```bash
 # ALWAYS NODE_ENV=production — without it Payload boots in dev mode and tries to
 # drizzle-push the schema over the pooler, which mutates prod and poisons the pool.
-DATABASE_URL="<prod-url-from-.env-comment>" NODE_ENV=production \
+DATABASE_URL="<prod-url-from-the-Neon-console>" NODE_ENV=production \
   pnpm exec tsx scripts/<script>.ts
 ```
 
