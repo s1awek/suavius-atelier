@@ -133,3 +133,38 @@ Payload migrations live in `src/migrations/`. Workflow: `pnpm payload migrate:cr
 commit, push — the prod deploy runs `pnpm payload migrate` automatically. The baseline
 `*_initial` migration is recorded in `payload_migrations`; migrate skips already-applied
 ones (assuming the search_path issue above is resolved).
+
+## Security updates
+
+- **2026-09-18: Payload security release 3.90.0 / 3.90.1** (12 advisories patched in 3.90.0, incl. a critical
+  auth-token issue GHSA-66wr-7vmr-p5jq and RCE via first-register; `gh api repos/payloadcms/payload/security-advisories`).
+  The store was on 3.84.1 (last deploy 2026-07-23, commit `7f600f4`). **Update prepared locally on 2026-09-21**:
+  `payload` + all `@payloadcms/*` -> 3.90.1; `next` 16.2.6 -> 16.3.5 (required: `@payloadcms/next@3.90.1` peer range is
+  >= 16.3.3, and Next 16.2.6 itself has published advisories: two critical from 2026-08-25, GHSA-2xp9-vwfh-vxw4 RCE in
+  the Image Optimization API with AVIF, patched in 16.3.3, plus a 2026-07-21 batch of SSRF / middleware-bypass / DoS
+  issues patched in 16.2.11); `eslint-config-next` 16.3.5; `@aws-sdk/client-s3` ^3.1136 (peer of `storage-s3`).
+  Migration `20260921_124512_add_reset_password_requested_at` adds `users.reset_password_requested_at` and
+  `_objectkey` on `media` / `personalization_uploads`; it runs on prod through the `vercel.json` build command.
+  Verified locally: lint / typecheck / `next build` green; REST + browser smoke (admin login, product save, R2 upload
+  and delete, `/_next/image`, customer SVG through `/api/personalization/upload`, Stripe test checkout session);
+  R2 objects carry `Cache-Control` and, for customer SVGs, `Content-Disposition: attachment` after upload.
+  Tracking: `.workspace/payload-security-update-2026-09-stan.md` (local, gitignored) and Trello card 13x3REX4.
+  **Status: PENDING DEPLOY** - replace this line with the deploy date and version once shipped.
+  Lessons from this case:
+  1. Install with **pnpm 10** (`npx pnpm@10 …`): pnpm 12 fails with `ERR_PNPM_IGNORED_BUILDS` (it ignores
+     `pnpm.onlyBuiltDependencies`) and links `node_modules` to a different store; Vercel builds with pnpm 9/10 from
+     lockfile 9.0. A half-installed `node_modules` from the wrong pnpm major must be removed before retrying.
+  2. Never run `pnpm payload migrate` against the dev branch: dev gets its schema from drizzle push on `next dev`
+     (`payload_migrations` holds only `initial` plus the `dev` marker), so `migrate` tries to replay every old migration
+     and hangs. Dev workflow is `migrate:create`, then `next dev` (push), then commit the migration for prod.
+  3. `R2 cache-control set failed … UnknownError` in the logs on every upload is `HeadObject` 404 from the first
+     `afterChange` pass (collection hooks run before the storage plugin's upload hook; `UnknownError` is the SDK's
+     message for a 404 on HeadObject). The plugin's follow-up document update re-runs the hook once the object exists,
+     so the headers land. Same hook ordering in 3.84.1; cosmetic, not a regression.
+  4. Next 16.3 deprecates `src/middleware.ts` in favour of `proxy.ts` (build warning only; codemod
+     `npx @next/codemod@canary middleware-to-proxy .`). Not part of the security update. `next dev` on 16.3 also
+     writes `AGENTS.md` + `CLAUDE.md` into the repo root (set `agentRules: false` in `next.config.ts` to stop it);
+     they were removed before commit. A failed pnpm 12 run leaves a placeholder `pnpm-workspace.yaml`
+     (`allowBuilds: … set this to true or false`) - delete it, the real setting lives in `package.json` `pnpm.onlyBuiltDependencies`.
+  5. Payload security releases are announced on Discord #announcements (@everyone); the Discord mail notification carries
+     no content, so read the GitHub advisories, then check `package.json` here.
