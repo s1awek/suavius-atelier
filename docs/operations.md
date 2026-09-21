@@ -149,7 +149,7 @@ ones (assuming the search_path issue above is resolved).
   and delete, `/_next/image`, customer SVG through `/api/personalization/upload`, Stripe test checkout session);
   R2 objects carry `Cache-Control` and, for customer SVGs, `Content-Disposition: attachment` after upload.
   Tracking: `.workspace/payload-security-update-2026-09-stan.md` (local, gitignored) and Trello card 13x3REX4.
-  **Status: PENDING DEPLOY** - replace this line with the deploy date and version once shipped.
+  **Status: DEPLOYED 2026-09-21** - commit `68bab92` on `main`, Vercel production build succeeded (GitHub deployment 6569220450, 13:14 UTC, ~4 min after the push). Verified on production right after: `/` 200, `/admin/login` 200, `/api/media?limit=1` 200 with `_objectKey` in the document - that field exists only in 3.90, so both the new code and the migration are live. Build log not inspected (no Vercel CLI on the workstation); a failed `payload migrate` would have failed the build.
   Lessons from this case:
   1. Install with **pnpm 10** (`npx pnpm@10 …`): pnpm 12 fails with `ERR_PNPM_IGNORED_BUILDS` (it ignores
      `pnpm.onlyBuiltDependencies`) and links `node_modules` to a different store; Vercel builds with pnpm 9/10 from
