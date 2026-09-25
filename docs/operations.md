@@ -48,6 +48,13 @@ After deploying: `pnpm deploy:check` — waits for the deployment, surfaces buil
 warnings/errors, and checks the **production** live site (HTTP status + browser
 console/JS/network). Treat dev-console-clean + deploy:check-clean as the done bar.
 
+**Gotcha: stale theme CSS from the Vercel build cache** (2026-09-25, commit `807551e`). The deploy served
+new markup and new utility classes, but the `@theme` colour tokens from the previous `styles.css`
+(`--color-warm:#f5f0e8`, no `--color-board`), while a local `pnpm build` of the same commit produced the
+new tokens. A **Redeploy with "Use existing Build Cache" unchecked** fixed it (checked by fetching the
+live CSS file). After any deploy that changes `src/app/(frontend)/styles.css`, fetch the CSS linked from
+the live `/` and confirm one new token value is in it; if not, redeploy without the build cache.
+
 Deploy cadence: batch related changes; deploy at sensible checkpoints. Don't deploy on
 every tiny edit (clutters Vercel), don't let changes pile up for weeks either.
 
