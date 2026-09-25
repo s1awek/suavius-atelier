@@ -58,7 +58,7 @@ export function ProductPurchasePanel({
       <button
         type="button"
         disabled
-        className="mt-10 w-full px-6 py-4 bg-dark text-warm opacity-50 cursor-not-allowed text-sm tracking-wide"
+        className="mt-10 w-full px-6 py-4 bg-enig text-board font-medium opacity-50 cursor-not-allowed text-sm"
       >
         Unavailable
       </button>
@@ -86,7 +86,7 @@ export function ProductPurchasePanel({
     <div>
       {showSelector && (
         <div className="mt-8">
-          <p className="text-xs uppercase tracking-wider text-ink-muted mb-3">Option</p>
+          <p className="text-sm text-ink-muted mb-3">Option</p>
           <div className="flex flex-wrap gap-2">
             {variants.map((v) => {
               const isSelected = v.sku === selectedSku
@@ -118,8 +118,8 @@ export function ProductPurchasePanel({
       )}
 
       {!outOfStock && !atLimit && (
-        <div className="mt-8">
-          <p className="text-xs uppercase tracking-wider text-ink-muted mb-3">Quantity</p>
+        <div className="mt-6 md:mt-8 flex items-center gap-5">
+          <p className="text-sm text-ink-muted">Quantity</p>
           <div className="flex items-center gap-4">
             <button
               type="button"

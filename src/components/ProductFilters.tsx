@@ -14,7 +14,7 @@ type Updates = Record<string, string | null>
 
 const inputCls =
   'px-3 py-2 bg-warm border border-warm-mid focus:border-dark focus:outline-none text-sm'
-const labelCls = 'text-xs uppercase tracking-[0.15em] text-ink-muted'
+const labelCls = 'text-sm text-ink-muted'
 
 /**
  * Top-bar product search/filter/sort controls. URL-driven: every change is
@@ -137,7 +137,7 @@ export function ProductFilters() {
           </div>
           <button
             type="submit"
-            className="px-4 py-2 bg-dark text-warm hover:bg-copper transition-colors text-xs uppercase tracking-wide cursor-pointer"
+            className="px-4 min-h-10 border border-dark/25 hover:border-copper hover:text-copper transition-colors text-sm cursor-pointer"
           >
             Go
           </button>
@@ -232,7 +232,7 @@ export function ProductFilters() {
         <button
           type="button"
           onClick={clearAll}
-          className="pb-2 text-xs uppercase tracking-wide text-ink-muted hover:text-copper transition-colors cursor-pointer underline"
+          className="pb-2 text-sm text-ink-muted hover:text-copper transition-colors cursor-pointer underline"
         >
           Clear
         </button>

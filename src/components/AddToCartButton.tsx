@@ -63,7 +63,7 @@ export function AddToCartButton({
           currency,
         })
       }}
-      className="mt-10 w-full px-6 py-4 bg-dark text-warm hover:bg-copper transition-colors text-sm tracking-wide cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-dark"
+      className="mt-6 md:mt-8 w-full px-6 min-h-13 bg-enig text-board font-medium hover:bg-dark hover:text-warm transition-colors text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-enig disabled:hover:text-board"
     >
       {disabled ? disabledLabel : label}
     </button>

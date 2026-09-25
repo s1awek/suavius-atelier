@@ -71,7 +71,7 @@ export function NewsletterForm() {
         <button
           type="submit"
           disabled={status === 'sending' || !consent}
-          className="px-4 py-2.5 bg-dark text-warm hover:bg-copper transition-colors text-xs tracking-wide uppercase cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
+          className="px-5 py-2.5 min-h-11 bg-enig text-board font-medium hover:bg-dark hover:text-warm transition-colors text-sm cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
         >
           {status === 'sending' ? '…' : 'Subscribe'}
         </button>

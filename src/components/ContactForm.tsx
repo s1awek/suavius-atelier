@@ -81,7 +81,7 @@ export function ContactForm({
       />
 
       <div>
-        <label htmlFor="contact-name" className="block text-xs uppercase tracking-wider text-ink-muted mb-2">
+        <label htmlFor="contact-name" className="block text-sm text-ink-muted mb-2">
           Name
         </label>
         <input
@@ -91,12 +91,12 @@ export function ContactForm({
           required
           maxLength={120}
           autoComplete="name"
-          className="w-full px-4 py-3 bg-warm border border-warm-mid focus:border-dark focus:outline-none text-sm"
+          className="w-full px-4 py-3 bg-white/40 border border-dark/25 focus:border-copper focus:outline-none text-base"
         />
       </div>
 
       <div>
-        <label htmlFor="contact-email" className="block text-xs uppercase tracking-wider text-ink-muted mb-2">
+        <label htmlFor="contact-email" className="block text-sm text-ink-muted mb-2">
           Email
         </label>
         <input
@@ -105,7 +105,7 @@ export function ContactForm({
           type="email"
           required
           autoComplete="email"
-          className="w-full px-4 py-3 bg-warm border border-warm-mid focus:border-dark focus:outline-none text-sm"
+          className="w-full px-4 py-3 bg-white/40 border border-dark/25 focus:border-copper focus:outline-none text-base"
         />
       </div>
 
@@ -113,7 +113,7 @@ export function ContactForm({
         <input type="hidden" name="subject" value={fixedSubject} />
       ) : (
         <div>
-          <label htmlFor="contact-subject" className="block text-xs uppercase tracking-wider text-ink-muted mb-2">
+          <label htmlFor="contact-subject" className="block text-sm text-ink-muted mb-2">
             Subject <span className="text-ink-muted/60 normal-case tracking-normal">(optional)</span>
           </label>
           <input
@@ -122,13 +122,13 @@ export function ContactForm({
             type="text"
             maxLength={200}
             defaultValue={defaultSubject}
-            className="w-full px-4 py-3 bg-warm border border-warm-mid focus:border-dark focus:outline-none text-sm"
+            className="w-full px-4 py-3 bg-white/40 border border-dark/25 focus:border-copper focus:outline-none text-base"
           />
         </div>
       )}
 
       <div>
-        <label htmlFor="contact-message" className="block text-xs uppercase tracking-wider text-ink-muted mb-2">
+        <label htmlFor="contact-message" className="block text-sm text-ink-muted mb-2">
           {messageLabel}
         </label>
         {messageHint && (
@@ -144,7 +144,7 @@ export function ContactForm({
           maxLength={4000}
           rows={6}
           aria-describedby={messageHint ? 'contact-message-hint' : undefined}
-          className="w-full px-4 py-3 bg-warm border border-warm-mid focus:border-dark focus:outline-none text-sm resize-y"
+          className="w-full px-4 py-3 bg-white/40 border border-dark/25 focus:border-copper focus:outline-none text-base resize-y"
         />
       </div>
 
@@ -153,7 +153,7 @@ export function ContactForm({
       <button
         type="submit"
         disabled={status === 'sending'}
-        className="px-8 py-3 bg-dark text-warm hover:bg-copper transition-colors text-sm tracking-wide cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+        className="px-8 min-h-12 bg-enig text-board font-medium hover:bg-dark hover:text-warm transition-colors text-sm cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {status === 'sending' ? 'Sending…' : submitLabel}
       </button>

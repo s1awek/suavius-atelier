@@ -32,15 +32,23 @@ export default async function ProductsPage({
   })
 
   const filtered = hasActiveFilters(filters)
+  // A handful of pieces reads better as a plain grid; filters appear once the range grows
+  // (and always while a filtered URL is open, so it can be cleared).
+  const showFilters = filtered || result.totalDocs > 12
 
   return (
-    <section className="max-w-7xl mx-auto px-6 py-16">
-      <div className="mb-12">
-        <p className="text-xs uppercase tracking-[0.25em] text-copper mb-4">All pieces</p>
-        <h1 className="text-4xl md:text-5xl text-dark">Shop</h1>
+    <section className="max-w-7xl mx-auto px-6 py-16 md:py-20">
+      <div className="mb-10 md:mb-12 grid gap-4 md:grid-cols-12 md:items-end">
+        <h1 className="md:col-span-7 text-4xl md:text-6xl text-dark leading-[1.02]">
+          All <em className="text-copper">coasters.</em>
+        </h1>
+        <p className="md:col-span-5 text-base md:text-lg text-ink leading-relaxed max-w-md">
+          Real circuit boards with a plated gold rim, each with a gold reverse. One in solid
+          ash, too.
+        </p>
       </div>
 
-      <ProductFilters />
+      {showFilters && <ProductFilters />}
 
       {result.docs.length === 0 ? (
         <p className="text-ink-muted">
@@ -49,7 +57,7 @@ export default async function ProductsPage({
             : 'No products available yet.'}
         </p>
       ) : (
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-x-4 gap-y-10 md:gap-x-8 md:gap-y-14 grid-cols-2 lg:grid-cols-3">
           {result.docs.map((p, i) => (
             <ProductCard key={p.id} product={p} priority={i < 3} />
           ))}

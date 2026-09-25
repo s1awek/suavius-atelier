@@ -42,7 +42,7 @@ export default async function OGImage() {
             maxWidth: 1000,
           }}
         >
-          Hand-designed PCB coasters & engraved wood accessories
+          Circuit board coasters with a gold rim, and solid ash
         </div>
         <div
           style={{

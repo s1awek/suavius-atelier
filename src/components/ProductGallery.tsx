@@ -30,16 +30,16 @@ type Props = {
 export function ProductGallery({ images, video, productTitle }: Props) {
   const [activeIdx, setActiveIdx] = useState(0)
 
-  // Etsy convention: first image, then the video, then the remaining images.
+  // Front, then the gold reverse (what sets the piece apart), then the video, then the rest.
   const slides: Slide[] = [
-    ...images.slice(0, 1).map<Slide>((img) => ({ kind: 'image', ...img })),
+    ...images.slice(0, 2).map<Slide>((img) => ({ kind: 'image', ...img })),
     ...(video ? [{ kind: 'video' as const, ...video }] : []),
-    ...images.slice(1).map<Slide>((img) => ({ kind: 'image', ...img })),
+    ...images.slice(2).map<Slide>((img) => ({ kind: 'image', ...img })),
   ]
 
   if (slides.length === 0) {
     return (
-      <div className="aspect-square bg-warm-mid flex items-center justify-center text-ink-muted text-sm rounded-md">
+      <div className="aspect-square bg-warm-mid flex items-center justify-center text-ink-muted text-sm">
         [no images]
       </div>
     )
@@ -48,8 +48,8 @@ export function ProductGallery({ images, video, productTitle }: Props) {
   const active = slides[activeIdx] ?? slides[0]
 
   return (
-    <div className="space-y-4">
-      <div className="aspect-square bg-warm-mid relative overflow-hidden rounded-md">
+    <div className="space-y-3 md:space-y-4">
+      <div className="aspect-[4/3] md:aspect-square bg-warm-mid relative overflow-hidden">
         {active.kind === 'video' ? (
           <video
             key={active.id}
@@ -69,15 +69,15 @@ export function ProductGallery({ images, video, productTitle }: Props) {
             src={active.url}
             alt={active.alt || productTitle}
             fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover animate-[fade-in_200ms_ease-out]"
+            sizes="(max-width: 768px) 100vw, 58vw"
+            className="object-contain md:object-cover animate-[fade-in_200ms_ease-out]"
             priority
           />
         )}
       </div>
 
       {slides.length > 1 && (
-        <div className="grid grid-cols-4 gap-3" role="tablist" aria-label="Product media">
+        <div className="grid grid-cols-5 md:grid-cols-4 gap-2 md:gap-3" role="tablist" aria-label="Product media">
           {slides.map((slide, i) => {
             const isActive = i === activeIdx
             const thumbUrl = slide.kind === 'video' ? slide.poster : slide.url
@@ -91,7 +91,7 @@ export function ProductGallery({ images, video, productTitle }: Props) {
                 aria-label={
                   slide.kind === 'video' ? 'Play product video' : `Show image ${i + 1}`
                 }
-                className={`aspect-square bg-warm-mid relative overflow-hidden cursor-pointer transition-all rounded-md ${
+                className={`aspect-square bg-warm-mid relative overflow-hidden cursor-pointer transition-all ${
                   isActive
                     ? 'ring-2 ring-dark ring-offset-2 ring-offset-warm'
                     : 'opacity-70 hover:opacity-100'

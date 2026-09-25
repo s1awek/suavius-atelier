@@ -35,7 +35,7 @@ export async function generateMetadata({
   const url = `${SITE_URL}/categories/${category.slug}`
   const description =
     category.description ??
-    `${category.title} from Suavius Atelier - hand-designed PCB and laser-engraved wood pieces, made in small batches.`
+    `${category.title} from Suavius Atelier - circuit board coasters and solid ash wood, made in small batches.`
   const brandedTitle = `${category.title} · Suavius Atelier`
   return {
     title: category.title,
@@ -105,8 +105,10 @@ export default async function CategoryPage({
         className="mb-8"
       />
       <div className="mb-12">
-        <p className="text-xs uppercase tracking-[0.25em] text-copper mb-4">Category</p>
-        <h1 className="text-4xl md:text-5xl text-dark">{category.title}</h1>
+        <h1 className="text-4xl md:text-6xl text-dark leading-[1.02]">
+          {category.title.replace(/\S+$/, '')}
+          <em className="text-copper">{category.title.match(/\S+$/)?.[0]}.</em>
+        </h1>
         {category.description && (
           <p className="mt-4 max-w-2xl text-lg text-ink leading-relaxed">{category.description}</p>
         )}
@@ -121,7 +123,7 @@ export default async function CategoryPage({
             : 'No products in this category yet.'}
         </p>
       ) : (
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-x-4 gap-y-10 md:gap-x-8 md:gap-y-14 grid-cols-2 lg:grid-cols-3">
           {products.docs.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}

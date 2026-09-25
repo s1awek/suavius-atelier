@@ -16,9 +16,6 @@ export async function Footer() {
     <footer className="border-t border-warm-mid bg-warm-mid/30 mt-24">
       <div className="max-w-7xl mx-auto px-6 py-14 border-b border-warm-mid grid gap-8 md:grid-cols-[1.4fr_1fr] items-center">
         <div>
-          <p className="text-xs uppercase tracking-[0.25em] text-copper mb-3">
-            Atelier journal
-          </p>
           <h3 className="font-display text-2xl md:text-3xl text-dark leading-tight">
             First news of new pieces, in your inbox.
           </h3>
@@ -38,12 +35,12 @@ export async function Footer() {
             className="h-6 w-auto"
           />
           <p className="text-sm text-ink-muted mt-3 max-w-xs">
-            Hand-designed PCB coasters and laser-engraved wood accessories.
+            Circuit board coasters with a gold rim, and one in solid ash. Designed in Bielawa.
           </p>
         </div>
 
         <div>
-          <h4 className="text-sm font-medium uppercase tracking-wider text-ink-muted mb-3">
+          <h4 className="text-sm font-medium text-ink-muted mb-3">
             Shop
           </h4>
           <ul className="space-y-2 text-sm">
@@ -76,7 +73,7 @@ export async function Footer() {
         </div>
 
         <div>
-          <h4 className="text-sm font-medium uppercase tracking-wider text-ink-muted mb-3">
+          <h4 className="text-sm font-medium text-ink-muted mb-3">
             Atelier
           </h4>
           <ul className="space-y-2 text-sm">
@@ -111,7 +108,7 @@ export async function Footer() {
         </div>
 
         <div>
-          <h4 className="text-sm font-medium uppercase tracking-wider text-ink-muted mb-3">
+          <h4 className="text-sm font-medium text-ink-muted mb-3">
             Legal
           </h4>
           <ul className="space-y-2 text-sm">

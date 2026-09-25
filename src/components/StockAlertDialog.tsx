@@ -76,7 +76,7 @@ export function StockAlertDialog({ productId, variantSku, variantName, reason = 
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="mt-10 w-full px-6 py-4 bg-dark text-warm hover:bg-copper transition-colors text-sm tracking-wide cursor-pointer"
+        className="mt-10 w-full px-6 py-4 bg-enig text-board font-medium hover:bg-dark hover:text-warm transition-colors text-sm cursor-pointer"
       >
         Join the waitlist
       </button>
@@ -115,7 +115,7 @@ export function StockAlertDialog({ productId, variantSku, variantName, reason = 
                     <button
                       type="button"
                       onClick={() => setOpen(false)}
-                      className="mt-6 px-6 py-3 bg-dark text-warm hover:bg-copper transition-colors text-sm tracking-wide cursor-pointer"
+                      className="mt-6 px-6 py-3 bg-enig text-board font-medium hover:bg-dark hover:text-warm transition-colors text-sm cursor-pointer"
                     >
                       Done
                     </button>
@@ -163,7 +163,7 @@ export function StockAlertDialog({ productId, variantSku, variantName, reason = 
                       <button
                         type="submit"
                         disabled={status === 'sending' || !consent}
-                        className="w-full px-6 py-3.5 bg-dark text-warm hover:bg-copper transition-colors text-sm tracking-wide cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-dark"
+                        className="w-full px-6 py-3.5 bg-enig text-board font-medium hover:bg-dark hover:text-warm transition-colors text-sm cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-enig disabled:hover:text-board"
                       >
                         {status === 'sending' ? 'Adding you…' : 'Notify me when available'}
                       </button>

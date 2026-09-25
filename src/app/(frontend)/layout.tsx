@@ -1,5 +1,5 @@
 import React from 'react'
-import { Cormorant_Garamond, Inter } from 'next/font/google'
+import { Hanken_Grotesk, Martian_Mono } from 'next/font/google'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { CartDrawer } from '@/components/CartDrawer'
@@ -10,25 +10,25 @@ import { DraftPreviewBanner } from '@/components/DraftPreviewBanner'
 import { AnalyticsGate } from '@/components/AnalyticsGate'
 import './styles.css'
 
-const cormorant = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  variable: '--font-cormorant',
+const hanken = Hanken_Grotesk({
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-hanken',
+  style: ['normal', 'italic'],
   display: 'swap',
 })
 
-const inter = Inter({
+const martian = Martian_Mono({
   subsets: ['latin'],
-  variable: '--font-inter',
+  variable: '--font-martian',
   display: 'swap',
 })
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://suaviusatelier.com'
 
-const SITE_TITLE = 'Suavius Atelier - Handcrafted PCB Coasters & Engraved Wood'
+const SITE_TITLE = 'Suavius Atelier - Circuit Board Coasters and Solid Ash Wood'
 const SITE_DESCRIPTION =
-  'A small atelier crafting hand-designed PCB coasters and laser-engraved wood accessories. Unique handmade pieces blending circuit-board aesthetics with natural materials.'
+  'Coasters made from real circuit boards: 1.6 mm FR4 with a plated gold rim and a printed picture, plus one in solid ash. Designed in Bielawa, Poland.'
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
@@ -70,12 +70,12 @@ const orgJsonLd = {
   url: SITE_URL,
   logo: `${SITE_URL}/brand/mark-512.png`,
   description:
-    'Hand-designed PCB coasters and laser-engraved wood accessories from a small atelier.',
+    'Circuit board coasters with a plated gold rim, and a solid ash wood coaster. Designed in Bielawa, Poland.',
 }
 
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${inter.variable}`}>
+    <html lang="en" className={`${hanken.variable} ${martian.variable}`}>
       <body className="min-h-screen flex flex-col" suppressHydrationWarning>
         <script
           type="application/ld+json"

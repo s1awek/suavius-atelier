@@ -166,7 +166,7 @@ export function PersonalizationFields({ productId, options, onChange }: Props) {
 
   return (
     <div className="mt-8 space-y-6">
-      <p className="text-xs uppercase tracking-wider text-ink-muted">Personalization</p>
+      <p className="text-sm text-ink-muted">Personalization</p>
       {options.map((opt) => {
         const modifierBadge = (mod: number) =>
           mod > 0 ? <span className="text-ink-muted"> (+{formatPrice(mod)})</span> : null

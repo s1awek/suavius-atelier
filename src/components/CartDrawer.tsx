@@ -271,7 +271,7 @@ export function CartDrawer() {
               type="button"
               onClick={handleCheckout}
               disabled={isCheckingOut}
-              className="w-full px-6 py-4 bg-dark text-warm hover:bg-copper transition-colors text-sm tracking-wide cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full px-6 py-4 bg-enig text-board font-medium hover:bg-dark hover:text-warm transition-colors text-sm cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {isCheckingOut ? 'Redirecting…' : 'Checkout'}
             </button>

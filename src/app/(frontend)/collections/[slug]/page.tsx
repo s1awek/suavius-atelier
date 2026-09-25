@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { draftMode } from 'next/headers'
 import { applyRedirect } from '@/lib/redirects'
-import Image from 'next/image'
+import { DiscRow } from '@/components/DiscRow'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { Product } from '@/payload-types'
 import { getPayloadClient } from '@/lib/payload'
@@ -52,7 +52,7 @@ export async function generateMetadata({
   const description =
     c.seoDescription ??
     c.tagline ??
-    `${c.title} collection from Suavius Atelier - hand-designed PCB and wood pieces.`
+    `${c.title} collection from Suavius Atelier - circuit board coasters drawn in our studio.`
   const brandedTitle = `${title} · Suavius Atelier`
   return {
     title,
@@ -77,8 +77,6 @@ export default async function CollectionPage({
     await applyRedirect(`/collections/${slug}`)
     notFound()
   }
-
-  const hero = typeof c.heroImage === 'object' && c.heroImage ? c.heroImage : null
 
   // The collection curates its own products (hasMany, manually ordered). With no
   // active filters we preserve that curated order; once the visitor searches,
@@ -133,43 +131,26 @@ export default async function CollectionPage({
         className="mb-8"
       />
 
-      <header className="grid md:grid-cols-2 gap-10 md:gap-16 items-center mb-16 md:mb-20">
-        <div>
-          {c.subtitle && (
-            <p className="text-xs uppercase tracking-[0.25em] text-copper mb-4">
-              {c.subtitle}
-            </p>
-          )}
-          <h1 className="font-display text-4xl md:text-5xl text-dark leading-tight">
-            {c.title}
+      <header className="grid md:grid-cols-12 gap-10 md:gap-12 items-center mb-16 md:mb-20">
+        <div className="md:col-span-6">
+          <h1 className="text-4xl md:text-6xl text-dark leading-[1.02]">
+            {c.title} <em className="text-copper">collection.</em>
           </h1>
           {c.tagline && (
-            <p className="mt-6 font-display italic text-xl md:text-2xl text-ink-muted leading-snug">
-              {c.tagline}
-            </p>
+            <p className="mt-6 text-xl md:text-2xl text-ink-muted leading-snug">{c.tagline}</p>
           )}
           {c.description && (
-            <div className="prose prose-lg max-w-none text-ink mt-8">
+            <div className="prose prose-lg max-w-xl text-ink mt-8">
               <RichText data={c.description} />
             </div>
           )}
         </div>
-        <div className="aspect-[4/5] relative overflow-hidden rounded-md bg-warm-mid">
-          {hero?.url ? (
-            <Image
-              src={hero.url}
-              alt={hero.alt ?? c.title}
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover"
-              priority
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-ink-muted text-xs uppercase tracking-[0.2em]">
-              [hero visual]
-            </div>
-          )}
-        </div>
+        <DiscRow
+          products={curated}
+          sizes="(max-width: 768px) 60vw, 30vw"
+          priority
+          className="md:col-span-6 aspect-[4/3]"
+        />
       </header>
 
       {curated.length > 0 && <ProductFilters />}
@@ -181,7 +162,6 @@ export default async function CollectionPage({
           </p>
         ) : (
           <div className="max-w-md mx-auto text-center py-12">
-            <p className="text-xs uppercase tracking-[0.25em] text-copper mb-4">Coming soon</p>
             <p className="text-ink-muted mb-6 leading-relaxed">
               Pieces in this collection are being prepared. Leave your email and we will tell you
               the moment the first ones are released.
@@ -192,7 +172,7 @@ export default async function CollectionPage({
           </div>
         )
       ) : (
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-x-4 gap-y-10 md:gap-x-8 md:gap-y-14 grid-cols-2 lg:grid-cols-3">
           {products.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}

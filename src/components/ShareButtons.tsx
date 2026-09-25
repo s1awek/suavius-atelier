@@ -45,7 +45,7 @@ export function ShareButtons({ url, title, imageUrl }: Props) {
 
   return (
     <div className="mt-6 pt-6 border-t border-warm-mid">
-      <p className="text-xs uppercase tracking-[0.2em] text-ink-muted mb-3">Share</p>
+      <p className="text-sm text-ink-muted mb-3">Share</p>
 
       {canNativeShare && (
         <button

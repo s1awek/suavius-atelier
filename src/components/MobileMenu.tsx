@@ -58,7 +58,7 @@ export function MobileMenu({ storeName, email }: Props) {
       </button>
 
       <div
-        className={`md:hidden fixed inset-0 z-[60] bg-warm transition-opacity duration-300 ${
+        className={`md:hidden fixed inset-0 z-[60] bg-warm text-ink transition-opacity duration-300 ${
           open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
         role="dialog"
@@ -108,7 +108,7 @@ export function MobileMenu({ storeName, email }: Props) {
             {email && (
               <a
                 href={`mailto:${email}`}
-                className="block text-sm text-ink-muted hover:text-copper transition-colors"
+                className="block py-3 text-sm text-ink-muted hover:text-copper transition-colors"
               >
                 {email}
               </a>

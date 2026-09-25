@@ -17,7 +17,7 @@ type Props = {
 export function TrustShippingNote({ shippingFrom, currency = 'EUR' }: Props) {
   return (
     <div className="mt-6 space-y-1.5 text-sm text-ink-muted">
-      <p>Handcrafted in Poland · made in small batches</p>
+      <p>Designed in Bielawa, Poland · made in small batches</p>
       <p>
         Ships from Poland
         {shippingFrom != null ? ` · shipping from ${formatPrice(shippingFrom, currency)}` : ''}

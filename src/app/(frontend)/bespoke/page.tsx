@@ -1,133 +1,214 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
+import type { Media } from '@/payload-types'
+import { getPayloadClient } from '@/lib/payload'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { ContactForm } from '@/components/ContactForm'
+
+export const revalidate = 600
 
 export const metadata: Metadata = {
   title: 'Bespoke & Custom Orders',
   description:
-    'Commission a one-of-a-kind PCB or wood piece from Suavius Atelier - custom artwork, engraved names, corporate logos, wedding sets, and limited editions.',
+    'Commission circuit board coasters with your own picture or mark from Suavius Atelier: personal gifts, company editions, wedding sets and places that matter.',
 }
 
-export default function BespokePage() {
+// Real shots of one finished piece: a still from our bench footage for the header, and its
+// gold reverse beside the list of what we make.
+async function fetchShots(): Promise<{ bench: Media | null; reverse: Media | null }> {
+  const payload = await getPayloadClient()
+  const { docs } = await payload.find({
+    collection: 'products',
+    where: { slug: { equals: 'tennis-court-pcb-coaster' } },
+    depth: 1,
+    limit: 1,
+    overrideAccess: false,
+  })
+  const product = docs[0]
+  const poster = product?.video?.poster
+  const reverse = (product?.images ?? [])
+    .map((i) => i.image)
+    .find((m): m is Media => typeof m === 'object' && !!m?.url && !!m.filename?.includes('reverse-2'))
+  return {
+    bench: typeof poster === 'object' && poster?.url ? poster : null,
+    reverse: reverse ?? null,
+  }
+}
+
+const STEPS = [
+  {
+    title: 'Write to us',
+    body: 'Send your idea, a sketch or reference image, the quantity, and when you need it by. The more we know, the more useful our first reply will be.',
+  },
+  {
+    title: 'Proposal and quote',
+    body: 'Within two business days we send a written proposal with the design direction, unit price, total and a realistic timeline. This stage is free.',
+  },
+  {
+    title: 'Make and deliver',
+    body: 'Once you approve a digital proof, the boards go into production. PCB commissions ship in three to four weeks, tracked and insured.',
+  },
+]
+
+const OFFERS = [
+  {
+    title: 'Personal pieces',
+    body: 'Your picture on the front: a wedding date, a family monogram, an illustration from a photograph. Minimum order 5 pieces.',
+  },
+  {
+    title: 'Company editions',
+    body: 'Your wordmark printed on the front or plated in gold on the reverse, for offices, conferences and client gifts. Minimum order 25 pieces.',
+  },
+  {
+    title: 'Places',
+    body: 'A city, a ski run, a hiking trail or a sailing route, drawn for someone who knows it by heart. A single set or a small run.',
+  },
+  {
+    title: 'Wedding sets',
+    body: 'Coasters for the tables and a matching keepsake for the guests. We work with you directly or with your planner.',
+  },
+  {
+    title: 'Solid ash',
+    body: 'Plain ash coasters in the quantity you need, oiled and waxed. A gold-foil mark is in preparation; ask if you would like one.',
+  },
+  {
+    title: 'Something else',
+    body: 'If you are not sure whether we can make it, ask. We will be honest about what is and is not possible at our scale.',
+  },
+]
+
+export default async function BespokePage() {
+  const { bench, reverse } = await fetchShots()
+
   return (
-    <article className="max-w-7xl mx-auto px-6 py-16 md:py-24">
-      <Breadcrumbs home items={[{ label: 'Bespoke' }]} className="mb-8" />
-      <header className="max-w-3xl mb-16">
-        <p className="text-xs uppercase tracking-[0.25em] text-copper mb-4">Commissions</p>
-        <h1 className="font-display text-4xl md:text-5xl text-dark leading-tight">
-          One piece, made for you.
-        </h1>
-        <p className="mt-6 text-lg text-ink leading-relaxed">
-          We accept a small number of bespoke commissions each month. Wedding gifts, corporate
-          editions, monogrammed wood pieces, custom artwork on PCB - if it can be drawn and
-          fabricated to our standards, we will quote it.
-        </p>
+    <>
+      <header className="max-w-7xl mx-auto px-6 pt-10 pb-16 md:pt-12 md:pb-24 grid gap-10 md:grid-cols-12 md:items-center">
+        <div className="md:col-span-6">
+          <Breadcrumbs home items={[{ label: 'Bespoke' }]} className="mb-8" />
+          <h1 className="text-4xl md:text-6xl text-dark leading-[1.02]">
+            Made for <em className="text-copper">you.</em>
+          </h1>
+          <p className="mt-6 text-lg text-ink leading-relaxed max-w-xl">
+            We take a small number of commissions each month. If it can be drawn and made as a
+            circuit board to our standard, we will quote it.
+          </p>
+          <a
+            href="#start"
+            className="mt-8 inline-flex items-center min-h-12 px-7 border border-dark/25 hover:border-copper hover:text-copper transition-colors"
+          >
+            Start a commission
+          </a>
+        </div>
+        {bench?.url && (
+          <figure className="md:col-span-6">
+            <div className="relative aspect-[4/3] md:aspect-square bg-board overflow-hidden">
+              <Image
+                src={bench.url}
+                alt={bench.alt ?? 'A finished coaster held in white cotton gloves'}
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, 45vw"
+                className="object-cover"
+              />
+            </div>
+            <figcaption className="mt-3 text-sm text-ink-muted">
+              Every commission is checked by hand on our bench in Bielawa before it goes out.
+            </figcaption>
+          </figure>
+        )}
       </header>
 
-      <section className="grid md:grid-cols-3 gap-10 mb-20">
-        <div>
-          <p className="font-display text-3xl text-copper mb-3">01</p>
-          <h3 className="font-display text-xl text-dark mb-2">Write to us</h3>
-          <p className="text-ink text-base leading-relaxed">
-            Send your idea, a sketch or reference image, the quantity, and when you need it
-            by. The more we know, the more useful our first reply will be.
-          </p>
-        </div>
-        <div>
-          <p className="font-display text-3xl text-copper mb-3">02</p>
-          <h3 className="font-display text-xl text-dark mb-2">Proposal &amp; quote</h3>
-          <p className="text-ink text-base leading-relaxed">
-            Within two business days we send a written proposal: design direction, materials,
-            unit price, total, and a realistic timeline. There is no charge for this stage.
-          </p>
-        </div>
-        <div>
-          <p className="font-display text-3xl text-copper mb-3">03</p>
-          <h3 className="font-display text-xl text-dark mb-2">Make &amp; deliver</h3>
-          <p className="text-ink text-base leading-relaxed">
-            Once you approve a digital proof, we begin. PCB commissions ship in three to four
-            weeks. Wood commissions in one to two. Tracked and insured worldwide.
-          </p>
-        </div>
-      </section>
-
-      <section className="border-t border-warm-mid pt-16 mb-20">
-        <h2 className="font-display text-3xl md:text-4xl text-dark mb-8">
-          What we make.
+      <section className="max-w-7xl mx-auto px-6 pb-20 md:pb-28">
+        <h2 className="text-4xl md:text-6xl text-dark leading-[1.02] max-w-3xl">
+          How it <em className="text-copper">works.</em>
         </h2>
-        <div className="grid md:grid-cols-2 gap-x-12 gap-y-8 text-ink">
-          <BespokeItem
-            title="Personalised PCB"
-            body="Custom artwork on FR4 with ENIG gold edge. Wedding dates, family monograms, anniversary motifs, illustrations from your photographs. Minimum order: 5 pieces."
-          />
-          <BespokeItem
-            title="Corporate editions"
-            body="Branded coasters, desk objects, and welcome kits for offices, conferences, and gifting. Engraved or printed with your wordmark. Minimum order: 25 pieces."
-          />
-          <BespokeItem
-            title="Engraved wood"
-            body="Monogrammed coasters, trivets, headphone stands, and trays in oak, walnut, or beech. Names, initials, logos, or simple motifs. Minimum order: 1 piece."
-          />
-          <BespokeItem
-            title="Regional editions"
-            body="Maps of cities, regions, ski runs, hiking trails, sailing routes - drawn for a place that matters to someone. PCB or wood, single piece or a small run."
-          />
-          <BespokeItem
-            title="Wedding sets"
-            body="Coordinated coasters, place cards, or table numbers for the day, and matching keepsakes for guests. We work directly with you or your planner."
-          />
-          <BespokeItem
-            title="Something else"
-            body="If you are not sure whether we can make it, ask. We will be honest about what is and is not possible at our scale."
-          />
+        <ol className="mt-12 md:mt-16 grid gap-10 md:grid-cols-3 md:gap-8">
+          {STEPS.map((step, i) => (
+            <li key={step.title} className="relative border-t border-dark/20 pt-6">
+              <span
+                aria-hidden="true"
+                className="absolute -top-[5px] left-0 h-[9px] w-[9px] rounded-full bg-copper"
+              />
+              <p className="font-mono text-xs text-copper">{String(i + 1).padStart(2, '0')}</p>
+              <h3 className="mt-3 text-xl md:text-2xl text-dark">{step.title}</h3>
+              <p className="mt-3 text-base text-ink leading-relaxed max-w-sm">{step.body}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="bg-board text-silk">
+        <div className="max-w-7xl mx-auto px-6 py-20 md:py-28">
+          <h2 className="text-4xl md:text-6xl leading-[1.02] max-w-3xl">
+            What we <em className="text-enig">make.</em>
+          </h2>
+          <div className="mt-12 md:mt-16 grid gap-12 md:grid-cols-12">
+            <dl className="md:col-span-7 grid gap-x-12 sm:grid-cols-2 content-start">
+              {OFFERS.map((offer) => (
+                <div key={offer.title} className="border-t border-silk/15 py-6">
+                  <dt className="text-xl md:text-2xl">{offer.title}</dt>
+                  <dd className="mt-2 text-base text-silk-muted leading-relaxed">{offer.body}</dd>
+                </div>
+              ))}
+            </dl>
+            {reverse?.url && (
+              <figure className="md:col-span-5 md:sticky md:top-8 self-start">
+                <div className="relative aspect-square">
+                  <Image
+                    src={reverse.url}
+                    alt={reverse.alt ?? 'Gold reverse of a Suavius Atelier coaster'}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 38vw"
+                    className="object-contain"
+                  />
+                </div>
+                <figcaption className="mt-3 text-sm text-silk-muted">
+                  The reverse carries our mark in gold. On a commission it can carry yours.
+                </figcaption>
+              </figure>
+            )}
+          </div>
         </div>
       </section>
 
-      <section className="border-t border-warm-mid pt-16">
-        <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-start">
-          <div>
-            <h2 className="font-display text-3xl md:text-4xl text-dark leading-tight mb-6">
-              Start a commission.
+      <section id="start" className="max-w-7xl mx-auto px-6 pt-20 md:pt-28 scroll-mt-8">
+        <div className="grid gap-12 md:grid-cols-12">
+          <div className="md:col-span-5">
+            <h2 className="text-4xl md:text-6xl text-dark leading-[1.02]">
+              Start a <em className="text-copper">commission.</em>
             </h2>
-            <p className="text-ink leading-relaxed mb-8">
-              Tell us what you would like made. We take a small number of commissions each
-              month and reply to every enquiry personally.
+            <p className="mt-6 text-lg text-ink leading-relaxed max-w-md">
+              Tell us what you would like made. We reply to every enquiry personally, within two
+              business days.
             </p>
-            <div className="text-sm space-y-2 border-t border-warm-mid pt-8">
-              <p className="text-xs uppercase tracking-[0.25em] text-ink-muted mb-3">Prefer email</p>
+            <div className="mt-10 border-t border-dark/15 pt-6 text-base space-y-2 max-w-md">
+              <p className="text-ink-muted">Prefer email?</p>
               <p>
-                <a href="mailto:orders@suaviusatelier.com" className="hover:text-copper">
+                <a
+                  href="mailto:orders@suaviusatelier.com"
+                  className="inline-block py-1 text-dark underline underline-offset-4 hover:text-copper"
+                >
                   orders@suaviusatelier.com
                 </a>
               </p>
-              <p className="text-ink-muted">Reply within two business days.</p>
-              <p className="text-ink-muted pt-4 text-xs leading-relaxed">
-                For commissions above 100 units or with a deadline under three weeks, please
-                mention it in the first line so we can prioritise the reply.
+              <p className="pt-2 text-sm text-ink-muted leading-relaxed">
+                For more than 100 pieces, or a deadline under three weeks, say so in the first
+                line and we will reply first.
               </p>
             </div>
           </div>
-          <div>
+          <div className="md:col-span-7">
             <ContactForm
               fixedSubject="Bespoke enquiry"
               submitLabel="Send enquiry"
               successTitle="Enquiry received"
-              successBody="Thank you - your commission enquiry is in. We reply within two business days with design direction, materials, and a quote."
+              successBody="Thank you, your commission enquiry is in. We reply within two business days with a design direction and a quote."
               messageLabel="Your idea"
-              messageHint="Include a short description, any references, quantity, deadline, and a budget if you have one in mind."
+              messageHint="A short description, any references, the quantity, your deadline, and a budget if you have one in mind."
             />
           </div>
         </div>
       </section>
-    </article>
-  )
-}
-
-function BespokeItem({ title, body }: { title: string; body: string }) {
-  return (
-    <div>
-      <h3 className="font-display text-xl text-dark mb-2">{title}</h3>
-      <p className="text-ink text-base leading-relaxed">{body}</p>
-    </div>
+    </>
   )
 }

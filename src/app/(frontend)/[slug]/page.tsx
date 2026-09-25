@@ -6,6 +6,7 @@ import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { Page } from '@/payload-types'
 import { getPayloadClient } from '@/lib/payload'
 import { NOINDEX_SLUGS } from '@/lib/seo'
+import Image from 'next/image'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 
 type Params = { slug: string }
@@ -59,17 +60,76 @@ export default async function StaticPage({ params }: { params: Promise<Params> }
     notFound()
   }
 
+  const isAbout = slug === 'about'
+  const aside = isAbout ? await fetchAboutImage() : null
+
   return (
-    <article className="max-w-7xl mx-auto px-6 py-16">
-      <div className="max-w-3xl mx-auto">
-        <Breadcrumbs home items={[{ label: page.title }]} className="mb-8" />
-        <h1 className="font-display text-4xl md:text-5xl text-dark mb-8">{page.title}</h1>
+    <article className="max-w-7xl mx-auto px-6 pt-10 pb-16 md:pt-12">
+      <Breadcrumbs home items={[{ label: page.title }]} className="mb-8" />
+      <h1 className="text-4xl md:text-6xl text-dark leading-[1.02] max-w-4xl">
+        {isAbout ? (
+          <>
+            About the <em className="text-copper">atelier.</em>
+          </>
+        ) : (
+          <AccentTitle title={page.title} />
+        )}
+      </h1>
+      <div className={`mt-10 md:mt-14 grid gap-12 ${aside ? 'md:grid-cols-12' : ''}`}>
         {page.content ? (
-          <div className="prose prose-lg max-w-none text-ink">
+          <div
+            className={`prose prose-lg max-w-[62ch] text-ink ${
+              aside ? 'md:col-span-7' : ''
+            }`}
+          >
             <RichText data={page.content} />
           </div>
         ) : null}
+        {aside && (
+          <figure className="md:col-span-5 md:col-start-8 md:sticky md:top-8 self-start">
+            <div className="relative aspect-square bg-board">
+              <Image
+                src={aside.url}
+                alt={aside.alt}
+                fill
+                sizes="(max-width: 768px) 100vw, 38vw"
+                className="object-cover"
+              />
+            </div>
+            <figcaption className="mt-3 text-sm text-ink-muted">
+              A finished board on our bench in Bielawa, before it goes out.
+            </figcaption>
+          </figure>
+        )}
       </div>
     </article>
   )
+}
+
+/** Page titles get the same accent as every other heading: the last word in italic. */
+function AccentTitle({ title }: { title: string }) {
+  const match = title.match(/^(.*?)(\S+)$/)
+  if (!match) return <>{title}</>
+  return (
+    <>
+      {match[1]}
+      <em className="text-copper">{match[2].replace(/\.$/, '')}.</em>
+    </>
+  )
+}
+
+// The About page sits beside a still from our own bench footage.
+async function fetchAboutImage(): Promise<{ url: string; alt: string } | null> {
+  const payload = await getPayloadClient()
+  const { docs } = await payload.find({
+    collection: 'products',
+    where: { slug: { equals: 'autumn-forest-pcb-coaster' } },
+    depth: 1,
+    limit: 1,
+    overrideAccess: false,
+  })
+  const poster = docs[0]?.video?.poster
+  return typeof poster === 'object' && poster?.url
+    ? { url: poster.url, alt: poster.alt ?? 'A coaster held in white cotton gloves' }
+    : null
 }

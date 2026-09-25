@@ -1,18 +1,27 @@
 @import 'tailwindcss';
 
 @theme {
-  /* Brand colors */
-  --color-copper: #b87333;
-  --color-copper-light: #d4956a;
-  --color-dark: #1a1714;
-  --color-warm: #f5f0e8;
-  --color-warm-mid: #e8e0d0;
-  --color-ink: #2c2825;
-  --color-ink-muted: #8c7b6b;
+  /* Palette taken from the product itself (2026-09 redesign): solder-mask black,
+     ENIG gold, silkscreen white, and a neutral stone page. Token names predate the
+     redesign and are kept so every page moves to the new palette at once:
+     `copper` is now the deep ENIG used for text accents on light backgrounds
+     (5.4:1 on warm), `copper-light` is the ENIG gold used on dark and as button fill. */
+  --color-copper: #7a5a1c;
+  --color-copper-light: #c9a55a;
+  --color-dark: #141715;
+  --color-warm: #eeede8;
+  --color-warm-mid: #dcdbd4;
+  --color-ink: #232624;
+  --color-ink-muted: #62655f;
+  --color-board: #060707;
+  --color-enig: #c9a55a;
+  --color-silk: #f1efe8;
+  --color-silk-muted: #a9aba4;
 
-  /* Typography */
-  --font-display: var(--font-cormorant), 'Cormorant Garamond', Georgia, serif;
-  --font-body: var(--font-inter), system-ui, -apple-system, sans-serif;
+  /* Typography: one grotesk for display and text, a mono only for spec data. */
+  --font-display: var(--font-hanken), 'Hanken Grotesk', system-ui, sans-serif;
+  --font-body: var(--font-hanken), 'Hanken Grotesk', system-ui, sans-serif;
+  --font-mono: var(--font-martian), 'Martian Mono', ui-monospace, monospace;
 
   /* Sensible defaults overrides */
   --default-font-family: var(--font-body);
@@ -40,8 +49,8 @@
   h3,
   h4 {
     font-family: var(--font-display);
-    font-weight: 500;
-    letter-spacing: -0.01em;
+    font-weight: 400;
+    letter-spacing: -0.025em;
   }
 
   img {
@@ -88,7 +97,8 @@
   .prose h2 {
     font-size: 1.875rem;
     line-height: 1.2;
-    margin-top: 1.4em;
+    color: var(--color-dark);
+    margin-top: 1.8em;
     margin-bottom: 0.5em;
     letter-spacing: -0.015em;
   }

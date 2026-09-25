@@ -1,228 +1,213 @@
 import Link from 'next/link'
-import Image from 'next/image'
-import type { Media } from '@/payload-types'
-import { getPayloadClient } from '@/lib/payload'
+import type { Media, Product } from '@/payload-types'
+import { getPayloadClient, formatPrice } from '@/lib/payload'
 import { ProductCard } from '@/components/ProductCard'
+import { HeroVideo } from '@/components/home/HeroVideo'
+import { TurnItOver, type Face } from '@/components/home/TurnItOver'
+import { StudioClips, type Clip } from '@/components/home/StudioClips'
 
 export const revalidate = 300
+
+// Which pieces carry the hero clip and the turn-over moment. Fallbacks keep the
+// page whole if a slug is renamed or unpublished.
+const HERO_SLUG = 'black-marble-gold-pcb-coaster'
+const TURN_SLUG = 'topographic-pcb-coaster'
+// Reverse shot shown at the end of the turn: the flattest one of the set.
+const TURN_BACK = 'reverse-2'
+// Bench clips further down: the pieces not already carrying the hero or the turn.
+const CLIP_SLUGS = [
+  'gold-rings-pcb-coaster',
+  'tennis-court-pcb-coaster',
+  'autumn-forest-pcb-coaster',
+  'ash-wood-coaster',
+]
+
+function media(product: Product): Media[] {
+  return (product.images ?? [])
+    .map((i) => i.image)
+    .filter((m): m is Media => typeof m === 'object' && m !== null && !!m.url)
+}
+
+function findImage(product: Product | undefined, part: string): Media | undefined {
+  return product ? media(product).find((m) => m.filename?.includes(part)) : undefined
+}
+
+function heroMedia(product: Product | undefined) {
+  const video = product?.video
+  if (!video || typeof video !== 'object') return null
+  const file = typeof video.file === 'object' ? video.file : null
+  const poster = typeof video.poster === 'object' ? video.poster : null
+  if (!poster?.url) return null
+  return { videoUrl: file?.url ?? null, posterUrl: poster.url, alt: poster.alt ?? product!.title }
+}
 
 export default async function HomePage() {
   const payload = await getPayloadClient()
 
-  const [featured, collections] = await Promise.all([
-    payload.find({
-      collection: 'products',
-      limit: 6,
-      sort: '-updatedAt',
-      // Hide drafts on the public homepage (see authenticatedOrPublished).
-      overrideAccess: false,
-    }),
-    payload.find({
-      collection: 'collections',
-      limit: 4,
-      sort: 'order',
-      depth: 1,
-      overrideAccess: false,
-    }),
-  ])
+  const { docs: products } = await payload.find({
+    collection: 'products',
+    limit: 12,
+    sort: '-updatedAt',
+    depth: 1,
+    // Hide drafts on the public homepage (see authenticatedOrPublished).
+    overrideAccess: false,
+  })
+
+  const pcb = products.filter((p) => p.material === 'pcb')
+  const wood = products.filter((p) => p.material === 'wood')
+  const minPrice = (list: Product[]) =>
+    list.length ? Math.min(...list.map((p) => p.price)) : null
+  const pcbFrom = minPrice(pcb)
+  const woodFrom = minPrice(wood)
+
+  const bySlug = (slug: string) => products.find((p) => p.slug === slug)
+  const hero = heroMedia(bySlug(HERO_SLUG)) ?? heroMedia(pcb.find((p) => heroMedia(p)))
+
+  const turnProduct =
+    [bySlug(TURN_SLUG), ...pcb].find((p) => findImage(p, 'front') && findImage(p, 'reverse'))
+  const frontImg = findImage(turnProduct, 'front')
+  const backImg = findImage(turnProduct, TURN_BACK) ?? findImage(turnProduct, 'reverse')
+  const faces: { front: Face; back: Face } | null =
+    frontImg?.url && backImg?.url
+      ? {
+          front: { url: frontImg.url, alt: frontImg.alt ?? `${turnProduct!.title}, front` },
+          back: { url: backImg.url, alt: backImg.alt ?? `${turnProduct!.title}, reverse` },
+        }
+      : null
+
+  const clips: Clip[] = CLIP_SLUGS.flatMap((slug) => {
+    const product = bySlug(slug)
+    const clip = product && heroMedia(product)
+    if (!product || !clip) return []
+    return [
+      {
+        href: `/products/${product.slug}`,
+        title: product.title,
+        posterUrl: clip.posterUrl,
+        posterAlt: clip.alt,
+        videoUrl: clip.videoUrl,
+      },
+    ]
+  })
 
   return (
     <>
-      <section className="max-w-7xl mx-auto px-6 pt-20 pb-16 md:pt-32 md:pb-24">
-        <div className="grid gap-12 md:grid-cols-2 items-center">
-          <div>
-            <p className="text-xs uppercase tracking-[0.25em] text-copper mb-6">
-              Hand-designed in our atelier
-            </p>
-            <h1 className="text-5xl md:text-6xl text-dark leading-[1.05]">
-              Circuits, wood, and a quiet kind of craft.
+      {/* Hero: the piece itself, price and one action in the first screen. The clip
+          runs under the text column on desktop and fades into the board colour. */}
+      <section className="relative bg-board text-silk overflow-hidden">
+        <div className="relative h-[34svh] md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[64%]">
+          {hero ? (
+            <HeroVideo videoUrl={hero.videoUrl} posterUrl={hero.posterUrl} alt={hero.alt} />
+          ) : null}
+          <div
+            aria-hidden="true"
+            className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-board via-board/70 to-transparent hidden md:block"
+          />
+        </div>
+        <div className="relative max-w-7xl mx-auto px-6 md:min-h-[calc(100svh-5.5rem)] md:max-h-[860px] flex items-center">
+          <div className="pt-6 pb-12 md:py-20 md:max-w-[34rem]">
+            <h1 className="text-[2.15rem] leading-[1.04] md:text-6xl lg:text-7xl md:leading-[0.98] text-silk">
+              Circuits, wood, and a quiet kind of <em className="text-enig">craft.</em>
             </h1>
-            <p className="mt-6 text-lg text-ink max-w-md">
-              PCB coasters with ENIG copper finish and laser-engraved wood pieces - designed
-              to last, made in small batches.
+            <p className="mt-4 md:mt-6 text-base md:text-lg text-silk-muted leading-relaxed max-w-md">
+              Each coaster is a real circuit board, 1.6 mm of glass-fibre laminate with a plated
+              gold rim and a printed picture. There is one in solid ash, too.
             </p>
-            <div className="mt-10 flex gap-4">
+            {pcbFrom !== null && (
+              <p className="mt-5 md:mt-7 text-lg md:text-xl text-silk">
+                PCB coasters {formatPrice(pcbFrom)}
+                {woodFrom !== null && (
+                  <span className="text-silk-muted">, ash wood {formatPrice(woodFrom)}</span>
+                )}
+              </p>
+            )}
+            <div className="mt-5 md:mt-8 flex flex-wrap gap-3">
               <Link
                 href="/products"
-                className="inline-flex items-center px-6 py-3 bg-dark text-warm hover:bg-copper transition-colors text-sm tracking-wide"
+                className="inline-flex items-center min-h-12 px-7 bg-enig text-board font-medium hover:bg-silk transition-colors"
               >
-                Browse the shop
+                Shop the coasters
               </Link>
-              <Link
-                href="/about"
-                className="inline-flex items-center px-6 py-3 border border-dark/20 hover:border-copper hover:text-copper transition-colors text-sm tracking-wide"
-              >
-                The story
-              </Link>
-            </div>
-          </div>
-          <div className="aspect-square relative overflow-hidden rounded-md">
-            <div className="absolute inset-0 bg-[#ede2cf]" aria-hidden="true" />
-            <svg
-              className="absolute inset-0 w-full h-full opacity-[0.06]"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-            >
-              <filter id="heroPaper">
-                <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" />
-                <feColorMatrix values="0 0 0 0 0.2  0 0 0 0 0.15  0 0 0 0 0.1  0 0 0 1 0" />
-              </filter>
-              <rect width="100%" height="100%" filter="url(#heroPaper)" />
-            </svg>
-
-            <div className="relative h-full flex flex-col p-8 md:p-10">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.35em] text-ink-muted">
-                    Suavius Atelier
-                  </p>
-                  <div className="mt-2 w-12 h-px bg-copper" />
-                </div>
-                <p className="text-[10px] uppercase tracking-[0.25em] text-ink-muted">
-                  Anno MMXXVI
-                </p>
-              </div>
-
-              <div className="flex-1 flex items-center">
-                <blockquote className="font-display italic text-2xl md:text-3xl leading-tight text-dark">
-                  <span className="text-copper text-4xl leading-none mr-1">&ldquo;</span>
-                  Small batches, hand-finished, designed to outlast the trend that asked for them.
-                  <span className="text-copper text-4xl leading-none ml-1">&rdquo;</span>
-                </blockquote>
-              </div>
-
-              <div className="flex items-end justify-between gap-4">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-ink-muted">From the</p>
-                  <p className="font-display italic text-lg mt-1">Atelier journal</p>
-                </div>
-                <svg
-                  width="56"
-                  height="56"
-                  viewBox="0 0 56 56"
-                  fill="none"
-                  className="text-copper opacity-90"
-                  aria-hidden="true"
+              {faces && (
+                <a
+                  href="#turn-it-over"
+                  className="inline-flex items-center min-h-12 px-7 border border-silk/30 hover:border-enig hover:text-enig transition-colors"
                 >
-                  <circle cx="28" cy="28" r="27" stroke="currentColor" strokeWidth="0.6" />
-                  <circle cx="28" cy="28" r="20" stroke="currentColor" strokeWidth="0.4" opacity="0.6" />
-                  <path
-                    d="M 18 28 L 24 34 L 38 20"
-                    stroke="currentColor"
-                    strokeWidth="1"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
+                  See both sides
+                </a>
+              )}
             </div>
           </div>
         </div>
       </section>
 
-      {collections.docs.length > 0 && (
-        <section className="max-w-7xl mx-auto px-6 py-16 md:py-20 border-t border-warm-mid">
-          <div className="flex items-end justify-between mb-10 md:mb-14 gap-6">
-            <div>
-              <p className="text-xs uppercase tracking-[0.25em] text-copper mb-3">
-                In production
-              </p>
-              <h2 className="font-display text-3xl md:text-4xl text-dark leading-tight">
-                The first four collections.
-              </h2>
-              <p className="mt-3 text-ink-muted max-w-xl text-base">
-                Sixteen designs across four themes. Drawn here, fabricated by partners,
-                arriving soon.
-              </p>
-            </div>
-            <Link
-              href="/collections"
-              className="hidden md:inline-block text-sm text-copper hover:text-dark transition-colors whitespace-nowrap"
-            >
-              See all -&gt;
-            </Link>
-          </div>
-          <div className="grid gap-6 grid-cols-2 lg:grid-cols-4">
-            {collections.docs.map((c) => {
-              const hero = typeof c.heroImage === 'object' && c.heroImage
-                ? (c.heroImage as Media)
-                : null
-              return (
-                <Link
-                  key={c.id}
-                  href={`/collections/${c.slug}`}
-                  className="group block"
-                >
-                  <div className="aspect-square bg-warm-mid relative overflow-hidden rounded-md mb-3">
-                    {hero?.url ? (
-                      <Image
-                        src={hero.url}
-                        alt={hero.alt ?? c.title}
-                        fill
-                        sizes="(max-width: 640px) 50vw, 25vw"
-                        className="object-cover group-hover:scale-105 transition-transform duration-700"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-ink-muted text-xs uppercase tracking-[0.2em]">
-                        [{c.title}]
-                      </div>
-                    )}
-                  </div>
-                  <h3 className="font-display text-lg md:text-xl text-dark group-hover:text-copper transition-colors">
-                    {c.title}
-                  </h3>
-                </Link>
-              )
-            })}
-          </div>
-          <div className="md:hidden text-center mt-10">
-            <Link
-              href="/collections"
-              className="inline-block text-sm text-copper hover:text-dark transition-colors"
-            >
-              See all collections -&gt;
-            </Link>
-          </div>
-        </section>
-      )}
-
-      {featured.docs.length > 0 && (
-        <section className="max-w-7xl mx-auto px-6 py-16">
-          <div className="flex items-end justify-between mb-10">
-            <h2 className="text-3xl md:text-4xl text-dark">Featured</h2>
+      {products.length > 0 && (
+        <section className="max-w-7xl mx-auto px-6 py-20 md:py-28">
+          <div className="flex flex-wrap items-end justify-between gap-6 mb-10 md:mb-14">
+            <h2 className="text-4xl md:text-6xl text-dark leading-[1.02]">
+              Choose your <em className="text-copper">coaster.</em>
+            </h2>
             <Link
               href="/products"
-              className="text-sm text-copper hover:text-dark transition-colors"
+              className="inline-flex items-center min-h-11 px-5 border border-dark/25 hover:border-copper hover:text-copper transition-colors"
             >
-              See all -&gt;
+              All products
             </Link>
           </div>
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {featured.docs.map((p, i) => (
-              <ProductCard key={p.id} product={p} priority={i === 0} />
+          <div className="grid gap-x-4 gap-y-10 md:gap-x-8 md:gap-y-14 grid-cols-2 lg:grid-cols-3">
+            {products.slice(0, 6).map((p) => (
+              <ProductCard key={p.id} product={p} />
             ))}
           </div>
         </section>
       )}
 
-      <section className="max-w-4xl mx-auto px-6 py-24 text-center">
-        <p className="text-xs uppercase tracking-[0.25em] text-copper mb-6">Material & process</p>
-        <h2 className="text-3xl md:text-4xl text-dark mb-6">Why a PCB makes a beautiful coaster</h2>
-        <p className="text-lg text-ink">
-          We start with FR4 laminate - the same fiberglass-epoxy used in fine electronics -
-          plate it with gold-over-nickel (ENIG), then print designs with UV silkscreen. The
-          result is a small object that catches light like a circuit board and survives daily
-          use like one too.
-        </p>
+      {faces && <TurnItOver front={faces.front} back={faces.back} />}
+
+      <section className="max-w-7xl mx-auto px-6 pt-20 md:pt-28">
+        {clips.length > 0 && (
+          <>
+            <div className="grid gap-6 md:grid-cols-12 md:items-end mb-10 md:mb-14">
+              <h2 className="md:col-span-7 text-4xl md:text-6xl text-dark leading-[1.02]">
+                In the <em className="text-copper">hand.</em>
+              </h2>
+              <p className="md:col-span-5 text-base md:text-lg text-ink leading-relaxed max-w-md">
+                Every design was filmed on our bench before it went on sale. The board in the
+                clip is the board you receive.
+              </p>
+            </div>
+            <StudioClips clips={clips} />
+          </>
+        )}
+        <ul className="mt-14 md:mt-20 grid gap-8 md:grid-cols-3 border-t border-dark/15 pt-8">
+          <li>
+            <h3 className="text-xl text-dark">Takes a fresh espresso</h3>
+            <p className="mt-2 text-base text-ink leading-relaxed">
+              FR4 is cured under heat and pressure. It does not warp and it does not stain.
+            </p>
+          </li>
+          <li>
+            <h3 className="text-xl text-dark">Keeps its colour</h3>
+            <p className="mt-2 text-base text-ink leading-relaxed">
+              The rim is immersion gold over nickel, the finish used on fine-pitch electronics
+              because it does not tarnish.
+            </p>
+          </li>
+          <li>
+            <h3 className="text-xl text-dark">Designed in Bielawa</h3>
+            <p className="mt-2 text-base text-ink leading-relaxed">
+              Every picture is drawn in our studio in Poland. The boards come from a specialist
+              fabricator in Shenzhen.
+            </p>
+          </li>
+        </ul>
         <Link
           href="/materials"
-          className="inline-block mt-8 text-sm text-copper hover:text-dark transition-colors"
+          className="mt-10 inline-flex items-center min-h-11 px-5 border border-dark/25 hover:border-copper hover:text-copper transition-colors"
         >
-          Read about materials &amp; process -&gt;
+          Materials and process
         </Link>
       </section>
     </>
   )
 }
-

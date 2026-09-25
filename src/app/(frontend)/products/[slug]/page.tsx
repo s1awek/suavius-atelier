@@ -57,10 +57,7 @@ async function fetchRelated(currentId: number, categoryId: number | null): Promi
   const result = await payload.find({
     collection: 'products',
     where: {
-      and: [
-        { category: { equals: categoryId } },
-        { id: { not_equals: currentId } },
-      ],
+      and: [{ category: { equals: categoryId } }, { id: { not_equals: currentId } }],
     },
     limit: 4,
     depth: 1,
@@ -119,16 +116,12 @@ function fallbackDescription(product: Product): string {
     product.material === 'pcb'
       ? 'hand-designed PCB'
       : product.material === 'wood'
-        ? 'laser-engraved wood'
+        ? 'solid ash wood'
         : 'handcrafted'
-  return `${product.title} - a ${materialLabel} piece from Suavius Atelier. Hand-finished, made in small batches, shipped from Poland to anywhere in Europe.`
+  return `${product.title} - a ${materialLabel} piece from Suavius Atelier. Designed in Bielawa, made in small batches, shipped from Poland to anywhere in Europe.`
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<Params>
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { slug } = await params
   const product = await fetchProduct(slug)
   if (!product) return { title: 'Product not found' }
@@ -248,9 +241,7 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
         url: productUrl,
         priceCurrency: 'EUR',
         price: (product.price / 100).toFixed(2),
-        availability: inStock
-          ? 'https://schema.org/InStock'
-          : 'https://schema.org/OutOfStock',
+        availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
         itemCondition: 'https://schema.org/NewCondition',
       },
     },
@@ -290,7 +281,7 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
   ]
 
   return (
-    <article className="max-w-7xl mx-auto px-6 py-16">
+    <article className="max-w-7xl mx-auto px-6 pt-10 pb-16 md:pt-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -303,9 +294,11 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
         currency="EUR"
         category={category?.title ?? null}
       />
-      <Breadcrumbs items={visibleBreadcrumbs} className="mb-8" />
-      <div className="grid gap-12 md:grid-cols-2">
-        <div>
+      <Breadcrumbs items={visibleBreadcrumbs} className="mb-4 md:mb-8" />
+      {/* Phones: title and price, then the gallery, then the purchase panel (the
+          info column dissolves into the flex flow). Desktop: gallery beside a sticky column. */}
+      <div className="flex flex-col gap-6 md:grid md:gap-14 md:grid-cols-12 md:items-start">
+        <div className="order-2 md:order-none md:col-span-7">
           <ProductGallery
             images={images
               .filter((img): img is Media & { url: string } => Boolean(img.url))
@@ -319,57 +312,59 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
           />
         </div>
 
-        <div>
-          <h1 className="text-4xl md:text-5xl text-dark">{product.title}</h1>
-
-          <div className="mt-4 text-xl">
-            {onSale && (
-              <span className="line-through text-ink-muted mr-3">
-                {formatPrice(product.compareAtPrice!)}
-              </span>
-            )}
-            <span>{formatPrice(product.price)}</span>
+        <div className="contents md:block md:col-span-5 md:sticky md:top-8">
+          <div className="order-1 md:order-none">
+            <h1 className="text-[2rem] md:text-5xl text-dark leading-[1.04]">{product.title}</h1>
+            <p className="mt-2 md:mt-4 text-xl md:text-2xl text-dark">
+              {onSale && (
+                <span className="line-through text-ink-muted mr-3">
+                  {formatPrice(product.compareAtPrice!)}
+                </span>
+              )}
+              <span>{formatPrice(product.price)}</span>
+            </p>
           </div>
-
-          {product.description && (
-            <div className="prose prose-neutral mt-8 max-w-none text-ink">
-              <RichText data={product.description} />
-            </div>
-          )}
-
-          <ProductPurchasePanel
-            productId={product.id}
-            title={product.title}
-            slug={product.slug ?? ''}
-            price={product.price}
-            imageUrl={images[0]?.url ?? null}
-            currency="EUR"
-            variants={(product.variants ?? []).map((v) => ({
-              name: v.name,
-              sku: v.sku,
-              stock: typeof v.stock === 'number' ? v.stock : 0,
-            }))}
-            personalizations={resolvePersonalizations(product)}
-          />
-
-          <TrustShippingNote shippingFrom={shippingFrom} currency="EUR" />
-
-          {product.material === 'wood' && (
-            <RegisterInterestDialog
+          <div className="order-3 md:order-none -mt-6 md:mt-0">
+            <ProductPurchasePanel
               productId={product.id}
-              topic="gold-foil-personalization"
-              title="Gold-foil personalisation"
-              blurb="Hand-pressed gold-foil monogramming for our wood pieces is on its way. Tell us you would like it and we will email you the moment it is ready. Your coaster ships plain in the meantime."
+              title={product.title}
+              slug={product.slug ?? ''}
+              price={product.price}
+              imageUrl={images[0]?.url ?? null}
+              currency="EUR"
+              variants={(product.variants ?? []).map((v) => ({
+                name: v.name,
+                sku: v.sku,
+                stock: typeof v.stock === 'number' ? v.stock : 0,
+              }))}
+              personalizations={resolvePersonalizations(product)}
             />
-          )}
 
-          <ProductSpecs product={product} />
+            <TrustShippingNote shippingFrom={shippingFrom} currency="EUR" />
 
-          <ShareButtons
-            url={productUrl}
-            title={product.title}
-            imageUrl={images[0]?.url ? `${SITE_URL}${images[0].url}` : null}
-          />
+            {product.description && (
+              <div className="prose prose-neutral mt-10 max-w-none text-ink border-t border-dark/15 pt-8">
+                <RichText data={product.description} />
+              </div>
+            )}
+
+            {product.material === 'wood' && (
+              <RegisterInterestDialog
+                productId={product.id}
+                topic="gold-foil-personalization"
+                title="Gold-foil personalisation"
+                blurb="Hand-pressed gold-foil monogramming for our wood pieces is on its way. Tell us you would like it and we will email you the moment it is ready. Your coaster ships plain in the meantime."
+              />
+            )}
+
+            <ProductSpecs product={product} />
+
+            <ShareButtons
+              url={productUrl}
+              title={product.title}
+              imageUrl={images[0]?.url ? `${SITE_URL}${images[0].url}` : null}
+            />
+          </div>
         </div>
       </div>
 

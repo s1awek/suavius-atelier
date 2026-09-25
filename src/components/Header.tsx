@@ -12,9 +12,9 @@ export async function Header() {
   const storeName = settings.storeName ?? 'Suavius Atelier'
 
   return (
-    <header className="border-b border-warm-mid bg-warm">
+    <header className="bg-board text-silk [&_a:hover]:text-enig [&_button:hover]:text-enig">
       {settings.announcementBar?.enabled && settings.announcementBar.message && (
-        <div className="bg-dark text-warm text-center text-xs tracking-wide py-2 px-4">
+        <div className="border-b border-silk/10 text-silk-muted text-center text-sm py-2 px-4">
           {settings.announcementBar.link ? (
             <Link href={settings.announcementBar.link} className="hover:text-copper-light">
               {settings.announcementBar.message}

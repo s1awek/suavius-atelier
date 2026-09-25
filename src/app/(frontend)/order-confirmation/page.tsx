@@ -23,7 +23,7 @@ export default async function OrderConfirmationPage({
         <p className="mt-4 text-ink">No session id provided.</p>
         <Link
           href="/"
-          className="mt-8 inline-block px-6 py-3 bg-dark text-warm hover:bg-copper transition-colors text-sm"
+          className="mt-8 inline-block px-6 py-3 bg-enig text-board font-medium hover:bg-dark hover:text-warm transition-colors text-sm"
         >
           Back to shop
         </Link>
@@ -111,7 +111,7 @@ export default async function OrderConfirmationPage({
 
       <Link
         href="/products"
-        className="mt-12 inline-block px-6 py-3 bg-dark text-warm hover:bg-copper transition-colors text-sm"
+        className="mt-12 inline-block px-6 py-3 bg-enig text-board font-medium hover:bg-dark hover:text-warm transition-colors text-sm"
       >
         Continue shopping
       </Link>

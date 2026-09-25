@@ -14,7 +14,7 @@ export function ProductBadges({ product, className = '' }: Props) {
 
   return (
     <span
-      className={`text-[10px] uppercase tracking-[0.25em] text-ink-muted ${className}`}
+      className={`text-sm text-copper ${className}`}
     >
       {labels.join(' · ')}
     </span>

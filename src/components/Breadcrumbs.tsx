@@ -37,7 +37,7 @@ export function Breadcrumbs({ items, className = '', home = false }: Props) {
   return (
     <nav
       aria-label="Breadcrumb"
-      className={`text-xs uppercase tracking-[0.2em] text-ink-muted ${className}`}
+      className={`text-sm text-ink-muted ${className}`}
     >
       <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
         {home && (

@@ -34,20 +34,19 @@ export function CookieConsent() {
     <div
       role="dialog"
       aria-label="Cookie notice"
-      className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:bottom-6 md:max-w-md z-40 bg-warm border border-warm-mid shadow-lg p-5"
+      className="fixed bottom-0 inset-x-0 md:inset-x-auto md:right-6 md:bottom-6 md:max-w-md z-40 bg-warm border-t md:border border-warm-mid shadow-lg px-4 py-3 md:p-5 flex items-center gap-4 md:block"
     >
-      <p className="text-sm leading-relaxed text-ink">
-        This site uses essential cookies for the shopping cart and checkout, plus privacy-friendly,
-        cookieless analytics (no personal data, no cross-site tracking) to measure traffic.{' '}
+      <p className="text-sm leading-snug md:leading-relaxed text-ink">
+        Essential cookies for the cart and checkout, plus cookieless analytics with no personal
+        data.{' '}
         <Link href="/cookies" className="underline hover:text-copper">
           Learn more
         </Link>
-        .
       </p>
       <button
         type="button"
         onClick={accept}
-        className="mt-4 px-5 py-2 bg-dark text-warm text-sm tracking-wide hover:bg-copper transition-colors cursor-pointer"
+        className="shrink-0 md:mt-4 min-h-11 px-5 border border-dark/30 text-sm hover:border-copper hover:text-copper transition-colors cursor-pointer"
       >
         Got it
       </button>

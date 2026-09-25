@@ -9,9 +9,11 @@ export function RelatedProducts({ products }: Props) {
   if (products.length === 0) return null
 
   return (
-    <section className="mt-24 border-t border-warm-mid pt-12">
-      <h2 className="font-display text-2xl md:text-3xl text-dark mb-8">You may also like</h2>
-      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+    <section className="mt-24 md:mt-32">
+      <h2 className="text-4xl md:text-6xl text-dark leading-[1.02] mb-10 md:mb-14">
+        More <em className="text-copper">coasters.</em>
+      </h2>
+      <div className="grid gap-x-4 gap-y-10 md:gap-x-8 grid-cols-2 lg:grid-cols-4">
         {products.map((p) => (
           <ProductCard key={p.id} product={p} />
         ))}

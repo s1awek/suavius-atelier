@@ -31,7 +31,7 @@ export function ProductSpecs({ product }: { product: Product }) {
   if (rows.length === 0) return null
 
   return (
-    <dl className="mt-12 grid grid-cols-2 gap-4 text-sm border-t border-warm-mid pt-6">
+    <dl className="mt-10 grid grid-cols-[auto_1fr] gap-x-8 gap-y-3 text-sm border-t border-dark/15 pt-6">
       {rows.map(([term, value]) => (
         <div key={term} className="contents">
           <dt className="text-ink-muted">{term}</dt>
